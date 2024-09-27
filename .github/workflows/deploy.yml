@@ -24,7 +24,7 @@ jobs:
     - name: Deploy to EC2
       run: |
         ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_IP }} << 'EOF'
-          cd /home/ec2-user/runeterra/
+          cd /home/ec2-user/discord/
         
           git pull origin master
         
@@ -32,14 +32,16 @@ jobs:
             curl -fsSL https://get.docker.com -o get-docker.sh
             sh get-docker.sh
             sudo usermod -aG docker $USER
+            newgrp docker  # 그룹 변경 사항 바로 적용
           fi
           
-          docker stop runeterra-container || true
-          docker rm runeterra-container || true
+          # Docker 명령어에 sudo 추가
+          sudo docker stop discord-container || true
+          sudo docker rm discord-container || true
         
-          docker build -t runeterra-image .
+          sudo docker build -t discord-image .
         
-          docker run -d -p 80:80 --name runeterra-container \
+          sudo docker run -d -p 80:80 --name discord-container \
             -e DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }} \
-            runeterra-image
+            discord-image
         EOF
