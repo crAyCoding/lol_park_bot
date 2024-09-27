@@ -94,7 +94,11 @@ async def end_normal_game(ctx):
     if dcpaow.normal_game_creator != Summoner(ctx.author):
         return True
 
-    await ctx.send(f'내전 쫑내겠습니다~\n@내전')
+    # 내전 역할 가져오기
+    role_name = '내전'
+    role = discord.utils.get(ctx.guild.roles, name=role_name)
+
+    await ctx.send(f'내전 쫑내겠습니다~\n{role.mention}')
 
     # 초기화
     dcpaow.normal_game_creator = None
