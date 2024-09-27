@@ -91,7 +91,7 @@ async def close_normal_game(ctx, normal_game_log):
 async def end_normal_game(ctx):
     # 일반 내전 쫑
 
-    if dcpaow.normal_game_creator != ctx.author:
+    if dcpaow.normal_game_creator != Summoner(ctx.author):
         return True
 
     await ctx.send(f'내전 쫑내겠습니다~\n@내전')
