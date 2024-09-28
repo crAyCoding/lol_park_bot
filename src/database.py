@@ -38,6 +38,40 @@ async def add_normal_game_win_count(bot, summoner):
         conn.close()
 
 
+async def add_normal_game_lose_count(bot, summoner):
+    conn = sqlite3.connect('summoners.db')
+    db = conn.cursor()
+
+    try:
+        # id가 일치하는 행의 game_count를 1 증가
+        db.execute('''
+        UPDATE summoners
+        SET normal_game_lose = normal_game_lose + 1
+        WHERE id = ?
+        ''', (summoner.id,))
+
+        # 변경사항 저장
+        conn.commit()
+        update_log_channel = bot.get_channel(channels.RECORD_UPDATE_LOG_SERVER_ID)
+
+        # 업데이트된 행이 있는지 확인
+        if db.rowcount > 0:
+            # 정상적으로 업데이트된 경우에만 메시지 전송
+            lose_count = await get_normal_game_lose_count(bot, summoner)
+            await update_log_channel.send(f'{functions.get_nickname(summoner.nickname)} '
+                                          f'님의 일반 내전 패배 수가 업데이트 되었습니다. '
+                                          f'현재 내전 승리 수 : {lose_count}')
+        else:
+            # id를 찾을 수 없는 경우에 대한 처리 (선택 사항)
+            await update_log_channel.send(f"{summoner.nickname} 님을 찾을 수 없습니다.")
+
+    except sqlite3.Error as e:
+        print(f"An error occurred: {e}")
+    finally:
+        db.close()
+        conn.close()
+
+
 def add_summoner(summoner):
     conn = sqlite3.connect('summoners.db')
     db = conn.cursor()
@@ -88,13 +122,40 @@ def create_table():
     conn.close()
 
 
-# 일반 내전 승수 가져오기
+# 일반 내전 승리 수 가져오기
 async def get_normal_game_win_count(bot, summoner):
     conn = sqlite3.connect('summoners.db')
     db = conn.cursor()
     try:
         # id에 따른 game_count 조회
         db.execute('SELECT normal_game_win FROM summoners WHERE id = ?', (summoner.id,))
+        result = db.fetchone()
+
+        # 결과 확인
+        if result:
+            win_count = result[0]
+            return win_count
+        else:
+            update_log_channel = bot.get_channel(channels.RECORD_UPDATE_LOG_SERVER_ID)
+            await update_log_channel.send(f'{summoner.nickname} 소환사를 찾을 수 없습니다.')
+            return None
+
+    except sqlite3.Error as e:
+        print(f"An error occurred: {e}")
+        return None
+    finally:
+        # 커서 및 연결 닫기
+        db.close()
+        conn.close()
+
+
+# 일반 내전 패배 수 가져오기
+async def get_normal_game_lose_count(bot, summoner):
+    conn = sqlite3.connect('summoners.db')
+    db = conn.cursor()
+    try:
+        # id에 따른 game_count 조회
+        db.execute('SELECT normal_game_lose FROM summoners WHERE id = ?', (summoner.id,))
         result = db.fetchone()
 
         # 결과 확인
