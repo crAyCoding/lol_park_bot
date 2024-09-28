@@ -166,8 +166,8 @@ async def reset_game(ctx):
 
 
 def main() -> None:
-    bot.run(token=TOKEN)
     create_table()
+    bot.run(token=TOKEN)
 
 
 if __name__ == '__main__':
