@@ -334,7 +334,7 @@ async def choose_game_team(ctx, teams, flag, members):
                            f'{8 - len(pick_order)}번째로 뽑았습니다.')
 
             if len(pick_order) == 1:
-                add_member_to_team(pick_order, teams, self.view.members[0].name)
+                add_member_to_team(pick_order, teams, self.view.members[0])
                 await interaction.message.delete()
                 await ctx.send(get_game_board(teams))
                 await ctx.send(f'밴픽은 아래 사이트에서 진행해주시면 됩니다.')
