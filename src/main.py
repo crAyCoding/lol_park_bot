@@ -1,4 +1,8 @@
 import os
+import sqlite3
+
+import discord
+
 import dcpaow
 import channels
 import managers
@@ -6,6 +10,7 @@ from discord import Intents
 from discord.ext import commands
 from normal_game import make_normal_game, close_normal_game, end_normal_game
 from summoner import Summoner
+from database import add_summoner, add_normal_game_win_count, create_table
 
 # GitHub Secrets에서 가져오는 값
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -113,12 +118,33 @@ async def twenty_auction_by_own(ctx):
 
 @bot.command(name='테스트')
 async def test_only_def(ctx):
+    # create_table()
+    add_summoner(Summoner(ctx.author))
     return None
 
 
 @bot.command(name='테스트종료')
 async def test_end_def(ctx):
     return None
+
+
+@bot.command(name='승리')
+async def update_win_count(ctx, member: discord.Member):
+    summoner = Summoner(member)
+    if ctx.channel.id == channels.RECORD_UPDATE_SERVER_ID:
+        await add_normal_game_win_count(bot, summoner)
+
+
+@bot.command(name='등록')
+async def enroll_summoner_to_database(ctx, member: discord.Member):
+    summoner = Summoner(member)
+    manager_list = [managers.MASULSA, managers.YUUMI, managers.JUYE, managers.FERRERO]
+    if ctx.channel.id == channels.SUMMONER_ENROLL_ID and ctx.author.id in manager_list:
+        is_enrolled = add_summoner(summoner)
+        if is_enrolled:
+            await ctx.send(f'{summoner.nickname} 님이 등록되었습니다.')
+        else:
+            await ctx.send(f'이미 등록된 소환사입니다.')
 
 
 @bot.command(name='초기화')
@@ -141,6 +167,7 @@ async def reset_game(ctx):
 
 def main() -> None:
     bot.run(token=TOKEN)
+    create_table()
 
 
 if __name__ == '__main__':
