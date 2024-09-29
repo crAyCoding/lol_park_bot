@@ -5,7 +5,7 @@ from summoner import Summoner
 
 
 async def add_normal_game_win_count(bot, summoner):
-    conn = sqlite3.connect('summoners.db')
+    conn = sqlite3.connect('/app/src/summoners.db')
     db = conn.cursor()
 
     try:
@@ -38,7 +38,7 @@ async def add_normal_game_win_count(bot, summoner):
 
 
 async def add_normal_game_lose_count(bot, summoner):
-    conn = sqlite3.connect('summoners.db')
+    conn = sqlite3.connect('/app/src/summoners.db')
     db = conn.cursor()
 
     try:
@@ -71,7 +71,7 @@ async def add_normal_game_lose_count(bot, summoner):
 
 
 def add_summoner(summoner):
-    conn = sqlite3.connect('summoners.db')
+    conn = sqlite3.connect('/app/src/summoners.db')
     db = conn.cursor()
     # 해당 id가 존재하는지 확인
     db.execute('SELECT id FROM summoners WHERE id = ?', (summoner.id,))
@@ -96,7 +96,7 @@ def add_summoner(summoner):
 
 
 def create_table():
-    conn = sqlite3.connect('summoners.db')
+    conn = sqlite3.connect('/app/src/summoners.db')
     db = conn.cursor()
 
     # users 테이블 생성
@@ -122,7 +122,7 @@ def create_table():
 
 # 일반 내전 승리 수 가져오기
 async def get_normal_game_win_count(bot, summoner):
-    conn = sqlite3.connect('summoners.db')
+    conn = sqlite3.connect('/app/src/summoners.db')
     db = conn.cursor()
     try:
         # id에 따른 game_count 조회
@@ -149,7 +149,7 @@ async def get_normal_game_win_count(bot, summoner):
 
 # 일반 내전 패배 수 가져오기
 async def get_normal_game_lose_count(bot, summoner):
-    conn = sqlite3.connect('summoners.db')
+    conn = sqlite3.connect('/app/src/summoners.db')
     db = conn.cursor()
     try:
         # id에 따른 game_count 조회
