@@ -339,7 +339,7 @@ async def choose_game_team(ctx, teams, flag, members):
                 await ctx.send(get_game_board(teams))
                 await ctx.send(f'밴픽은 아래 사이트에서 진행해주시면 됩니다.')
                 await ctx.send(f'https://banpick.kr/')
-                await ctx.send(f'사용자 설정 방 제목 : 룬테라 / 비밀번호 : 1234')
+                await ctx.send(f'사용자 설정 방 제목 : 아직 안정함 / 비밀번호 : 1234')
                 return
 
             team_head = get_team_head(pick_order, teams)
