@@ -22,6 +22,8 @@ async def add_normal_game_win_count(bot, summoner):
 
         # 업데이트된 행이 있는지 확인
         if db.rowcount > 0:
+            db.close()
+            conn.close()
             # 정상적으로 업데이트된 경우에만 메시지 전송
             win_count = await get_normal_game_win_count(bot, summoner)
             await update_log_channel.send(f'{functions.get_nickname(summoner.nickname)} '
@@ -33,9 +35,6 @@ async def add_normal_game_win_count(bot, summoner):
 
     except sqlite3.Error as e:
         print(f"An error occurred: {e}")
-    finally:
-        db.close()
-        conn.close()
 
 
 async def add_normal_game_lose_count(bot, summoner):
@@ -56,6 +55,8 @@ async def add_normal_game_lose_count(bot, summoner):
 
         # 업데이트된 행이 있는지 확인
         if db.rowcount > 0:
+            db.close()
+            conn.close()
             # 정상적으로 업데이트된 경우에만 메시지 전송
             lose_count = await get_normal_game_lose_count(bot, summoner)
             await update_log_channel.send(f'{functions.get_nickname(summoner.nickname)} '
@@ -67,9 +68,6 @@ async def add_normal_game_lose_count(bot, summoner):
 
     except sqlite3.Error as e:
         print(f"An error occurred: {e}")
-    finally:
-        db.close()
-        conn.close()
 
 
 def add_summoner(summoner):
