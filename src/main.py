@@ -10,7 +10,7 @@ from discord import Intents
 from discord.ext import commands
 from normal_game import make_normal_game, close_normal_game, end_normal_game
 from summoner import Summoner
-from database import add_summoner, add_normal_game_win_count, create_table
+from database import add_summoner, add_normal_game_win_count, add_normal_game_lose_count, create_table
 
 # GitHub Secrets에서 가져오는 값
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -102,7 +102,7 @@ async def on_message_delete(message):
 @commands.is_owner()
 async def shutdown(ctx):
     # 디스코드에서 봇 종료를 위한 명령어
-    await ctx.send("BYE")
+    await ctx.send("봇을 강제로 종료합니다")
     await bot.close()
 
 
@@ -133,6 +133,13 @@ async def update_win_count(ctx, member: discord.Member):
     summoner = Summoner(member)
     if ctx.channel.id == channels.RECORD_UPDATE_SERVER_ID:
         await add_normal_game_win_count(bot, summoner)
+
+
+@bot.command(name='패배')
+async def update_lose_count(ctx, member: discord.Member):
+    summoner = Summoner(member)
+    if ctx.channel.id == channels.RECORD_UPDATE_SERVER_ID:
+        await add_normal_game_lose_count(bot, summoner)
 
 
 @bot.command(name='등록')
