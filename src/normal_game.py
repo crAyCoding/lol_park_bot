@@ -54,7 +54,7 @@ async def close_normal_game(ctx, summoners):
             if new_summoner in summoners:
                 await interaction.response.defer()
             else:
-                self.view.members[self.index - 1] = GameMember(self.index, new_summoner)
+                self.view.members[self.index - 1] = GameMember(self.index - 1, new_summoner)
                 summoners[self.index - 1] = new_summoner
                 updated_message = "\n".join([f"### {member.index}: <@{member.summoner.id}>"
                                              for member in self.view.members])
