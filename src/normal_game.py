@@ -5,6 +5,7 @@ import discord
 from discord.ui import Button
 from functions import *
 from summoner import Summoner
+from database import add_summoner, update_summoner, add_normal_game_count
 
 
 async def make_normal_game(ctx, message='3판 2선 모이면 바로 시작'):
@@ -371,7 +372,7 @@ async def finalize_team(ctx, board_message, summoners):
                 return
             self.view.clear_items()
             await interaction.response.edit_message(view=self.view)
-            # 여기에 데이터베이스 내용 추가
+            await add_normal_game_to_database(summoners)
             await ctx.send(f'https://banpick.kr/')
             await ctx.send(f'밴픽은 위 사이트에서 진행해주시면 됩니다.')
             await ctx.send(f'## 사용자 설정 방 제목 : 롤파크 / 비밀번호 : 0921')
@@ -395,6 +396,12 @@ async def finalize_team(ctx, board_message, summoners):
     await ctx.send(content=f'{board_message}',
                    view=final_team_view)
 
+
+async def add_normal_game_to_database(summoners):
+    for summoner in summoners:
+        add_summoner(summoner)
+        update_summoner(summoner)
+        await add_normal_game_count(summoner)
 
 def get_game_board(teams):
     board = f'```\n'
