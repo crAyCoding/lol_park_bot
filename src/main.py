@@ -149,10 +149,17 @@ async def enroll_summoner_to_database(ctx, member: discord.Member):
 
 
 @bot.command(name='전적')
-async def show_summoner_record(ctx):
-    summoner = Summoner(ctx.author)
-    record_message = await get_summoner_record_message(summoner)
-    await ctx.send(record_message)
+async def show_summoner_record(ctx, member: discord.Member = None):
+    channel_id = ctx.channel.id
+    # 멘션이 없으면 자기 자신의 정보로 설정, 있으면 멘션된 사용자로 설정
+    if member is None:
+        summoner = Summoner(ctx.author)
+    else:
+        summoner = Summoner(member)
+
+    if channel_id == channels.RECORD_SERVER_ID:
+        record_message = await get_summoner_record_message(summoner)
+        await ctx.send(record_message)
 
 
 @bot.command(name='초기화')
