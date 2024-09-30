@@ -6,20 +6,14 @@ import discord
 import dcpaow
 import channels
 import managers
-from discord import Intents
 from discord.ext import commands
 from normal_game import make_normal_game, close_normal_game, end_normal_game
 from summoner import Summoner
-from database import add_summoner, add_normal_game_win_count, add_normal_game_lose_count, create_table
+from database import add_summoner, add_normal_game_win_count, add_normal_game_lose_count, create_table, get_summoner_record_message
+from bot import bot
 
 # GitHub Secrets에서 가져오는 값
 TOKEN = os.getenv('DISCORD_TOKEN')
-
-# 디스코드 봇 설정
-intents: Intents = Intents.default()
-intents.message_content = True
-
-bot = commands.Bot(command_prefix='!', intents=intents)
 
 
 @bot.event
@@ -132,14 +126,14 @@ async def test_end_def(ctx):
 async def update_win_count(ctx, member: discord.Member):
     summoner = Summoner(member)
     if ctx.channel.id == channels.RECORD_UPDATE_SERVER_ID:
-        await add_normal_game_win_count(bot, summoner)
+        await add_normal_game_win_count(summoner)
 
 
 @bot.command(name='패배')
 async def update_lose_count(ctx, member: discord.Member):
     summoner = Summoner(member)
     if ctx.channel.id == channels.RECORD_UPDATE_SERVER_ID:
-        await add_normal_game_lose_count(bot, summoner)
+        await add_normal_game_lose_count(summoner)
 
 
 @bot.command(name='등록')
@@ -152,6 +146,12 @@ async def enroll_summoner_to_database(ctx, member: discord.Member):
             await ctx.send(f'{summoner.nickname} 님이 등록되었습니다.')
         else:
             await ctx.send(f'이미 등록된 소환사입니다.')
+
+
+@bot.command(name='전적')
+async def show_summoner_record(ctx):
+    summoner = Summoner(ctx.author)
+    await ctx.send(get_summoner_record_message(summoner))
 
 
 @bot.command(name='초기화')

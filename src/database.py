@@ -2,7 +2,7 @@ import sqlite3
 import channels
 import functions
 from summoner import Summoner
-from main import bot
+from bot import bot
 
 
 async def add_normal_game_win_count(summoner):
@@ -261,3 +261,12 @@ async def get_normal_game_count(summoner):
         # 커서 및 연결 닫기
         db.close()
         conn.close()
+
+
+def get_summoner_record_message(summoner):
+    normal_game_count = get_normal_game_count(summoner)
+
+    record_message = f''
+    record_message += f'현재까지 내전 참여 횟수는 {normal_game_count}회 입니다.'
+
+    return record_message
