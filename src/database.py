@@ -263,8 +263,8 @@ async def get_normal_game_count(summoner):
         conn.close()
 
 
-def get_summoner_record_message(summoner):
-    normal_game_count = get_normal_game_count(summoner)
+async def get_summoner_record_message(summoner):
+    normal_game_count = await get_normal_game_count(summoner)
 
     record_message = f''
     record_message += f'현재까지 내전 참여 횟수는 {normal_game_count}회 입니다.'

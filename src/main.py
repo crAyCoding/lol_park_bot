@@ -151,7 +151,8 @@ async def enroll_summoner_to_database(ctx, member: discord.Member):
 @bot.command(name='전적')
 async def show_summoner_record(ctx):
     summoner = Summoner(ctx.author)
-    await ctx.send(get_summoner_record_message(summoner))
+    record_message = await get_summoner_record_message(summoner)
+    await ctx.send(record_message)
 
 
 @bot.command(name='초기화')
