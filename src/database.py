@@ -267,6 +267,6 @@ async def get_summoner_record_message(summoner):
     normal_game_count = await get_normal_game_count(summoner)
 
     record_message = f''
-    record_message += f'현재까지 내전 참여 횟수는 {normal_game_count}회 입니다.'
+    record_message += f'{functions.get_nickname(summoner.nickname)}님의 내전 참여 횟수는 {normal_game_count}회 입니다.'
 
     return record_message

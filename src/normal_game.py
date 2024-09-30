@@ -366,7 +366,7 @@ async def finalize_team(ctx, board_message, summoners):
             press_user = Summoner(interaction.user)
             if press_user != dcpaow.normal_game_creator:
                 await (interaction.response.edit_message
-                       (content=f'## {get_nickname(dcpaow.normal_game_creator.nickname)}님이 누른 것만 인식합니다. '
+                       (content=f'{board_message}\n## {get_nickname(dcpaow.normal_game_creator.nickname)}님이 누른 것만 인식합니다. '
                                 f'{get_nickname(press_user.nickname)}님 누르지 말아주세요.',
                         view=self.view))
                 return
