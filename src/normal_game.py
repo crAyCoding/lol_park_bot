@@ -24,10 +24,8 @@ async def make_normal_game(ctx, message='3판 2선 모이면 바로 시작'):
     return True
 
 
-async def close_normal_game(ctx, normal_game_log):
+async def close_normal_game(ctx, summoners):
     # 일반 내전 마감
-    summoners = [user for user in normal_game_log.keys()]
-
     class GameMember:
         def __init__(self, index, summoner):
             self.index = index + 1
@@ -56,10 +54,8 @@ async def close_normal_game(ctx, normal_game_log):
             if new_summoner in summoners:
                 await interaction.response.defer()
             else:
-                self.view.members[self.index] = GameMember(self.index, new_summoner)
-                summoners[self.index] = new_summoner
-                del normal_game_log[summoners[self.index]]
-                normal_game_log[new_summoner] = []
+                self.view.members[self.index - 1] = GameMember(self.index, new_summoner)
+                summoners[self.index - 1] = new_summoner
                 updated_message = "\n".join([f"### {member.index}: <@{member.summoner.id}>"
                                              for member in self.view.members])
                 await interaction.response.edit_message(content=updated_message, view=self.view)
@@ -81,7 +77,7 @@ async def close_normal_game(ctx, normal_game_log):
             sorted_summoners_message = get_result_sorted_by_tier(summoners_result)
 
             await ctx.send(sorted_summoners_message)
-            await handle_game_team(ctx, summoners_result, normal_game_log)
+            await handle_game_team(ctx, summoners_result, summoners)
 
     view = GameView()
     game_members_result = "\n".join([f"### {member.index}: <@{member.summoner.id}>" for member in view.members])
@@ -106,7 +102,7 @@ async def end_normal_game(ctx):
     return False
 
 
-async def handle_game_team(ctx, summoners, normal_game_log):
+async def handle_game_team(ctx, summoners, prev_summoners):
     team_head_list = []
 
     class GameMember:
@@ -176,7 +172,7 @@ async def handle_game_team(ctx, summoners, normal_game_log):
                         view=self.view))
                 return
             await interaction.message.delete()
-            await close_normal_game(ctx, normal_game_log)
+            await close_normal_game(ctx, prev_summoners)
 
     handle_team_view = HandleTeamView()
     await ctx.send(content=f'## {get_nickname(dcpaow.normal_game_creator.nickname)}님, '
@@ -331,15 +327,15 @@ async def choose_game_team(ctx, teams, flag, members):
 
             await ctx.send(f'{get_nickname(press_user.nickname)}님이 '
                            f'{get_nickname(self.member.nickname)}님을 '
-                           f'{8 - len(pick_order)}번째로 뽑았습니다.')
+                           f'뽑았습니다.')
 
             if len(pick_order) == 1:
                 add_member_to_team(pick_order, teams, self.view.members[0])
                 await interaction.message.delete()
                 await ctx.send(get_game_board(teams))
-                await ctx.send(f'밴픽은 아래 사이트에서 진행해주시면 됩니다.')
                 await ctx.send(f'https://banpick.kr/')
-                await ctx.send(f'사용자 설정 방 제목 : 아직 안정함 / 비밀번호 : 1234')
+                await ctx.send(f'밴픽은 위 사이트에서 진행해주시면 됩니다.')
+                await ctx.send(f'## 사용자 설정 방 제목 : 롤파크 / 비밀번호 : 0921')
                 return
 
             team_head = get_team_head(pick_order, teams)

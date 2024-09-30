@@ -74,7 +74,7 @@ async def on_message(message):
             print(user.nickname)
         # 참여자 수가 10명이면 내전 자동 마감
         if len(dcpaow.normal_game_log) == 10:
-            await close_normal_game(message.channel, dcpaow.normal_game_log)
+            await close_normal_game(message.channel, list(dcpaow.normal_game_log.keys()))
 
             # 내전 변수 초기화, 명단 확정 후에 진행
             dcpaow.normal_game_log = None
