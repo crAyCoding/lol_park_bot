@@ -25,7 +25,7 @@ async def make_normal_game(ctx, message='3판 2선 모이면 바로 시작'):
     return True
 
 
-async def close_normal_game(ctx, summoners):
+async def close_normal_game(ctx, summoners, host):
     # 일반 내전 마감
     class GameMember:
         def __init__(self, index, summoner):
@@ -55,8 +55,11 @@ async def close_normal_game(ctx, summoners):
             if new_summoner in summoners:
                 await interaction.response.defer()
             else:
+                prev_summoner = summoners[self.index - 1]
                 self.view.members[self.index - 1] = GameMember(self.index - 1, new_summoner)
                 summoners[self.index - 1] = new_summoner
+                await ctx.send(f'{self.index - 1}번 소환사가 {get_nickname(prev_summoner.nickname)}에서 '
+                               f'{get_nickname(new_summoner.nickname)}으로 변경되었습니다.')
                 updated_message = "\n".join([f"### {member.index}: <@{member.summoner.id}>"
                                              for member in self.view.members])
                 await interaction.response.edit_message(content=updated_message, view=self.view)
@@ -67,8 +70,8 @@ async def close_normal_game(ctx, summoners):
 
         async def callback(self, interaction: discord.Interaction):
             press_summoner = Summoner(interaction.user)
-            if press_summoner != dcpaow.normal_game_creator:
-                await ctx.send(f'{get_nickname(dcpaow.normal_game_creator.nickname)}만 확정할 수 있습니다.')
+            if press_summoner != host:
+                await ctx.send(f'{get_nickname(host.nickname)}만 확정할 수 있습니다.')
                 await interaction.response.defer()
                 return
             await interaction.message.delete()
@@ -78,7 +81,7 @@ async def close_normal_game(ctx, summoners):
             sorted_summoners_message = get_result_sorted_by_tier(sorted_summoners)
 
             await ctx.send(sorted_summoners_message)
-            await handle_game_team(ctx, sorted_summoners, summoners)
+            await handle_game_team(ctx, sorted_summoners, summoners, host)
 
     view = GameView()
     game_members_result = "\n".join([f"### {member.index}: <@{member.summoner.id}>" for member in view.members])
@@ -98,12 +101,15 @@ async def end_normal_game(ctx):
     await ctx.send(f'내전 쫑내겠습니다~\n{role.mention}')
 
     # 초기화
+    dcpaow.normal_game_log = None
+    dcpaow.normal_game_channel = None
     dcpaow.normal_game_creator = None
+    dcpaow.is_normal_game = False
 
     return False
 
 
-async def handle_game_team(ctx, sorted_summoners, summoners):
+async def handle_game_team(ctx, sorted_summoners, summoners, host):
     team_head_list = []
 
     class GameMember:
@@ -127,9 +133,9 @@ async def handle_game_team(ctx, sorted_summoners, summoners):
 
         async def callback(self, interaction: discord.Interaction):
             press_user = Summoner(interaction.user)
-            if press_user != dcpaow.normal_game_creator:
+            if press_user != host:
                 await (interaction.response.edit_message
-                       (content=f'## {get_nickname(dcpaow.normal_game_creator.nickname)}님이 누른 것만 인식합니다. '
+                       (content=f'## {get_nickname(host.nickname)}님이 누른 것만 인식합니다. '
                                 f'{get_nickname(press_user.nickname)}님 누르지 말아주세요.',
                         view=self.view))
                 return
@@ -139,7 +145,7 @@ async def handle_game_team(ctx, sorted_summoners, summoners):
             self.view.users.remove(self.user)
             if len(team_head_list) == 2:
                 await interaction.message.delete()
-                await choose_blue_red_game(ctx, team_head_list, self.view.users, summoners)
+                await choose_blue_red_game(ctx, team_head_list, self.view.users, summoners, host)
                 return
 
             await interaction.response.edit_message(content=f'## 두번째 팀장 닉네임 버튼을 눌러주세요.',
@@ -151,9 +157,9 @@ async def handle_game_team(ctx, sorted_summoners, summoners):
 
         async def callback(self, interaction: discord.Interaction):
             press_user = Summoner(interaction.user)
-            if press_user != dcpaow.normal_game_creator:
+            if press_user != host:
                 await (interaction.response.edit_message
-                       (content=f'## {get_nickname(dcpaow.normal_game_creator.nickname)}님이 누른 것만 인식합니다. '
+                       (content=f'## {get_nickname(host.nickname)}님이 누른 것만 인식합니다. '
                                 f'{get_nickname(press_user.nickname)}님 누르지 말아주세요.',
                         view=self.view))
                 return
@@ -166,21 +172,21 @@ async def handle_game_team(ctx, sorted_summoners, summoners):
 
         async def callback(self, interaction: discord.Interaction):
             press_user = Summoner(interaction.user)
-            if press_user != dcpaow.normal_game_creator:
+            if press_user != host:
                 await (interaction.response.edit_message
-                       (content=f'## {get_nickname(dcpaow.normal_game_creator.nickname)}님이 누른 것만 인식합니다. '
+                       (content=f'## {get_nickname(host.nickname)}님이 누른 것만 인식합니다. '
                                 f'{get_nickname(press_user.nickname)}님 누르지 말아주세요.',
                         view=self.view))
                 return
             await interaction.message.delete()
-            await close_normal_game(ctx, summoners)
+            await close_normal_game(ctx, summoners, host)
 
     handle_team_view = HandleTeamView()
-    await ctx.send(content=f'## {get_nickname(dcpaow.normal_game_creator.nickname)}님, '
+    await ctx.send(content=f'## {get_nickname(host.nickname)}님, '
                            f'팀장 두 분의 닉네임 버튼을 눌러주세요.', view=handle_team_view)
 
 
-async def choose_blue_red_game(ctx, team_head_list, members, summoners):
+async def choose_blue_red_game(ctx, team_head_list, members, summoners, host):
     await ctx.send(f'=========================================')
     # 블루팀 레드팀 고르기
     blue_team = []
@@ -225,13 +231,13 @@ async def choose_blue_red_game(ctx, team_head_list, members, summoners):
             selected_team = '블루팀' if team_type else '레드팀'
             await ctx.send(f'{get_nickname(selected.nickname)}님이 {selected_team}을 선택하셨습니다.')
             await interaction.message.delete()
-            await choose_order_game(ctx, blue_team, red_team, members, summoners)
+            await choose_order_game(ctx, blue_team, red_team, members, summoners, host)
 
     blue_red_view = BlueRedView()
     await ctx.send(content=f'## {get_nickname(selected.nickname)}님, 진영을 선택해주세요.', view=blue_red_view)
 
 
-async def choose_order_game(ctx, blue_team, red_team, members, summoners):
+async def choose_order_game(ctx, blue_team, red_team, members, summoners, host):
     await ctx.send(f'=========================================')
     # 선뽑 후뽑 고르기
     teams = [blue_team, red_team]
@@ -272,14 +278,14 @@ async def choose_order_game(ctx, blue_team, red_team, members, summoners):
             order_type = '선뽑' if pick_type else '후뽑'
             await ctx.send(f'{get_nickname(selected.nickname)}님이 {order_type}입니다.')
             await interaction.message.delete()
-            await choose_game_team(ctx, teams, order_flag if pick_type else not order_flag, members, summoners)
+            await choose_game_team(ctx, teams, order_flag if pick_type else not order_flag, members, summoners, host)
             return
 
     order_view = OrderView()
     await ctx.send(content=f'## {get_nickname(selected.nickname)}님, 뽑는 순서를 정해주세요.', view=order_view)
 
 
-async def choose_game_team(ctx, teams, flag, members, summoners):
+async def choose_game_team(ctx, teams, flag, members, summoners, host):
     await ctx.send(f'=========================================')
 
     pick_order = [flag, not flag, not flag, flag, flag, not flag, not flag, flag]
@@ -334,7 +340,7 @@ async def choose_game_team(ctx, teams, flag, members, summoners):
                 add_member_to_team(pick_order, teams, self.view.members[0])
                 await interaction.message.delete()
                 board_message = get_game_board(teams)
-                await finalize_team(ctx, board_message, summoners)
+                await finalize_team(ctx, board_message, summoners, host)
                 return
 
             team_head = get_team_head(pick_order, teams)
@@ -350,7 +356,7 @@ async def choose_game_team(ctx, teams, flag, members, summoners):
     # await ctx.send(get_game_board(teams))
 
 
-async def finalize_team(ctx, board_message, summoners):
+async def finalize_team(ctx, board_message, summoners, host):
 
     class FinalTeamView(discord.ui.View):
         def __init__(self):
@@ -364,18 +370,19 @@ async def finalize_team(ctx, board_message, summoners):
 
         async def callback(self, interaction: discord.Interaction):
             press_user = Summoner(interaction.user)
-            if press_user != dcpaow.normal_game_creator:
+            if press_user != host:
                 await (interaction.response.edit_message
-                       (content=f'{board_message}\n## {get_nickname(dcpaow.normal_game_creator.nickname)}님이 누른 것만 인식합니다. '
+                       (content=f'{board_message}\n## {get_nickname(host.nickname)}님이 누른 것만 인식합니다. '
                                 f'{get_nickname(press_user.nickname)}님 누르지 말아주세요.',
                         view=self.view))
                 return
             self.view.clear_items()
-            await interaction.response.edit_message(view=self.view)
-            await add_normal_game_to_database(summoners)
+
+            await interaction.response.edit_message(content=f'{board_message}', view=self.view)
             await ctx.send(f'https://banpick.kr/')
             await ctx.send(f'밴픽은 위 사이트에서 진행해주시면 됩니다.')
             await ctx.send(f'## 사용자 설정 방 제목 : 롤파크 / 비밀번호 : 0921')
+            await add_normal_game_to_database(summoners)
 
     class EditButton(discord.ui.Button):
         def __init__(self):
@@ -383,14 +390,14 @@ async def finalize_team(ctx, board_message, summoners):
 
         async def callback(self, interaction: discord.Interaction):
             press_user = Summoner(interaction.user)
-            if press_user != dcpaow.normal_game_creator:
+            if press_user != host:
                 await (interaction.response.edit_message
-                       (content=f'## {get_nickname(dcpaow.normal_game_creator.nickname)}님이 누른 것만 인식합니다. '
+                       (content=f'## {get_nickname(host.nickname)}님이 누른 것만 인식합니다. '
                                 f'{get_nickname(press_user.nickname)}님 누르지 말아주세요.',
                         view=self.view))
                 return
             await interaction.message.delete()
-            await close_normal_game(ctx, summoners)
+            await close_normal_game(ctx, summoners, host)
 
     final_team_view = FinalTeamView()
     await ctx.send(content=f'{board_message}',
@@ -402,6 +409,7 @@ async def add_normal_game_to_database(summoners):
         add_summoner(summoner)
         update_summoner(summoner)
         await add_normal_game_count(summoner)
+
 
 def get_game_board(teams):
     board = f'```\n'

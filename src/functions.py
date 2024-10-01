@@ -171,6 +171,11 @@ def sort_game_members(user_list: list):
         for user in bronze_users:
             user_result.append(user[1])
 
+    if iron_users:
+        iron_users.sort(key=lambda pair: pair[0])
+        for user in iron_users:
+            user_result.append(user[1])
+
     if unranked_users:
         for user in unranked_users:
             user_result.append(user[1])
