@@ -414,8 +414,8 @@ async def add_normal_game_to_database(summoners):
         await add_normal_game_count(summoner)
 
 
-async def move_summoners(ctx, teams):
-    channel_id = ctx.channel.id
+async def move_summoners(channel, teams):
+    channel_id = channel.id
     normal_game_recruit_channel_id_list = [channels.GAME_A_RECRUIT_CHANNEL_ID, channels.GAME_B_RECRUIT_CHANNEL_ID,
                                            channels.GAME_C_RECRUIT_CHANNEL_ID, channels.GAME_D_RECRUIT_CHANNEL_ID,]
     blue_team_channel_id_list = [channels.GAME_A_TEAM_1_CHANNEL_ID, channels.GAME_B_TEAM_1_CHANNEL_ID,
