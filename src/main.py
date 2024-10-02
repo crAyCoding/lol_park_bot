@@ -211,7 +211,7 @@ async def record_normal_game(ctx):
             await interaction.response.edit_message(view=self)
 
     view = RecordUpdateView(ctx=ctx, teams=teams)
-    await ctx.send(view=view)
+    await ctx.send(content='승패기록하기', view=view)
 
     lolpark.finalized_normal_game_team_list.pop(0)
     if not lolpark.finalized_normal_game_team_list:
