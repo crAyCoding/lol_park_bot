@@ -73,7 +73,8 @@ async def close_normal_game(ctx, summoners, host):
         async def callback(self, interaction: discord.Interaction):
             press_summoner = Summoner(interaction.user)
             if press_summoner != host:
-                await ctx.send(f'{get_nickname(host.nickname)}만 확정할 수 있습니다.')
+                await ctx.send(f'{get_nickname(host.nickname)}님만 확정할 수 있습니다.'
+                               f'{get_nickname(press_summoner.nickname)}님 누르지 말아주세요.')
                 await interaction.response.defer()
                 return
             await interaction.message.delete()
