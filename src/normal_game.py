@@ -429,11 +429,13 @@ async def move_summoners(channel, teams):
             blue_team_channel = bot.get_channel(blue_team_channel_id_list[i])
             for summoner in teams[0]:
                 member = guild.get_member(summoner.id)
-                await member.move_to(blue_team_channel)
+                if member.voice is not None:
+                    await member.move_to(blue_team_channel)
             red_team_channel = bot.get_channel(red_team_channel_id_list[i])
             for summoner in teams[1]:
                 member = guild.get_member(summoner.id)
-                await member.move_to(red_team_channel)
+                if member.voice is not None:
+                    await member.move_to(red_team_channel)
 
 
 def get_game_board(teams):
