@@ -9,7 +9,8 @@ import managers
 from discord.ext import commands
 from normal_game import make_normal_game, close_normal_game, end_normal_game
 from summoner import Summoner
-from database import add_summoner, add_normal_game_win_count, add_normal_game_lose_count, create_table, get_summoner_record_message
+from database import (add_summoner, add_normal_game_win_count,
+                      add_normal_game_lose_count, create_table, get_summoner_record_message)
 from bot import bot
 
 # GitHub Secrets에서 가져오는 값
@@ -27,7 +28,8 @@ async def make_game(ctx, *, message='모이면 바로 시작'):
     # return None
 
     channel_id = ctx.channel.id
-    normal_channel_id_list = [channels.GAME_1_RECRUIT_CHANNEL_ID, channels.GAME_2_RECRUIT_CHANNEL_ID]
+    normal_channel_id_list = [channels.GAME_A_RECRUIT_CHANNEL_ID, channels.GAME_B_RECRUIT_CHANNEL_ID,
+                              channels.GAME_C_RECRUIT_CHANNEL_ID, channels.GAME_D_RECRUIT_CHANNEL_ID]
 
     if channel_id in normal_channel_id_list and not dcpaow.is_normal_game:
         dcpaow.is_normal_game = await make_normal_game(ctx, message)
@@ -41,7 +43,8 @@ async def close_game(ctx):
 @bot.command(name='쫑')
 async def end_game(ctx):
     channel_id = ctx.channel.id
-    normal_channel_id_list = [channels.GAME_1_RECRUIT_CHANNEL_ID, channels.GAME_2_RECRUIT_CHANNEL_ID]
+    normal_channel_id_list = [channels.GAME_A_RECRUIT_CHANNEL_ID, channels.GAME_B_RECRUIT_CHANNEL_ID,
+                              channels.GAME_C_RECRUIT_CHANNEL_ID, channels.GAME_D_RECRUIT_CHANNEL_ID]
 
     if channel_id in normal_channel_id_list and dcpaow.is_normal_game:
         dcpaow.normal_game_log = None
@@ -114,7 +117,6 @@ async def twenty_auction_by_own(ctx):
 @bot.command(name='테스트')
 async def test_only_def(ctx):
     # create_table()
-    add_summoner(Summoner(ctx.author))
     return None
 
 
@@ -137,18 +139,6 @@ async def update_lose_count(ctx, member: discord.Member):
         await add_normal_game_lose_count(summoner)
 
 
-@bot.command(name='등록')
-async def enroll_summoner_to_database(ctx, member: discord.Member):
-    summoner = Summoner(member)
-    manager_list = [managers.MASULSA, managers.YUUMI, managers.JUYE, managers.FERRERO]
-    if ctx.channel.id == channels.SUMMONER_ENROLL_ID and ctx.author.id in manager_list:
-        is_enrolled = add_summoner(summoner)
-        if is_enrolled:
-            await ctx.send(f'{summoner.nickname} 님이 등록되었습니다.')
-        else:
-            await ctx.send(f'이미 등록된 소환사입니다.')
-
-
 @bot.command(name='전적')
 async def show_summoner_record(ctx, member: discord.Member = None):
     channel_id = ctx.channel.id
@@ -168,7 +158,8 @@ async def reset_game(ctx):
     channel_id = ctx.channel.id
     user_id = ctx.author.id
 
-    normal_channel_id_list = [channels.GAME_1_RECRUIT_CHANNEL_ID, channels.GAME_2_RECRUIT_CHANNEL_ID]
+    normal_channel_id_list = [channels.GAME_A_RECRUIT_CHANNEL_ID, channels.GAME_B_RECRUIT_CHANNEL_ID,
+                              channels.GAME_C_RECRUIT_CHANNEL_ID, channels.GAME_D_RECRUIT_CHANNEL_ID]
 
     if user_id != managers.MASULSA:
         await ctx.send('개발자만 가능해요~ 안돼요~ 돌아가요~')
@@ -182,7 +173,7 @@ async def reset_game(ctx):
 
 
 def main() -> None:
-    create_table()
+    # create_table()
     bot.run(token=TOKEN)
 
 

@@ -1,11 +1,12 @@
 import dcpaow
-import itertools
+import channels
 import random
 import discord
 from discord.ui import Button
 from functions import *
 from summoner import Summoner
 from database import add_summoner, update_summoner, add_normal_game_count
+from bot import bot
 
 
 async def make_normal_game(ctx, message='3판 2선 모이면 바로 시작'):
@@ -21,7 +22,8 @@ async def make_normal_game(ctx, message='3판 2선 모이면 바로 시작'):
     role = discord.utils.get(ctx.guild.roles, name=role_name)
 
     dcpaow.normal_game_creator = Summoner(ctx.author)
-    await ctx.send(f'{get_nickname(ctx.author.display_name)} 님이 내전을 모집합니다!\n[ {message} ]\n{role.mention}')
+    await ctx.send(f'{get_nickname(ctx.author.display_name)} 님이 내전을 모집합니다!\n'
+                   f'[ {message} ]\n{role.mention}')
     return True
 
 
@@ -58,7 +60,7 @@ async def close_normal_game(ctx, summoners, host):
                 prev_summoner = summoners[self.index - 1]
                 self.view.members[self.index - 1] = GameMember(self.index - 1, new_summoner)
                 summoners[self.index - 1] = new_summoner
-                await ctx.send(f'{self.index - 1}번 소환사가 {get_nickname(prev_summoner.nickname)}에서 '
+                await ctx.send(f'{self.index}번 소환사가 {get_nickname(prev_summoner.nickname)}에서 '
                                f'{get_nickname(new_summoner.nickname)}으로 변경되었습니다.')
                 updated_message = "\n".join([f"### {member.index}: <@{member.summoner.id}>"
                                              for member in self.view.members])
@@ -340,7 +342,7 @@ async def choose_game_team(ctx, teams, flag, members, summoners, host):
                 add_member_to_team(pick_order, teams, self.view.members[0])
                 await interaction.message.delete()
                 board_message = get_game_board(teams)
-                await finalize_team(ctx, board_message, summoners, host)
+                await finalize_team(ctx, teams, board_message, summoners, host)
                 return
 
             team_head = get_team_head(pick_order, teams)
@@ -356,7 +358,7 @@ async def choose_game_team(ctx, teams, flag, members, summoners, host):
     # await ctx.send(get_game_board(teams))
 
 
-async def finalize_team(ctx, board_message, summoners, host):
+async def finalize_team(ctx, teams, board_message, summoners, host):
 
     class FinalTeamView(discord.ui.View):
         def __init__(self):
@@ -382,6 +384,7 @@ async def finalize_team(ctx, board_message, summoners, host):
             await ctx.send(f'https://banpick.kr/')
             await ctx.send(f'밴픽은 위 사이트에서 진행해주시면 됩니다.')
             await ctx.send(f'## 사용자 설정 방 제목 : 롤파크 / 비밀번호 : 0921')
+            await move_summoners(ctx, teams)
             await add_normal_game_to_database(summoners)
 
     class EditButton(discord.ui.Button):
@@ -409,6 +412,27 @@ async def add_normal_game_to_database(summoners):
         add_summoner(summoner)
         update_summoner(summoner)
         await add_normal_game_count(summoner)
+
+
+async def move_summoners(ctx, teams):
+    channel_id = ctx.channel.id
+    normal_game_recruit_channel_id_list = [channels.GAME_A_RECRUIT_CHANNEL_ID, channels.GAME_B_RECRUIT_CHANNEL_ID,
+                                           channels.GAME_C_RECRUIT_CHANNEL_ID, channels.GAME_D_RECRUIT_CHANNEL_ID,]
+    blue_team_channel_id_list = [channels.GAME_A_TEAM_1_CHANNEL_ID, channels.GAME_B_TEAM_1_CHANNEL_ID,
+                                 channels.GAME_C_TEAM_1_CHANNEL_ID, channels.GAME_D_TEAM_1_CHANNEL_ID]
+    red_team_channel_id_list = [channels.GAME_A_TEAM_2_CHANNEL_ID, channels.GAME_B_TEAM_2_CHANNEL_ID,
+                                channels.GAME_C_TEAM_2_CHANNEL_ID, channels.GAME_D_TEAM_2_CHANNEL_ID]
+
+    for i, recruit_channel_id in enumerate(normal_game_recruit_channel_id_list):
+        if channel_id == recruit_channel_id:
+            blue_team_channel = bot.get_channel(blue_team_channel_id_list[i])
+            for summoner in teams[0]:
+                if summoner.voice is not None:
+                    await summoner.move_to(blue_team_channel)
+            red_team_channel = bot.get_channel(red_team_channel_id_list[i])
+            for summoner in teams[1]:
+                if summoner.voice is not None:
+                    await summoner.move_to(red_team_channel)
 
 
 def get_game_board(teams):
