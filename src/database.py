@@ -199,7 +199,7 @@ async def get_normal_game_win_count(summoner):
         else:
             update_log_channel = bot.get_channel(channels.RECORD_UPDATE_LOG_SERVER_ID)
             await update_log_channel.send(f'{summoner.nickname} 소환사를 찾을 수 없습니다.')
-            return None
+            return 0
 
     except sqlite3.Error as e:
         print(f"An error occurred: {e}")
@@ -226,7 +226,7 @@ async def get_normal_game_lose_count(summoner):
         else:
             update_log_channel = bot.get_channel(channels.RECORD_UPDATE_LOG_SERVER_ID)
             await update_log_channel.send(f'{summoner.nickname} 소환사를 찾을 수 없습니다.')
-            return None
+            return 0
 
     except sqlite3.Error as e:
         print(f"An error occurred: {e}")
@@ -252,7 +252,7 @@ async def get_normal_game_count(summoner):
         else:
             update_log_channel = bot.get_channel(channels.RECORD_UPDATE_LOG_SERVER_ID)
             await update_log_channel.send(f'{summoner.nickname} 소환사를 찾을 수 없습니다.')
-            return None
+            return 0
 
     except sqlite3.Error as e:
         print(f"An error occurred: {e}")
