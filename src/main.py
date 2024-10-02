@@ -7,7 +7,7 @@ import lolpark
 import channels
 import managers
 from discord.ext import commands
-from normal_game import make_normal_game, close_normal_game, end_normal_game
+from normal_game import make_normal_game, close_normal_game, end_normal_game, get_game_board
 from summoner import Summoner
 from database import (add_summoner, add_normal_game_win_count,
                       add_normal_game_lose_count, create_table, get_summoner_record_message,
@@ -211,7 +211,7 @@ async def record_normal_game(ctx):
             await interaction.response.edit_message(view=self)
 
     view = RecordUpdateView(ctx=ctx, teams=teams)
-    await ctx.send(content='승패기록하기', view=view)
+    await ctx.send(content=get_game_board(teams), view=view)
 
     lolpark.finalized_normal_game_team_list.pop(0)
     if not lolpark.finalized_normal_game_team_list:
