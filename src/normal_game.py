@@ -1,4 +1,4 @@
-import dcpaow
+import lolpark
 import channels
 import random
 import discord
@@ -14,14 +14,14 @@ async def make_normal_game(ctx, message='3판 2선 모이면 바로 시작'):
 
     # 내전 채팅 로그 기록 시작, 내전을 연 사람을 로그에 추가
     user = Summoner(ctx.author)
-    dcpaow.normal_game_log = {user: [ctx.message.id]}
-    dcpaow.normal_game_channel = ctx.channel.id
+    lolpark.normal_game_log = {user: [ctx.message.id]}
+    lolpark.normal_game_channel = ctx.channel.id
 
     # 내전 역할 가져오기
     role_name = '내전'
     role = discord.utils.get(ctx.guild.roles, name=role_name)
 
-    dcpaow.normal_game_creator = Summoner(ctx.author)
+    lolpark.normal_game_creator = Summoner(ctx.author)
     await ctx.send(f'{get_nickname(ctx.author.display_name)} 님이 내전을 모집합니다!\n'
                    f'[ {message} ]\n{role.mention}')
     return True
@@ -94,7 +94,7 @@ async def close_normal_game(ctx, summoners, host):
 async def end_normal_game(ctx):
     # 일반 내전 쫑
 
-    if dcpaow.normal_game_creator != Summoner(ctx.author):
+    if lolpark.normal_game_creator != Summoner(ctx.author):
         return True
 
     # 내전 역할 가져오기
@@ -104,10 +104,10 @@ async def end_normal_game(ctx):
     await ctx.send(f'내전 쫑내겠습니다~\n{role.mention}')
 
     # 초기화
-    dcpaow.normal_game_log = None
-    dcpaow.normal_game_channel = None
-    dcpaow.normal_game_creator = None
-    dcpaow.is_normal_game = False
+    lolpark.normal_game_log = None
+    lolpark.normal_game_channel = None
+    lolpark.normal_game_creator = None
+    lolpark.is_normal_game = False
 
     return False
 
@@ -387,6 +387,7 @@ async def finalize_team(ctx, teams, board_message, summoners, host):
             await ctx.send(f'## 사용자 설정 방 제목 : 롤파크 / 비밀번호 : 0921')
             await move_summoners(ctx, teams)
             await add_normal_game_to_database(summoners)
+            add_final_teams(teams)
 
     class EditButton(discord.ui.Button):
         def __init__(self):
@@ -449,3 +450,9 @@ def get_game_board(teams):
         board += f'{red_member.nickname}\n'
     board += f'```'
     return board
+
+
+def add_final_teams(teams):
+    if lolpark.finalized_normal_game_team_list is None:
+        lolpark.finalized_normal_game_team_list = []
+    lolpark.finalized_normal_game_team_list.append(teams)

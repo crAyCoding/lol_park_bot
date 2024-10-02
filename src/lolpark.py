@@ -12,3 +12,6 @@ normal_game_channel = None
 
 # 일반 내전 모집 호스트
 normal_game_creator = None
+
+# 확정된 내전 팀 리스트
+finalized_normal_game_team_list = None

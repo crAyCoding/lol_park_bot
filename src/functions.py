@@ -203,3 +203,17 @@ def get_result_sorted_by_tier(user_result: list):
     result += f'\n=========================================\n'
 
     return result
+
+
+def calculate_win_rate(a: int, b: int) -> str:
+    # 총 경기 수
+    total_games = a + b
+
+    # 승률 계산
+    if total_games == 0:
+        return "0.00%"  # 총 경기 수가 0일 때 처리
+
+    win_rate = (a / total_games) * 100
+
+    # 소수점 둘째 자리까지 포맷팅
+    return f"{win_rate:.2f}%"

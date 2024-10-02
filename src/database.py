@@ -265,8 +265,26 @@ async def get_normal_game_count(summoner):
 
 async def get_summoner_record_message(summoner):
     normal_game_count = await get_normal_game_count(summoner)
+    normal_game_win_count = await get_normal_game_win_count(summoner)
+    normal_game_lose_count = await get_normal_game_lose_count(summoner)
 
     record_message = f''
-    record_message += f'{functions.get_nickname(summoner.nickname)}님의 내전 참여 횟수는 {normal_game_count}회 입니다.'
+    record_message += f'### {functions.get_nickname(summoner.nickname)}\n\n'
+    record_message += f'일반 내전 참여 횟수 : {normal_game_count}회\n'
+    record_message += (f'일반 내전 전적 : {normal_game_win_count}승 {normal_game_lose_count}패, '
+                       f'승률 : {functions.calculate_win_rate(normal_game_win_count, normal_game_lose_count)}')
 
     return record_message
+
+
+async def record_normal_game(teams, blue_win_count, red_win_count):
+    for _ in range(blue_win_count):
+        for summoner in teams[0]:
+            await add_normal_game_win_count(summoner)
+        for summoner in teams[1]:
+            await add_normal_game_lose_count(summoner)
+    for _ in range(red_win_count):
+        for summoner in teams[1]:
+            await add_normal_game_win_count(summoner)
+        for summoner in teams[0]:
+            await add_normal_game_lose_count(summoner)
