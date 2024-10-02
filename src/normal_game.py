@@ -384,7 +384,7 @@ async def finalize_team(ctx, teams, board_message, summoners, host):
             await ctx.send(f'https://banpick.kr/')
             await ctx.send(f'밴픽은 위 사이트에서 진행해주시면 됩니다.')
             await ctx.send(f'## 사용자 설정 방 제목 : 롤파크 / 비밀번호 : 0921')
-            # await move_summoners(ctx, teams)
+            await move_summoners(ctx, teams)
             await add_normal_game_to_database(summoners)
 
     class EditButton(discord.ui.Button):
@@ -416,6 +416,7 @@ async def add_normal_game_to_database(summoners):
 
 async def move_summoners(channel, teams):
     channel_id = channel.id
+    guild = channel.guild
     normal_game_recruit_channel_id_list = [channels.GAME_A_RECRUIT_CHANNEL_ID, channels.GAME_B_RECRUIT_CHANNEL_ID,
                                            channels.GAME_C_RECRUIT_CHANNEL_ID, channels.GAME_D_RECRUIT_CHANNEL_ID,]
     blue_team_channel_id_list = [channels.GAME_A_TEAM_1_CHANNEL_ID, channels.GAME_B_TEAM_1_CHANNEL_ID,
@@ -427,10 +428,12 @@ async def move_summoners(channel, teams):
         if channel_id == recruit_channel_id:
             blue_team_channel = bot.get_channel(blue_team_channel_id_list[i])
             for summoner in teams[0]:
-                await summoner.move_to(blue_team_channel)
+                member = guild.get_member(summoner.id)
+                await member.move_to(blue_team_channel)
             red_team_channel = bot.get_channel(red_team_channel_id_list[i])
             for summoner in teams[1]:
-                await summoner.move_to(red_team_channel)
+                member = guild.get_member(summoner.id)
+                await member.move_to(red_team_channel)
 
 
 def get_game_board(teams):
