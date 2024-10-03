@@ -170,37 +170,56 @@ async def record_normal_game(ctx):
     class RecordUpdateView(discord.ui.View):
         def __init__(self, ctx, teams):
             super().__init__(timeout=3600)
-            self.ctx = ctx
-            self.teams = teams
             self.blue_win_count = 0
             self.red_win_count = 0
+            self.add_item(BlueWinButton(self))
+            self.add_item(RedWinButton(self))
+            self.add_item(FinalizeButton(self, ctx, teams))
+            self.add_item(ResetButton(self))
 
-        @discord.ui.button(label='블루팀 승리 : 0', style=discord.ButtonStyle.primary)
-        async def blue_win_button(self, button: discord.ui.Button, interaction: discord.Interaction):
-            self.blue_win_count += 1
-            button.label = f"블루팀 승리: {self.blue_win_count}"
-            await interaction.response.edit_message(view=self)
+    class BlueWinButton(discord.ui.Button):
+        def __init__(self, record_view):
+            super().__init__(label=f"블루팀 승리 : 0", style=discord.ButtonStyle.primary)
+            self.record_view = record_view
 
-        @discord.ui.button(label='레드팀 승리 : 0', style=discord.ButtonStyle.red)
-        async def red_win_button(self, button: discord.ui.Button, interaction: discord.Interaction):
-            self.red_win_count += 1
-            button.label = f"레드팀 승리: {self.red_win_count}"
-            await interaction.response.edit_message(view=self)
+        async def callback(self, interaction: discord.Interaction):
+            self.record_view.blue_win_count += 1
+            self.label = f"블루팀 승리 : {self.record_view.blue_win_count}"
+            await interaction.response.edit_message(content=get_game_board(teams), view=self.view)
 
-        @discord.ui.button(label='이대로 확정', style=discord.ButtonStyle.green)
-        async def finalize_button(self, button: discord.ui.Button, interaction: discord.Interaction):
-            await record_normal_game(self.teams, self.blue_win_count, self.red_win_count)
+    class RedWinButton(discord.ui.Button):
+        def __init__(self, record_view):
+            super().__init__(label=f"레드팀 승리 : 0", style=discord.ButtonStyle.red)
+            self.record_view = record_view
+
+        async def callback(self, interaction: discord.Interaction):
+            self.record_view.red_win_count += 1
+            self.label = f"레드팀 승리 : {self.record_view.red_win_count}"
+            await interaction.response.edit_message(content=get_game_board(teams), view=self.view)
+
+    class FinalizeButton(discord.ui.Button):
+        def __init__(self, record_view, ctx, teams):
+            super().__init__(label=f"이대로 확정", style=discord.ButtonStyle.green)
+            self.record_view = record_view
+            self.teams = teams
+            self.ctx = ctx
+
+        async def callback(self, interaction: discord.Interaction):
+            await record_normal_game(self.teams, self.record_view.blue_win_count, self.record_view.red_win_count)
             await interaction.message.delete()
             await self.ctx.send(f'내전 승/패가 기록되었습니다.')
 
-        @discord.ui.button(label='초기화', style=discord.ButtonStyle.gray)
-        async def reset_button(self, button: discord.ui.Button, interaction: discord.Interaction):
-            # 승리 횟수 초기화
-            self.blue_win_count = 0
-            self.red_win_count = 0
+    class ResetButton(discord.ui.Button):
+        def __init__(self, record_view):
+            super().__init__(label=f"이대로 확정", style=discord.ButtonStyle.green)
+            self.record_view = record_view
+
+        async def callback(self, interaction: discord.Interaction):
+            self.record_view.blue_win_count = 0
+            self.record_view.red_win_count = 0
 
             # 각 버튼 라벨 초기화
-            for child in self.children:
+            for child in self.record_view.children:
                 if isinstance(child, discord.ui.Button):
                     if '블루팀' in child.label:
                         child.label = '블루팀 승리 : 0'
@@ -208,7 +227,7 @@ async def record_normal_game(ctx):
                         child.label = '레드팀 승리 : 0'
 
             # 메시지 업데이트
-            await interaction.response.edit_message(view=self)
+            await interaction.response.edit_message(content=get_game_board(teams), view=self.view)
 
     view = RecordUpdateView(ctx=ctx, teams=teams)
     await ctx.send(content=get_game_board(teams), view=view)
