@@ -211,7 +211,7 @@ async def record_normal_game_in_main(ctx):
 
     class ResetButton(discord.ui.Button):
         def __init__(self, record_view):
-            super().__init__(label=f"이대로 확정", style=discord.ButtonStyle.green)
+            super().__init__(label=f"초기화", style=discord.ButtonStyle.gray)
             self.record_view = record_view
 
         async def callback(self, interaction: discord.Interaction):
