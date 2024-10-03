@@ -11,7 +11,7 @@ from normal_game import make_normal_game, close_normal_game, end_normal_game, ge
 from summoner import Summoner
 from database import (add_summoner, add_normal_game_win_count,
                       add_normal_game_lose_count, create_table, get_summoner_record_message,
-                      record_normal_game)
+                      record_normal_game, get_summoner_most_normal_game_message)
 from bot import bot
 
 # GitHub Secrets에서 가져오는 값
@@ -154,6 +154,15 @@ async def show_summoner_record(ctx, member: discord.Member = None):
         await ctx.send(record_message)
 
 
+@bot.command(name='내전악귀')
+async def show_summoner_most_normal_game(ctx):
+    channel_id = ctx.channel.id
+
+    if channel_id == channels.RECORD_SERVER_ID:
+        most_normal_game_message = await get_summoner_most_normal_game_message()
+        await ctx.send(most_normal_game_message)
+
+
 @bot.command(name='기록')
 async def record_normal_game_in_main(ctx):
     channel_id = ctx.channel.id
@@ -169,7 +178,7 @@ async def record_normal_game_in_main(ctx):
 
     class RecordUpdateView(discord.ui.View):
         def __init__(self, ctx, teams):
-            super().__init__(timeout=3600)
+            super().__init__(timeout=14400)
             self.blue_win_count = 0
             self.red_win_count = 0
             self.add_item(BlueWinButton(self))
@@ -205,8 +214,8 @@ async def record_normal_game_in_main(ctx):
             self.ctx = ctx
 
         async def callback(self, interaction: discord.Interaction):
-            await record_normal_game(self.teams, self.record_view.blue_win_count, self.record_view.red_win_count)
             await interaction.message.delete()
+            await record_normal_game(self.teams, self.record_view.blue_win_count, self.record_view.red_win_count)
             await self.ctx.send(f'내전 승/패가 기록되었습니다.')
 
     class ResetButton(discord.ui.Button):

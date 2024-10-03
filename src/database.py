@@ -5,7 +5,10 @@ from summoner import Summoner
 from bot import bot
 
 
-async def add_normal_game_win_count(summoner):
+async def add_normal_game_win_count(summoner, count):
+    if count == 0:
+        return None
+
     conn = sqlite3.connect('/app/src/summoners.db')
     db = conn.cursor()
 
@@ -13,9 +16,9 @@ async def add_normal_game_win_count(summoner):
         # id가 일치하는 행의 game_count를 1 증가
         db.execute('''
         UPDATE summoners
-        SET normal_game_win = normal_game_win + 1
+        SET normal_game_win = normal_game_win + ?
         WHERE id = ?
-        ''', (summoner.id,))
+        ''', (count, summoner.id,))
 
         # 변경사항 저장
         conn.commit()
@@ -40,7 +43,10 @@ async def add_normal_game_win_count(summoner):
 
 
 # 내전 패배 수 증가
-async def add_normal_game_lose_count(summoner):
+async def add_normal_game_lose_count(summoner, count):
+    if count == 0:
+        return None
+
     conn = sqlite3.connect('/app/src/summoners.db')
     db = conn.cursor()
 
@@ -48,9 +54,9 @@ async def add_normal_game_lose_count(summoner):
         # id가 일치하는 행의 game_count를 1 증가
         db.execute('''
         UPDATE summoners
-        SET normal_game_lose = normal_game_lose + 1
+        SET normal_game_lose = normal_game_lose + ?
         WHERE id = ?
-        ''', (summoner.id,))
+        ''', (count, summoner.id,))
 
         # 변경사항 저장
         conn.commit()
@@ -263,6 +269,7 @@ async def get_normal_game_count(summoner):
         conn.close()
 
 
+# 내전 전적 메세지 가져오기
 async def get_summoner_record_message(summoner):
     normal_game_count = await get_normal_game_count(summoner)
     normal_game_win_count = await get_normal_game_win_count(summoner)
@@ -277,14 +284,42 @@ async def get_summoner_record_message(summoner):
     return record_message
 
 
+# 일반 내전 승/패 기록
 async def record_normal_game(teams, blue_win_count, red_win_count):
-    for _ in range(blue_win_count):
-        for summoner in teams[0]:
-            await add_normal_game_win_count(summoner)
-        for summoner in teams[1]:
-            await add_normal_game_lose_count(summoner)
-    for _ in range(red_win_count):
-        for summoner in teams[1]:
-            await add_normal_game_win_count(summoner)
-        for summoner in teams[0]:
-            await add_normal_game_lose_count(summoner)
+    for summoner in teams[0]:
+        await add_normal_game_win_count(summoner, blue_win_count)
+        await add_normal_game_lose_count(summoner, red_win_count)
+    for summoner in teams[1]:
+        await add_normal_game_lose_count(summoner, blue_win_count)
+        await add_normal_game_win_count(summoner, red_win_count)
+
+
+# 내전 횟수 TOP 10 가져오기
+def get_top_ten_normal_game_players():
+    conn = sqlite3.connect('/app/src/summoners.db')
+    db = conn.cursor()
+
+    try:
+        # normal_game_count가 가장 높은 10명 가져오기
+        db.execute('''
+        SELECT display_name, normal_game_count
+        FROM summoners
+        ORDER BY normal_game_count DESC
+        LIMIT 10
+        ''')
+
+        top_players = db.fetchall()
+        return top_players  # [(display_name, normal_game_count), ...]
+    finally:
+        conn.close()
+
+
+# 일반 내전 탑 텐 가져오기
+async def get_summoner_most_normal_game_message():
+    most_normal_game_message = f'## 내전 악귀 명단\n\n'
+    top_ten = get_top_ten_normal_game_players()
+    for index, result in enumerate(top_ten):
+        most_normal_game_message += f'{index + 1}위 : {result[0]}, {result[1]}회\n'
+
+    return most_normal_game_message
+
