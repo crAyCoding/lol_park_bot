@@ -36,7 +36,7 @@ async def close_normal_game(ctx, summoners, host):
 
     class GameView(discord.ui.View):
         def __init__(self):
-            super().__init__(timeout=3600)
+            super().__init__(timeout=14400)
             self.members = [GameMember(i, summoners[i]) for i in range(0, 10)]
             for member in self.members:
                 self.add_item(EditButton(member))

@@ -16,7 +16,7 @@ async def record_normal_game_in_main(ctx):
 
     class RecordUpdateView(discord.ui.View):
         def __init__(self, ctx, teams):
-            super().__init__(timeout=14400)
+            super().__init__(timeout=86400)
             self.blue_win_count = 0
             self.red_win_count = 0
             self.add_item(BlueWinButton(self))
