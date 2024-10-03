@@ -155,7 +155,7 @@ async def show_summoner_record(ctx, member: discord.Member = None):
 
 
 @bot.command(name='기록')
-async def record_normal_game(ctx):
+async def record_normal_game_in_main(ctx):
     channel_id = ctx.channel.id
 
     if channel_id != channels.RECORD_UPDATE_SERVER_ID:
