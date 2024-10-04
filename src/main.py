@@ -8,7 +8,7 @@ import channels
 from discord.ext import commands
 from normal_game import close_normal_game
 from summoner import Summoner
-from database import get_summoner_most_normal_game_message, create_table
+import database
 from bot import bot
 import main_functions
 import record
@@ -107,6 +107,7 @@ async def twenty_auction_by_own(ctx):
 
 @bot.command(name='테스트')
 async def test_only_def(ctx):
+    database.add_summoner(Summoner(ctx.author))
     return None
 
 
@@ -125,7 +126,7 @@ async def show_summoner_most_normal_game(ctx):
     channel_id = ctx.channel.id
 
     if channel_id == channels.RECORD_SERVER_ID:
-        most_normal_game_message = await get_summoner_most_normal_game_message()
+        most_normal_game_message = await database.get_summoner_most_normal_game_message()
         await ctx.send(most_normal_game_message)
 
 
@@ -140,10 +141,7 @@ async def command_reset(ctx):
 
 
 def main() -> None:
-    if not os.path.exists(lolpark.summoners_db):
-        conn = sqlite3.connect(lolpark.summoners_db)
-        conn.close()
-    create_table()
+    database.create_table()
     bot.run(token=TOKEN)
 
 
