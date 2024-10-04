@@ -140,6 +140,9 @@ async def command_reset(ctx):
 
 
 def main() -> None:
+    if not os.path.exists(lolpark.summoners_db):
+        conn = sqlite3.connect(lolpark.summoners_db)
+        conn.close()
     create_table()
     bot.run(token=TOKEN)
 
