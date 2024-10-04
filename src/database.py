@@ -1,6 +1,7 @@
 import sqlite3
 import channels
 import functions
+import lolpark
 from summoner import Summoner
 from bot import bot
 
@@ -9,7 +10,7 @@ async def add_normal_game_win_count(summoner, count):
     if count == 0:
         return None
 
-    conn = sqlite3.connect('/app/src/summoners.db')
+    conn = sqlite3.connect(lolpark.summoners_db)
     db = conn.cursor()
 
     try:
@@ -25,14 +26,7 @@ async def add_normal_game_win_count(summoner, count):
         update_log_channel = bot.get_channel(channels.RECORD_UPDATE_LOG_SERVER_ID)
 
         # 업데이트된 행이 있는지 확인
-        if db.rowcount > 0:
-            # 정상적으로 업데이트된 경우에만 메시지 전송
-            win_count = await get_normal_game_win_count(summoner)
-            await update_log_channel.send(f'{functions.get_nickname(summoner.nickname)} '
-                                          f'님의 일반 내전 승리 수가 업데이트 되었습니다. '
-                                          f'현재 내전 승리 수 : {win_count}')
-        else:
-            # id를 찾을 수 없는 경우에 대한 처리 (선택 사항)
+        if db.rowcount == 0:
             await update_log_channel.send(f"{summoner.nickname} 님을 찾을 수 없습니다.")
 
     except sqlite3.Error as e:
@@ -47,7 +41,7 @@ async def add_normal_game_lose_count(summoner, count):
     if count == 0:
         return None
 
-    conn = sqlite3.connect('/app/src/summoners.db')
+    conn = sqlite3.connect(lolpark.summoners_db)
     db = conn.cursor()
 
     try:
@@ -63,14 +57,7 @@ async def add_normal_game_lose_count(summoner, count):
         update_log_channel = bot.get_channel(channels.RECORD_UPDATE_LOG_SERVER_ID)
 
         # 업데이트된 행이 있는지 확인
-        if db.rowcount > 0:
-            # 정상적으로 업데이트된 경우에만 메시지 전송
-            lose_count = await get_normal_game_lose_count(summoner)
-            await update_log_channel.send(f'{functions.get_nickname(summoner.nickname)} '
-                                          f'님의 일반 내전 패배 수가 업데이트 되었습니다. '
-                                          f'현재 내전 승리 수 : {lose_count}')
-        else:
-            # id를 찾을 수 없는 경우에 대한 처리 (선택 사항)
+        if db.rowcount == 0:
             await update_log_channel.send(f"{summoner.nickname} 님을 찾을 수 없습니다.")
 
     except sqlite3.Error as e:
@@ -81,7 +68,7 @@ async def add_normal_game_lose_count(summoner, count):
 
 
 def add_summoner(summoner):
-    conn = sqlite3.connect('/app/src/summoners.db')
+    conn = sqlite3.connect(lolpark.summoners_db)
     db = conn.cursor()
     try:
         # 해당 id가 존재하는지 확인
@@ -109,7 +96,7 @@ def add_summoner(summoner):
 
 # id를 통해 display_name, score, rank 값 업데이트
 def update_summoner(summoner):
-    conn = sqlite3.connect('/app/src/summoners.db')
+    conn = sqlite3.connect(lolpark.summoners_db)
     db = conn.cursor()
 
     try:
@@ -132,7 +119,7 @@ def update_summoner(summoner):
 
 # 일반 내전 횟수 증가
 async def add_normal_game_count(summoner):
-    conn = sqlite3.connect('/app/src/summoners.db')
+    conn = sqlite3.connect(lolpark.summoners_db)
     db = conn.cursor()
 
     try:
@@ -165,7 +152,7 @@ async def add_normal_game_count(summoner):
 
 
 def create_table():
-    conn = sqlite3.connect('/app/src/summoners.db')
+    conn = sqlite3.connect(lolpark.summoners_db)
     db = conn.cursor()
 
     # users 테이블 생성
@@ -191,7 +178,7 @@ def create_table():
 
 # 일반 내전 승리 수 가져오기
 async def get_normal_game_win_count(summoner):
-    conn = sqlite3.connect('/app/src/summoners.db')
+    conn = sqlite3.connect(lolpark.summoners_db)
     db = conn.cursor()
     try:
         # id에 따른 game_count 조회
@@ -218,7 +205,7 @@ async def get_normal_game_win_count(summoner):
 
 # 일반 내전 패배 수 가져오기
 async def get_normal_game_lose_count(summoner):
-    conn = sqlite3.connect('/app/src/summoners.db')
+    conn = sqlite3.connect(lolpark.summoners_db)
     db = conn.cursor()
     try:
         # id에 따른 game_count 조회
@@ -244,7 +231,7 @@ async def get_normal_game_lose_count(summoner):
 
 
 async def get_normal_game_count(summoner):
-    conn = sqlite3.connect('/app/src/summoners.db')
+    conn = sqlite3.connect(lolpark.summoners_db)
     db = conn.cursor()
     try:
         # id에 따른 game_count 조회
@@ -296,7 +283,7 @@ async def record_normal_game(teams, blue_win_count, red_win_count):
 
 # 내전 횟수 TOP 10 가져오기
 def get_top_ten_normal_game_players():
-    conn = sqlite3.connect('/app/src/summoners.db')
+    conn = sqlite3.connect(lolpark.summoners_db)
     db = conn.cursor()
 
     try:
@@ -319,7 +306,7 @@ async def get_summoner_most_normal_game_message():
     most_normal_game_message = f'## 내전 악귀 명단\n\n'
     top_ten = get_top_ten_normal_game_players()
     for index, result in enumerate(top_ten):
-        most_normal_game_message += f'{index + 1}위 : {result[0]}, {result[1]}회\n'
+        most_normal_game_message += f'### {index + 1}위 : {result[0]}, {result[1]}회\n\n'
 
     return most_normal_game_message
 

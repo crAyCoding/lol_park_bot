@@ -15,3 +15,6 @@ normal_game_creator = None
 
 # 확정된 내전 팀 리스트
 finalized_normal_game_team_list = None
+
+# 데이터베이스 파일 저장소
+summoners_db = '/app/src/october_summoners.db'

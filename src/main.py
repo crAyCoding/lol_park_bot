@@ -8,7 +8,7 @@ import channels
 from discord.ext import commands
 from normal_game import close_normal_game
 from summoner import Summoner
-from database import get_summoner_most_normal_game_message
+from database import get_summoner_most_normal_game_message, create_table
 from bot import bot
 import main_functions
 import record
@@ -39,12 +39,16 @@ async def command_end(ctx):
 async def on_message(message):
     channel_id = message.channel.id
 
+    recognize_message_list = ['ㅅ', 't', 'T', '손', '발']
+
     # 봇 메세지는 메세지로 인식 X
     if message.author == bot.user:
         return
 
     # 내전이 열려 있을 경우, 손 든 사람 모집
     if lolpark.is_normal_game and channel_id == lolpark.normal_game_channel:
+        if message.content not in recognize_message_list:
+            return
         user = Summoner(message.author)
         if user in lolpark.normal_game_log:
             lolpark.normal_game_log[user].append(message.id)
@@ -136,7 +140,7 @@ async def command_reset(ctx):
 
 
 def main() -> None:
-    # create_table()
+    create_table()
     bot.run(token=TOKEN)
 
 
