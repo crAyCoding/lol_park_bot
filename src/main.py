@@ -1,6 +1,6 @@
 import os
 import sqlite3
-
+from dotenv import load_dotenv
 import discord
 
 import lolpark
@@ -13,6 +13,8 @@ from bot import bot
 import main_functions
 import record
 
+# 테스트 할때 아래 사용
+# load_dotenv()
 # GitHub Secrets에서 가져오는 값
 TOKEN = os.getenv('DISCORD_TOKEN')
 
@@ -101,7 +103,6 @@ async def twenty_auction_by_own(ctx):
 
 @bot.command(name='테스트')
 async def test_only_def(ctx):
-    # create_table()
     return None
 
 
