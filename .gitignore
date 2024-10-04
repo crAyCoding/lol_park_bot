@@ -1,3 +1,4 @@
 venv/
 .idea/
 token.txt
+src/.env
