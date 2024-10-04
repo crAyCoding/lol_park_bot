@@ -1,5 +1,8 @@
-from src import channels, lolpark, normal_game, database
 import discord
+import channels
+import database
+import lolpark
+import normal_game
 
 
 async def record_normal_game_in_main(ctx):
