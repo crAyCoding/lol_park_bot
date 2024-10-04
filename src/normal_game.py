@@ -386,6 +386,7 @@ async def finalize_team(ctx, teams, board_message, summoners, host):
             await ctx.send(f'밴픽은 위 사이트에서 진행해주시면 됩니다.')
             await ctx.send(f'## 사용자 설정 방 제목 : 롤파크 / 비밀번호 : 0921')
             await move_summoners(ctx, teams)
+            await send_random_record_update_person(ctx, teams)
             await add_normal_game_to_database(summoners)
             add_final_teams(teams)
 
@@ -438,6 +439,18 @@ async def move_summoners(channel, teams):
                 member = guild.get_member(summoner.id)
                 if member.voice is not None:
                     await member.move_to(red_team_channel)
+
+
+async def send_random_record_update_person(ctx, teams):
+    blue_team = teams[0]
+    red_team = teams[1]
+
+    blue_person = random.choice(blue_team)
+    red_person = random.choice(red_team)
+
+    await ctx.send(f'### 이번 내전의 스크린샷을 <#1290946711153414205> 에 첨부할 서버원입니다.\n\n'
+                   f'블루 팀 승리 시 : <@{blue_person.id}>\n'
+                   f'레드 팀 승리 시 : <@{red_person.id}>')
 
 
 def get_game_board(teams):
