@@ -24,7 +24,7 @@ jobs:
     - name: Deploy to EC2
       run: |
         ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_IP }} << 'EOF'
-          cd /home/ec2-user/discord/
+          cd /home/ec2-user/lol_park_bot/
         
           git pull origin master
         
@@ -43,6 +43,6 @@ jobs:
         
           sudo docker run -d -p 80:80 --name discord-container \
             -e DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }} \
-            -v /home/ec2-user/discord/src/october_summoners.db:/app/src/october_summoners.db \
+            -v /home/ec2-user/lol_park_bot/src/october_summoners.db:/app/src/october_summoners.db \
             discord-image
         EOF
