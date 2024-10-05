@@ -77,10 +77,11 @@ async def on_message_delete(message):
     if message.author == bot.user:
         return
 
-    user = Summoner(message.author)
-
     # 내전 모집에서 채팅 지우면 로그에서 삭제
     if lolpark.is_normal_game and channel_id == lolpark.normal_game_channel:
+        user = Summoner(message.author)
+        if user not in lolpark.normal_game_log:
+            return
         lolpark.normal_game_log[user] = [mid for mid in lolpark.normal_game_log[user] if mid != message.id]
         # 만약 채팅이 더 남아 있지 않으면 로그에서 유저 삭제
         if not lolpark.normal_game_log[user]:
@@ -141,7 +142,7 @@ async def command_reset(ctx):
 
 
 def main() -> None:
-    database.create_table()
+    # database.create_table()
     bot.run(token=TOKEN)
 
 
