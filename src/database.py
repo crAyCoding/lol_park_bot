@@ -132,10 +132,10 @@ async def add_normal_game_count(summoner):
 
         # 변경사항 저장
         conn.commit()
-        update_log_channel = bot.get_channel(channels.RECORD_UPDATE_LOG_SERVER_ID)
 
         # 업데이트된 행이 있는지 확인
         if db.rowcount == 0:
+            update_log_channel = bot.get_channel(channels.RECORD_UPDATE_LOG_SERVER_ID)
             await update_log_channel.send(f"{summoner.nickname} 님을 찾을 수 없습니다.")
     except sqlite3.Error as e:
         print(f"An error occurred: {e}")
@@ -183,8 +183,6 @@ async def get_normal_game_win_count(summoner):
             win_count = result[0]
             return win_count
         else:
-            update_log_channel = bot.get_channel(channels.RECORD_UPDATE_LOG_SERVER_ID)
-            await update_log_channel.send(f'{summoner.nickname} 소환사를 찾을 수 없습니다.')
             return 0
 
     except sqlite3.Error as e:
@@ -210,8 +208,6 @@ async def get_normal_game_lose_count(summoner):
             win_count = result[0]
             return win_count
         else:
-            update_log_channel = bot.get_channel(channels.RECORD_UPDATE_LOG_SERVER_ID)
-            await update_log_channel.send(f'{summoner.nickname} 소환사를 찾을 수 없습니다.')
             return 0
 
     except sqlite3.Error as e:
