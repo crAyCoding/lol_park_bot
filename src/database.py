@@ -135,14 +135,7 @@ async def add_normal_game_count(summoner):
         update_log_channel = bot.get_channel(channels.RECORD_UPDATE_LOG_SERVER_ID)
 
         # 업데이트된 행이 있는지 확인
-        if db.rowcount > 0:
-            # 정상적으로 업데이트된 경우에만 메시지 전송
-            normal_game_count = await get_normal_game_count(summoner)
-            await update_log_channel.send(f'{functions.get_nickname(summoner.nickname)} '
-                                          f'님의 일반 내전 횟수가 업데이트 되었습니다. '
-                                          f'현재 내전 횟수 : {normal_game_count}')
-        else:
-            # id를 찾을 수 없는 경우에 대한 처리 (선택 사항)
+        if db.rowcount == 0:
             await update_log_channel.send(f"{summoner.nickname} 님을 찾을 수 없습니다.")
     except sqlite3.Error as e:
         print(f"An error occurred: {e}")
@@ -264,7 +257,7 @@ async def get_summoner_record_message(summoner):
 
     record_message = f''
     record_message += f'### {functions.get_nickname(summoner.nickname)}\n\n'
-    record_message += f'일반 내전 참여 횟수 : {normal_game_count}회\n'
+    record_message += f'일반 내전 참여 횟수 : {normal_game_win_count + normal_game_lose_count}회\n'
     record_message += (f'일반 내전 전적 : {normal_game_win_count}승 {normal_game_lose_count}패, '
                        f'승률 : {functions.calculate_win_rate(normal_game_win_count, normal_game_lose_count)}')
 
@@ -289,14 +282,14 @@ def get_top_ten_normal_game_players():
     try:
         # normal_game_count가 가장 높은 10명 가져오기
         db.execute('''
-        SELECT display_name, normal_game_count
+        SELECT display_name, normal_game_win, normal_game_lose
         FROM summoners
-        ORDER BY normal_game_count DESC
+        ORDER BY (normal_game_win + normal_game_lose) DESC
         LIMIT 10
         ''')
 
         top_players = db.fetchall()
-        return top_players  # [(display_name, normal_game_count), ...]
+        return top_players
     finally:
         conn.close()
 
@@ -306,7 +299,7 @@ async def get_summoner_most_normal_game_message():
     most_normal_game_message = f'## 내전 악귀 명단\n\n'
     top_ten = get_top_ten_normal_game_players()
     for index, result in enumerate(top_ten):
-        most_normal_game_message += f'### {index + 1}위 : {result[0]}, {result[1]}회\n\n'
+        most_normal_game_message += f'### {index + 1}위 : {result[0]}, {result[1] + result[2]}회\n\n'
 
     return most_normal_game_message
 
