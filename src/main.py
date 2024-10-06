@@ -31,6 +31,7 @@ async def command_start(ctx, *, message='3판 2선 모이면 바로 시작'):
 
 @bot.command(name='쫑')
 async def command_end(ctx):
+    print("HI")
     await main_functions.end_game(ctx)
 
 
@@ -39,16 +40,15 @@ async def command_end(ctx):
 async def on_message(message):
     channel_id = message.channel.id
 
-    recognize_message_list = ['ㅅ', 't', 'T', '손', '발']
+    recognize_message_list = ['ㅅ', 't', 'T', '손', '발', 'ㅅㅅ', 'ㅅㅅㅅ', 'ㅅㅅㅅㅅ']
 
     # 봇 메세지는 메세지로 인식 X
     if message.author == bot.user:
         return
 
     # 내전이 열려 있을 경우, 손 든 사람 모집
-    if lolpark.is_normal_game and channel_id == lolpark.normal_game_channel:
-        if message.content not in recognize_message_list:
-            return
+    if (lolpark.is_normal_game and channel_id == lolpark.normal_game_channel
+            and message.content in recognize_message_list):
         user = Summoner(message.author)
         if user in lolpark.normal_game_log:
             lolpark.normal_game_log[user].append(message.id)
@@ -108,7 +108,7 @@ async def twenty_auction_by_own(ctx):
 
 @bot.command(name='테스트')
 async def test_only_def(ctx):
-    database.add_summoner(Summoner(ctx.author))
+    # database.add_summoner(Summoner(ctx.author))
     return None
 
 
@@ -123,17 +123,23 @@ async def command_record(ctx, member: discord.Member = None):
 
 
 @bot.command(name='내전악귀')
-async def show_summoner_most_normal_game(ctx):
-    channel_id = ctx.channel.id
-
-    if channel_id == channels.RECORD_SERVER_ID:
-        most_normal_game_message = await database.get_summoner_most_normal_game_message()
-        await ctx.send(most_normal_game_message)
+async def command_game_ghost(ctx):
+    await main_functions.show_summoner_most_normal_game(ctx)
 
 
 @bot.command(name='기록')
 async def command_record(ctx):
     await record.record_normal_game_in_main(ctx)
+
+
+@bot.command(name='승리')
+async def command_win_manual(ctx, *members: discord.Member):
+    record.manually_add_summoner_win(ctx, members)
+
+
+@bot.command(name='패배')
+async def command_lose_manual(ctx, *members: discord.Member):
+    record.manually_add_summoner_lose(ctx, members)
 
 
 @bot.command(name='초기화')

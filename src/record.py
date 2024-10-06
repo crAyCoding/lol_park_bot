@@ -3,6 +3,8 @@ import channels
 import database
 import lolpark
 import normal_game
+import managers
+from summoner import Summoner
 
 
 async def record_normal_game_in_main(ctx):
@@ -85,3 +87,21 @@ async def record_normal_game_in_main(ctx):
     lolpark.finalized_normal_game_team_list.pop(0)
     if not lolpark.finalized_normal_game_team_list:
         lolpark.finalized_normal_game_team_list = None
+
+
+def manually_add_summoner_win(ctx, members):
+    if ctx.author.id != managers.MASULSA:
+        return
+
+    for member in members:
+        summoner = Summoner(member)
+        database.add_normal_game_win_count(summoner, 1)
+
+
+def manually_add_summoner_lose(ctx, members):
+    if ctx.author.id != managers.MASULSA:
+        return
+
+    for member in members:
+        summoner = Summoner(member)
+        database.add_normal_game_win_count(summoner, 1)

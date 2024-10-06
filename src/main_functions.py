@@ -6,6 +6,7 @@ import managers
 from summoner import Summoner
 
 
+# '!내전' 입력 시 동작
 async def make_game(ctx, message):
     # await ctx.send("현재 수습 마술사 작업중 입니다. 수동으로 내전 진행해주시면 감사하겠습니다.")
     # return None
@@ -18,6 +19,7 @@ async def make_game(ctx, message):
         lolpark.is_normal_game = await normal_game.make_normal_game(ctx, message)
 
 
+# '!쫑' 입력 시 동작
 async def end_game(ctx):
     channel_id = ctx.channel.id
     normal_channel_id_list = [channels.GAME_A_RECRUIT_CHANNEL_ID, channels.GAME_B_RECRUIT_CHANNEL_ID,
@@ -29,6 +31,7 @@ async def end_game(ctx):
         lolpark.is_normal_game = await normal_game.end_normal_game(ctx)
 
 
+# '!전적' 입력 시 동작
 async def show_summoner_record(ctx, member):
     channel_id = ctx.channel.id
     # 멘션이 없으면 자기 자신의 정보로 설정, 있으면 멘션된 사용자로 설정
@@ -42,6 +45,7 @@ async def show_summoner_record(ctx, member):
         await ctx.send(record_message)
 
 
+# '!초기화' 입력 시 동작
 async def reset_game(ctx):
     channel_id = ctx.channel.id
     user_id = ctx.author.id
@@ -58,3 +62,12 @@ async def reset_game(ctx):
         lolpark.normal_game_log = None
         lolpark.normal_game_channel = None
         await ctx.send("일반 내전을 초기화했습니다.")
+
+
+# '!내전악귀' 입력 시 동작
+async def show_summoner_most_normal_game(ctx):
+    channel_id = ctx.channel.id
+
+    if channel_id == channels.RECORD_SERVER_ID:
+        most_normal_game_message = await database.get_summoner_most_normal_game_message()
+        await ctx.send(most_normal_game_message)
