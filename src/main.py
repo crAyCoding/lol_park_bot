@@ -134,12 +134,12 @@ async def command_record(ctx):
 
 @bot.command(name='승리')
 async def command_win_manual(ctx, *members: discord.Member):
-    record.manually_add_summoner_win(ctx, members)
+    await record.manually_add_summoner_win(ctx, members)
 
 
 @bot.command(name='패배')
 async def command_lose_manual(ctx, *members: discord.Member):
-    record.manually_add_summoner_lose(ctx, members)
+    await record.manually_add_summoner_lose(ctx, members)
 
 
 @bot.command(name='초기화')

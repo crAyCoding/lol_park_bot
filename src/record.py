@@ -89,19 +89,19 @@ async def record_normal_game_in_main(ctx):
         lolpark.finalized_normal_game_team_list = None
 
 
-def manually_add_summoner_win(ctx, members):
+async def manually_add_summoner_win(ctx, members):
     if ctx.author.id != managers.MASULSA:
         return
 
     for member in members:
         summoner = Summoner(member)
-        database.add_normal_game_win_count(summoner, 1)
+        await database.add_normal_game_win_count(summoner, 1)
 
 
-def manually_add_summoner_lose(ctx, members):
+async def manually_add_summoner_lose(ctx, members):
     if ctx.author.id != managers.MASULSA:
         return
 
     for member in members:
         summoner = Summoner(member)
-        database.add_normal_game_win_count(summoner, 1)
+        await database.add_normal_game_win_count(summoner, 1)
