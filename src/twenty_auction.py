@@ -46,7 +46,6 @@ async def confirm_twenty_recruit(ctx):
     class ConfirmButton(discord.ui.Button):
         def __init__(self, view):
             super().__init__(label="이대로 확정", style=discord.ButtonStyle.green)
-            self.view = view
 
         async def callback(self, interaction: discord.Interaction):
             press_user = Summoner(interaction.user)
@@ -158,8 +157,11 @@ async def twenty_auction(host, team_head_line_number, ctx):
     # 경매 인원에서 팀장 삭제
     del auction_summoners[team_head_line_number]
 
+    # 강제 종료 플래그
+    end_flag = False
+
     # 경매 로테이션.
-    while auction_summoners:
+    while auction_summoners and not end_flag:
         available_lines = [line for line, summoners in auction_summoners.items() if summoners]
 
         # 경매 인원이 비어있을 경우 유찰 목록에서 다시 진행
@@ -187,18 +189,19 @@ async def twenty_auction(host, team_head_line_number, ctx):
         def check(message):
             if message.author != host or message.channel != ctx.channel:
                 return False
+
             msg_content = message.content
-            if msg_content == '유찰':
+
+            # 유찰 또는 종료 조건
+            if msg_content in {'유찰', '종료'}:
                 return True
-            if msg_content == '종료':
-                return True
+
+            # 팀 번호와 점수 조건
             msg_info = msg_content.split(' ')
-            if len(msg_info) != 2:
-                return False
-            if msg_info[0][0] not in {'1', '2', '3', '4'}:
-                return False
-            if msg_info[1].isdigit():
-                return True
+            if len(msg_info) == 2 and msg_info[0][0] in {'1', '2', '3', '4'}:
+                score = msg_info[1]
+                return score.isdigit() and int(score) >= 0 and int(score) % 10 == 0
+
             return False
 
         user_message = await ctx.bot.wait_for('message', check=check)
@@ -206,28 +209,21 @@ async def twenty_auction(host, team_head_line_number, ctx):
         if user_message.content == '유찰':
             remain_summoners[chosen_line].append(chosen_summoner)
         elif user_message.content == '종료':
-            await auction_result_message.delete()
-            await auction_remain_message.delete()
             end_flag = True
-            break
         else:
-            message_info = user_message.content.split(' ')
-            team_number = int(message_info[0][0])
-            auction_score = int(message_info[1])
+            team_number, auction_score = map(int, user_message.content.split())
 
             auction_dict[f'{team_number}팀'][chosen_line] = (chosen_summoner, auction_score)
             remain_scores[team_number - 1] -= auction_score
 
-            # 라인에 남은 인원이 한 명 뿐인 경우
+            # 라인에 남은 인원이 한 명뿐인 경우
             if len(auction_summoners[chosen_line]) + len(remain_summoners[chosen_line]) == 1:
-                last_summoner = auction_summoners[chosen_line] if auction_summoners[chosen_line] \
-                    else remain_summoners[chosen_line]
+                last_summoner = (auction_summoners[chosen_line] or remain_summoners[chosen_line])[0]
                 auction_summoners[chosen_line] = []
                 remain_summoners[chosen_line] = []
-                for (team_number, team_info) in auction_dict.items():
-                    for (line_name, summoner) in team_info.items():
-                        if chosen_line == line_name and summoner is None:
-                            auction_dict[team_number][line_name] = (last_summoner, 0)
+                for team_info in auction_dict.values():
+                    if team_info.get(chosen_line) is None:
+                        team_info[chosen_line] = (last_summoner, 0)
 
         await auction_result_message.delete()
         await auction_remain_message.delete()
@@ -251,7 +247,7 @@ def add_auction_team_head(auction_list, team_head_line_number):
     team_head_line_name = lolpark.line_names[team_head_line_number]
     team_names = ['1팀', '2팀', '3팀', '4팀']
     sorted_team_head = functions.sort_game_members(lolpark.twenty_summoner_list[team_head_line_name])
-    auction_list.update({team: sorted_team_head[i] for i, team in enumerate(team_names)})
+    auction_list.update(dict(zip(team_names, sorted_team_head)))
 
 
 def get_auction_result(auction_dict, remain_scores):
@@ -266,38 +262,29 @@ def get_auction_result(auction_dict, remain_scores):
 
 
 def get_auction_remain_user(auction_summoners, remain_summoners):
-    remain_result = f'```\n'
-    for (line_name, summoners) in auction_summoners:
-        if not summoners:
-            continue
-        remain_result += f'{line_name}\n'
-        for summoner in summoners:
-            remain_result += f'{summoner.nickname}\n'
-    remain_result += f'```\n'
-    remain_result += f'```\n'
-    for (line_name, summoners) in remain_summoners:
-        if not summoners:
-            continue
-        remain_result += f'{line_name}\n'
-        for summoner in summoners:
-            remain_result += f'{summoner.nickname}\n'
-    remain_result += f'```\n'
+    def format_summoners(summoners_dict):
+        result = ''
+        for line_name, summoners in summoners_dict:
+            if summoners:
+                result += f'{line_name}\n'
+                result += ''.join(f'{summoner.nickname}\n' for summoner in summoners)
+        return result
 
+    remain_result = '```\n' + format_summoners(auction_summoners) + '```\n```\n' + format_summoners(remain_summoners) + '```\n'
     return remain_result
 
 
 def get_auction_warning():
     warning_text = ''
 
-    warning_text += f'## 경매 진행 참고사항\n'
-    warning_text += f'명단에 변경 사항이 있는 경우 수정하기 버튼을 눌러 수정해주시길 바랍니다.\n'
-    warning_text += f'한 번 경매 시작 버튼을 누르면 명단 수정이 불가능합니다.\n'
-    warning_text += f'## 경매 시작을 누른 사람이 진행자가 됩니다. 진행자가 아닌 경우 장난으로 경매 시작 버튼 누르지 마시길 바랍니다.\n'
+    warning_text += (f'## 경매 시작을 누른 사람이 진행자가 됩니다. '
+                     f'진행자가 아닌 경우 장난으로 경매 시작 버튼 누르지 마시길 바랍니다.\n')
     warning_text += f'진행자 및 팀장을 제외한 모든 인원은 마이크를 꺼주시길 바랍니다.\n'
     warning_text += f'경매가 시작되면 랜덤으로 한명씩 출력되며, 그 사람에 대하여 경매를 진행해주시면 됩니다.\n'
-    warning_text += f'경매 결과에 해당하는 팀 번호 버튼을 누르고, 입력창에 가격을 입력해주시면 됩니다. ex) 1팀 80\n'
+    warning_text += f'경매가 완료되면, 진행자는 채팅에 팀 번호와 경매 점수를 입력해주시면 됩니다. ex) 1팀 80\n'
     warning_text += f'유찰의 경우 자동으로 유찰 대기열에 추가되며, 경매가 종료된 이후 유찰 대기열로 경매를 추가 진행합니다.\n'
-    warning_text += f'혹여 오류가 발생한 경우, 번거롭더라도 수동으로 추가 진행 부탁드립니다.\n'
+    warning_text += (f'혹여 오류가 발생했거나 입력을 잘못한 경우, `!종료`를 통해 강제 종료할 수 있습니다. '
+                     f'이후 다시 `!경매`를 통해 경매를 재진행할 수 있습니다.\n')
     warning_text += f'경매를 방해하는 행위 및 장난으로 버튼을 누르는 행위에는 경고가 부여될 수 있습니다.'
 
     return warning_text
