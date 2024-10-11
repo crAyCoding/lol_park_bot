@@ -1,14 +1,10 @@
 import os
-import sqlite3
-from dotenv import load_dotenv
 import discord
 
 import lolpark
-import channels
 from discord.ext import commands
 from normal_game import close_normal_game
 from summoner import Summoner
-import database
 from bot import bot
 import main_functions
 import record
@@ -22,6 +18,7 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user}')
+    bot.loop.create_task(main_functions.recommend_discord())
 
 
 @bot.command(name='내전')
@@ -54,7 +51,6 @@ async def on_message(message):
             lolpark.normal_game_log[user].append(message.id)
         else:
             lolpark.normal_game_log[user] = [message.id]
-            print(user.nickname)
         # 참여자 수가 10명이면 내전 자동 마감
         if len(lolpark.normal_game_log) == 10:
             await close_normal_game(message.channel, list(lolpark.normal_game_log.keys()), lolpark.normal_game_creator)

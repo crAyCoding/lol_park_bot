@@ -450,7 +450,9 @@ async def send_random_record_update_person(ctx, teams):
 
     await ctx.send(f'### 이번 내전의 스크린샷을 <#1290946711153414205> 에 첨부할 서버원입니다.\n\n'
                    f'블루 팀 승리 시 : <@{blue_person.id}>\n'
-                   f'레드 팀 승리 시 : <@{red_person.id}>')
+                   f'레드 팀 승리 시 : <@{red_person.id}>\n'
+                   f'스크린샷 업로드 후, `몇판 게임, 몇 대 몇` 이라고 꼭 남겨주세요.\n'
+                   f'ex) 3판 2선 , 2승 1패')
 
 
 def get_game_board(teams):

@@ -250,11 +250,14 @@ async def get_summoner_record_message(summoner):
     normal_game_count = await get_normal_game_count(summoner)
     normal_game_win_count = await get_normal_game_win_count(summoner)
     normal_game_lose_count = await get_normal_game_lose_count(summoner)
+    normal_game_count_rank = await get_summoner_game_count_rank(summoner)
 
     record_message = f''
     record_message += f'### {functions.get_nickname(summoner.nickname)}\n\n'
-    record_message += f'일반 내전 참여 횟수 : {normal_game_win_count + normal_game_lose_count}회\n'
-    record_message += (f'일반 내전 전적 : {normal_game_win_count}승 {normal_game_lose_count}패, '
+    record_message += f'일반 내전 참여 횟수 : {normal_game_count}회\n'
+    record_message += (f'일반 내전 전적 : {normal_game_win_count + normal_game_lose_count}전 '
+                       f'({normal_game_count_rank}등) '
+                       f'{normal_game_win_count}승 {normal_game_lose_count}패, '
                        f'승률 : {functions.calculate_win_rate(normal_game_win_count, normal_game_lose_count)}')
 
     return record_message
@@ -299,3 +302,33 @@ async def get_summoner_most_normal_game_message():
 
     return most_normal_game_message
 
+
+# 특정 소환사의 전적 등수 확인
+async def get_summoner_game_count_rank(summoner):
+    conn = sqlite3.connect(lolpark.summoners_db)
+    db = conn.cursor()
+
+    try:
+        db.execute('''
+        SELECT id, 
+               normal_win_count + normal_lose_count AS total_games,
+               (SELECT COUNT(DISTINCT normal_win_count + normal_lose_count)
+                FROM summoners AS s2
+                WHERE s2.normal_win_count + s2.normal_lose_count > s1.normal_win_count + s1.normal_lose_count) + 1 AS rank
+        FROM summoners AS s1
+        WHERE id = ?''', (summoner.id,))
+
+        result = db.fetchone()
+
+        # 결과 출력
+        if result:
+            return result[2]
+        else:
+            return -1
+    except sqlite3.Error as e:
+        print(f"An error occurred: {e}")
+        return None
+    finally:
+        # 커서 및 연결 닫기
+        db.close()
+        conn.close()
