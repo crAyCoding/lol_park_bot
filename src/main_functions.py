@@ -129,3 +129,7 @@ async def start_auction(ctx):
         return
 
     await twenty_auction.confirm_twenty_recruit(ctx)
+
+
+async def finalize_game(ctx):
+    await twenty_game.close_twenty_game(ctx)

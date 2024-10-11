@@ -26,6 +26,11 @@ async def command_start(ctx, *, message='모이면 바로 시작'):
     await main_functions.make_game(ctx, message)
 
 
+@bot.command(name='마감')
+async def command_finalize(ctx, *, message='모이면 바로 시작'):
+    await main_functions.finalize_game(ctx)
+
+
 @bot.command(name='쫑')
 async def command_end(ctx):
     await main_functions.end_game(ctx)
