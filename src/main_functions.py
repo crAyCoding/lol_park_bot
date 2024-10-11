@@ -6,7 +6,6 @@ import discord
 import channels
 import lolpark
 import normal_game
-import twenty_game
 import database
 import managers
 from summoner import Summoner
