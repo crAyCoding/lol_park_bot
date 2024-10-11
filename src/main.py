@@ -1,5 +1,6 @@
 import os
 import discord
+from dotenv import load_dotenv
 
 import lolpark
 from discord.ext import commands
@@ -103,6 +104,7 @@ async def command_auction(ctx):
 
 @bot.command(name='수동경매')
 async def twenty_auction_by_own(ctx):
+    await ctx.send(f':first_place:')
     return None
 
 

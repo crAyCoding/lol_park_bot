@@ -281,7 +281,7 @@ def get_top_ten_normal_game_players():
     try:
         # normal_game_count가 가장 높은 10명 가져오기
         db.execute('''
-        SELECT display_name, normal_game_win, normal_game_lose
+        SELECT display_name, normal_game_count, normal_game_win, normal_game_lose
         FROM summoners
         ORDER BY (normal_game_win + normal_game_lose) DESC
         LIMIT 10
@@ -297,8 +297,19 @@ def get_top_ten_normal_game_players():
 async def get_summoner_most_normal_game_message():
     most_normal_game_message = f'## 내전 악귀 명단\n\n'
     top_ten = get_top_ten_normal_game_players()
-    for index, result in enumerate(top_ten):
-        most_normal_game_message += f'### {index + 1}위 : {result[0]}, {result[1] + result[2]}회\n\n'
+    for index, result in enumerate(top_ten, 1):
+        if index == 1:
+            most_normal_game_message += (f'# 🥇 : {functions.get_nickname(result[0])}, '
+                                         f'{result[1]}회 {result[2] + result[3]}판\n\n')
+        elif index == 2:
+            most_normal_game_message += (f'## 🥈 : {functions.get_nickname(result[0])}, '
+                                         f'{result[1]}회 {result[2] + result[3]}판\n\n')
+        elif index == 3:
+            most_normal_game_message += (f'## 🥉 : {functions.get_nickname(result[0])}, '
+                                         f'{result[1]}회 {result[2] + result[3]}판\n\n')
+        else:
+            most_normal_game_message += (f'### {index}위 : {functions.get_nickname(result[0])}, '
+                                         f'{result[1]}회 {result[2] + result[3]}판\n\n')
 
     return most_normal_game_message
 
