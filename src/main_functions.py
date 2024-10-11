@@ -8,6 +8,8 @@ import lolpark
 import normal_game
 import database
 import managers
+import twenty_game
+import twenty_auction
 from summoner import Summoner
 from bot import bot
 
@@ -87,8 +89,8 @@ async def recommend_discord():
     now = datetime.now()
 
     # 오전 8시와 오후 8시 타겟 시간 설정
-    morning_time = datetime.combine(now.date(), datetime.strptime("08:00", "%H:%M").time())
-    evening_time = datetime.combine(now.date(), datetime.strptime("20:00", "%H:%M").time())
+    morning_time = datetime.combine(now.date(), datetime.strptime("23:00", "%H:%M").time())
+    evening_time = datetime.combine(now.date(), datetime.strptime("11:00", "%H:%M").time())
 
     # 현재 시간이 오전 8시를 지났고 오후 8시를 안 지났다면 evening_time까지 대기, 그렇지 않으면 morning_time으로 대기
     if now > evening_time:
@@ -118,3 +120,12 @@ async def recommend_discord():
 
     # 다음 실행을 위해 다시 태스크 생성 (오전 8시, 오후 8시 중 가장 가까운 시간에 맞추기)
     bot.loop.create_task(recommend_discord())
+
+
+async def start_auction(ctx):
+    channel_id = ctx.channel.id
+
+    if channel_id != channels.TWENTY_AUCTION_CHANNEL_ID:
+        return
+
+    await twenty_auction.confirm_twenty_recruit(ctx)

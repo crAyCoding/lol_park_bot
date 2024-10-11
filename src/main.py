@@ -22,13 +22,12 @@ async def on_ready():
 
 
 @bot.command(name='내전')
-async def command_start(ctx, *, message='3판 2선 모이면 바로 시작'):
+async def command_start(ctx, *, message='모이면 바로 시작'):
     await main_functions.make_game(ctx, message)
 
 
 @bot.command(name='쫑')
 async def command_end(ctx):
-    print("HI")
     await main_functions.end_game(ctx)
 
 
@@ -93,23 +92,12 @@ async def shutdown(ctx):
 
 
 @bot.command(name='경매')
-async def twenty_auction(ctx):
-    return None
+async def command_auction(ctx):
+    await main_functions.start_auction(ctx)
 
 
 @bot.command(name='수동경매')
 async def twenty_auction_by_own(ctx):
-    return None
-
-
-@bot.command(name='테스트')
-async def test_only_def(ctx):
-    # database.add_summoner(Summoner(ctx.author))
-    return None
-
-
-@bot.command(name='테스트종료')
-async def test_end_def(ctx):
     return None
 
 
