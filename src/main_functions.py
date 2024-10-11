@@ -21,7 +21,8 @@ async def make_game(ctx, message):
 
     channel_id = ctx.channel.id
     normal_channel_id_list = [channels.GAME_A_RECRUIT_CHANNEL_ID, channels.GAME_B_RECRUIT_CHANNEL_ID,
-                              channels.GAME_C_RECRUIT_CHANNEL_ID, channels.GAME_D_RECRUIT_CHANNEL_ID]
+                              channels.GAME_C_RECRUIT_CHANNEL_ID, channels.GAME_D_RECRUIT_CHANNEL_ID,
+                              channels.GAME_E_RECRUIT_CHANNEL_ID, channels.GAME_F_RECRUIT_CHANNEL_ID,]
 
     if channel_id in normal_channel_id_list and not lolpark.is_normal_game:
         lolpark.is_normal_game = await normal_game.make_normal_game(ctx, message)
@@ -33,10 +34,8 @@ async def make_game(ctx, message):
 # '!쫑' 입력 시 동작
 async def end_game(ctx):
     channel_id = ctx.channel.id
-    normal_channel_id_list = [channels.GAME_A_RECRUIT_CHANNEL_ID, channels.GAME_B_RECRUIT_CHANNEL_ID,
-                              channels.GAME_C_RECRUIT_CHANNEL_ID, channels.GAME_D_RECRUIT_CHANNEL_ID]
 
-    if channel_id in normal_channel_id_list and lolpark.is_normal_game:
+    if channel_id == lolpark.normal_game_channel and lolpark.is_normal_game:
         lolpark.normal_game_log = None
         lolpark.normal_game_channel = None
         lolpark.is_normal_game = await normal_game.end_normal_game(ctx)
@@ -62,7 +61,8 @@ async def reset_game(ctx):
     user_id = ctx.author.id
 
     normal_channel_id_list = [channels.GAME_A_RECRUIT_CHANNEL_ID, channels.GAME_B_RECRUIT_CHANNEL_ID,
-                              channels.GAME_C_RECRUIT_CHANNEL_ID, channels.GAME_D_RECRUIT_CHANNEL_ID]
+                              channels.GAME_C_RECRUIT_CHANNEL_ID, channels.GAME_D_RECRUIT_CHANNEL_ID,
+                              channels.GAME_E_RECRUIT_CHANNEL_ID, channels.GAME_F_RECRUIT_CHANNEL_ID,]
 
     if user_id != managers.MASULSA:
         await ctx.send('개발자만 가능해요~ 안돼요~ 돌아가요~')
