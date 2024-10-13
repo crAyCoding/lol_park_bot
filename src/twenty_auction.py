@@ -58,6 +58,7 @@ async def confirm_twenty_recruit(ctx):
                 return
 
             # 현재 메시지를 삭제
+            await interaction.response.defer()
             await interaction.message.delete()
 
             # Confirm 버튼이 눌리면 다음 라인 출력

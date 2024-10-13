@@ -60,7 +60,7 @@ async def make_twenty_game(ctx, message):
     # 변수 초기화, 새 내전 생성
     lolpark.twenty_summoner_list = {line_name: [] for line_name in lolpark.line_names}
     lolpark.twenty_view = TwentyView()
-    lolpark.twenty_host = ctx.author
+    lolpark.twenty_host = Summoner(ctx.author)
 
     # 내전 역할 가져오기
     role_name = '내전'
@@ -74,7 +74,7 @@ async def make_twenty_game(ctx, message):
 async def close_twenty_game(ctx):
     # 20인 내전 마감
 
-    if lolpark.twenty_host != ctx.author:
+    if lolpark.twenty_host != Summoner(ctx.author):
         return
 
     game_members = 20
@@ -106,7 +106,7 @@ async def close_twenty_game(ctx):
 async def end_twenty_game(ctx):
     # 20인 내전 쫑
 
-    if lolpark.twenty_host != ctx.author:
+    if lolpark.twenty_host != Summoner(ctx.author):
         return
 
     # 내전 역할 가져오기
