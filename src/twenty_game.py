@@ -88,10 +88,8 @@ async def close_twenty_game(ctx):
     # 팀원 텍스트
     team_user_lineup = get_user_lineup(team_head_line_number, game_members)
 
-    lineup_board = f'```\n'
-    lineup_board += team_head_lineup
+    lineup_board = team_head_lineup
     lineup_board += team_user_lineup
-    lineup_board += f'```'
 
     await ctx.send(lineup_board)
     if waiting_people_list != '':
@@ -253,7 +251,8 @@ def get_twenty_recruit_board(message):
     return twenty_recruit_board
 
 
-def reset_twenty_game(ctx):
+async def reset_twenty_game(ctx):
     lolpark.twenty_summoner_list = None
     lolpark.twenty_view = None
     lolpark.twenty_host = None
+    await ctx.send('20인 내전을 초기화했습니다.')

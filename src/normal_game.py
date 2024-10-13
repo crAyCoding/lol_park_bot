@@ -474,3 +474,10 @@ def add_final_teams(teams):
     if lolpark.finalized_normal_game_team_list is None:
         lolpark.finalized_normal_game_team_list = []
     lolpark.finalized_normal_game_team_list.append(teams)
+
+
+async def reset_normal_game(ctx):
+    lolpark.is_normal_game = False
+    lolpark.normal_game_log = None
+    lolpark.normal_game_channel = None
+    await ctx.send("일반 내전을 초기화했습니다.")

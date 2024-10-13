@@ -69,10 +69,10 @@ async def reset_game(ctx):
         return None
 
     if channel_id in normal_channel_id_list:
-        lolpark.is_normal_game = False
-        lolpark.normal_game_log = None
-        lolpark.normal_game_channel = None
-        await ctx.send("일반 내전을 초기화했습니다.")
+        await normal_game.reset_normal_game(ctx)
+
+    if channel_id == channels.TWENTY_RECRUIT_CHANNEL_ID:
+        await twenty_game.reset_twenty_game(ctx)
 
 
 # '!내전악귀' 입력 시 동작
