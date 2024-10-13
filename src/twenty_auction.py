@@ -11,12 +11,12 @@ from summoner import Summoner
 
 async def confirm_twenty_recruit(ctx):
     class LineView(discord.ui.View):
-        def __init__(self, line_name, next_line_callback=None):
+        def __init__(self, line_name, next_line_callback):
             super().__init__(timeout=3600)
             self.line_name = line_name
             self.next_line_callback = next_line_callback  # 다음 라인을 출력하는 콜백 함수
             for i, summoner in enumerate(lolpark.twenty_summoner_list[line_name]):
-                self.add_item(EditButton(line_name, summoner, i))
+                self.add_item(EditButton(line_name, summoner.nickname, i))
             self.add_item(ConfirmButton(self))  # ConfirmButton을 View에 추가
 
     class EditButton(discord.ui.Button):
@@ -40,7 +40,7 @@ async def confirm_twenty_recruit(ctx):
                                             f'{functions.get_nickname(press_user.nickname)}님으로 변경되었습니다.')
             lolpark.twenty_summoner_list[self.line_name][self.index] = press_user
             updated_summoners_text = get_line_summoners_text(self.line_name)
-            self.label = f"{press_user}"
+            self.label = f"{press_user.nickname}"
             await interaction.response.edit_message(content=updated_summoners_text, view=self.view)
 
     class ConfirmButton(discord.ui.Button):
@@ -64,7 +64,7 @@ async def confirm_twenty_recruit(ctx):
             if self.view.next_line_callback:
                 await self.view.next_line_callback()
 
-    async def show_line(line_name, next_line_callback=None):
+    async def show_line(line_name, next_line_callback):
         # 특정 라인의 정보를 보여주는 함수
         view = LineView(line_name, next_line_callback=next_line_callback)
         summoners_text = get_line_summoners_text(line_name)
