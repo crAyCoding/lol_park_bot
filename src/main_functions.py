@@ -128,7 +128,7 @@ async def start_auction(ctx):
     if channel_id != channels.TWENTY_AUCTION_CHANNEL_ID:
         return
 
-    await twenty_auction.confirm_twenty_recruit(ctx)
+    await twenty_auction.run_twenty_auction(ctx)
 
 
 async def finalize_game(ctx):
