@@ -149,8 +149,8 @@ async def twenty_auction(host, team_head_line_number, ctx):
     # 팀장 추가
     team_head_line_name = lolpark.line_names[team_head_line_number]
     # 팀장의 score는 -1로 설정
-    for i, team in enumerate(auction_dict, 1):
-        auction_dict[team][team_head_line_name]((auction_summoners[team_head_line_name][i-1]), -1)
+    for i, (team, _) in enumerate(auction_dict.items(), 1):
+        auction_dict[team][team_head_line_name] = ((auction_summoners[team_head_line_name][i-1]), -1)
 
     # 팀 남은 점수
     remain_scores = [summoner.score for summoner in auction_summoners[team_head_line_name]]
@@ -256,7 +256,10 @@ def get_auction_result(auction_dict, remain_scores):
     for (team_number, team_info) in auction_dict.items():
         auction_result += f'{team_number}팀 ( 남은 점수 : {remain_scores[team_number-1]}점 )\n'
         for (line_name, summoner) in team_info.items():
-            auction_result += f'{line_name} : {summoner[0].nickname} > {summoner[1]}\n'
+            if summoner[1] == -1:
+                auction_result += f'{line_name} : {summoner[0].nickname} [팀장]'
+            else:
+                auction_result += f'{line_name} : {summoner[0].nickname} > {summoner[1]}\n'
     auction_result += f'```'
 
     return auction_result
