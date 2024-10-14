@@ -6,6 +6,9 @@ import twenty_game
 import lolpark
 import functions
 from discord.ui import Button, View, Modal
+from bot import bot
+
+from src import channels
 from summoner import Summoner
 
 
@@ -238,8 +241,9 @@ async def twenty_auction(host, team_head_line_number, ctx):
                        f'4강전은 남은 점수가 높은 팀이 첫번째 판 진영 선택권을 가집니다. 점수가 동일한 경우 주사위를 굴려 진행해주시면 됩니다.'
                        f'완료된 경매에서는 되돌리기가 불가능합니다. 이 점 참고바랍니다.'
                        f'모두 화이팅입니다!')
-        # 사람들 각자 팀 채널로 강제 이동
-
+        # 사람들 각자 팀 채널로 강제
+        await move_summoners_in_twenty(ctx, auction_dict)
+        await send_random_record_update_person(ctx, auction_dict)
         # 초기화
         lolpark.twenty_summoner_list = None
 
@@ -292,3 +296,37 @@ def get_auction_warning():
     warning_text += f'경매를 방해하는 행위 및 장난으로 버튼을 누르는 행위에는 경고가 부여될 수 있습니다.'
 
     return warning_text
+
+
+async def move_summoners_in_twenty(ctx, auction_dict):
+    twenty_team_channel_list = [channels.AUCTION_TEAM_1_CHANNEL_ID, channels.AUCTION_TEAM_2_CHANNEL_ID,
+                                channels.AUCTION_TEAM_3_CHANNEL_ID, channels.AUCTION_TEAM_4_CHANNEL_ID]
+    guild = ctx.guild
+
+    for i, (team_number, team_info) in enumerate(auction_dict.items()):
+        discord_channel = bot.get_channel(twenty_team_channel_list[i])
+        for (line_name, twenty_summoner) in team_info.items():
+            summoner = twenty_summoner[0]
+            member = guild.get_member(summoner.id)
+            if member.voice is not None:
+                await member.move_to(discord_channel)
+
+
+async def send_random_record_update_person(ctx, auction_dict):
+    team_1 = list(auction_dict['1팀'].values())
+    team_2 = list(auction_dict['2팀'].values())
+    team_3 = list(auction_dict['3팀'].values())
+    team_4 = list(auction_dict['4팀'].values())
+
+    team_1_person = random.choice(team_1)
+    team_2_person = random.choice(team_2)
+    team_3_person = random.choice(team_3)
+    team_4_person = random.choice(team_4)
+
+    await ctx.send(f'### 이번 20인 내전의 스크린샷을 <#1295312942459523112> 에 첨부할 서버원입니다.\n\n'
+                   f'1팀 승리 시 : <@{team_1_person[0].id}>\n'
+                   f'2팀 승리 시 : <@{team_2_person[0].id}>\n'
+                   f'3팀 승리 시 : <@{team_3_person[0].id}>\n'
+                   f'4팀 승리 시 : <@{team_4_person[0].id}>\n'
+                   f'스크린샷 업로드 후, `몇팀 vs 몇팀, 몇승 몇패` 라고 꼭 남겨주세요.\n'
+                   f'ex) 1팀 vs 2팀, 2승 1패')
