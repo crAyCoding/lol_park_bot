@@ -8,7 +8,7 @@ import functions
 from discord.ui import Button, View, Modal
 from bot import bot
 
-from src import channels
+import channels
 from summoner import Summoner
 
 
