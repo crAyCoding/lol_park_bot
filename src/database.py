@@ -284,10 +284,20 @@ def get_top_ten_normal_game_players():
         SELECT display_name, normal_game_count, normal_game_win, normal_game_lose
         FROM summoners
         ORDER BY (normal_game_win + normal_game_lose) DESC
-        LIMIT 100
+        LIMIT 10
         ''')
 
         top_players = db.fetchall()
+
+        db.execute('''
+        SELECT display_name, normal_game_count, normal_game_win, normal_game_lose
+        FROM summoners
+        ORDER BY (normal_game_win + normal_game_lose) DESC
+        LIMIT 100
+        ''')
+
+        print(f'{db.fetchall()}')
+
         return top_players
     finally:
         conn.close()
