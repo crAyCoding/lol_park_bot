@@ -38,6 +38,7 @@ async def record_normal_game_in_main(ctx):
             press_user = Summoner(interaction.user)
             if press_user.id not in managers.ID_LIST:
                 await interaction.response.defer()
+                return
             self.record_view.blue_win_count += 1
             self.label = f"블루팀 승리 : {self.record_view.blue_win_count}"
             await interaction.response.edit_message(content=normal_game.get_game_board(teams), view=self.view)
@@ -51,6 +52,7 @@ async def record_normal_game_in_main(ctx):
             press_user = Summoner(interaction.user)
             if press_user.id not in managers.ID_LIST:
                 await interaction.response.defer()
+                return
             self.record_view.red_win_count += 1
             self.label = f"레드팀 승리 : {self.record_view.red_win_count}"
             await interaction.response.edit_message(content=normal_game.get_game_board(teams), view=self.view)
@@ -66,6 +68,7 @@ async def record_normal_game_in_main(ctx):
             press_user = Summoner(interaction.user)
             if press_user.id not in managers.ID_LIST:
                 await interaction.response.defer()
+                return
             await interaction.message.delete()
             await database.record_normal_game(self.teams, self.record_view.blue_win_count, self.record_view.red_win_count)
             await self.ctx.send(f'내전 승/패가 기록되었습니다.')
@@ -79,6 +82,7 @@ async def record_normal_game_in_main(ctx):
             press_user = Summoner(interaction.user)
             if press_user.id not in managers.ID_LIST:
                 await interaction.response.defer()
+                return
             self.record_view.blue_win_count = 0
             self.record_view.red_win_count = 0
 
