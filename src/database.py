@@ -252,6 +252,11 @@ async def get_summoner_record_message(summoner):
     normal_game_lose_count = await get_normal_game_lose_count(summoner)
     is_joint, normal_game_count_rank = await get_summoner_game_count_rank(summoner)
 
+    if normal_game_count < 5:
+        return (f'### {functions.get_nickname(summoner.nickname)}\n\n'
+                f'일반 내전 참여 횟수 : {normal_game_count}회\n'
+                f'내전 횟수 5회 미만인 소환사는 전적 검색 기능을 제공하지 않습니다.')
+
     record_message = f''
     record_message += f'### {functions.get_nickname(summoner.nickname)}\n\n'
     record_message += f'일반 내전 참여 횟수 : {normal_game_count}회\n'
@@ -289,15 +294,6 @@ def get_top_ten_normal_game_players():
 
         top_players = db.fetchall()
 
-        db.execute('''
-        SELECT display_name, normal_game_count, normal_game_win, normal_game_lose
-        FROM summoners
-        ORDER BY (normal_game_win + normal_game_lose) DESC
-        LIMIT 100
-        ''')
-
-        print(f'{db.fetchall()}')
-
         return top_players
     finally:
         conn.close()
@@ -329,47 +325,48 @@ async def get_summoner_game_count_rank(summoner):
     db = conn.cursor()
 
     try:
-        # 현재 소환사의 총 게임 수와 순위를 계산하는 쿼리
+        # 현재 소환사의 총 게임 수
         db.execute('''
-        SELECT id,
-               normal_game_win + normal_game_lose AS total_games,
-               (SELECT COUNT(*)
-                FROM (
-                    SELECT DISTINCT normal_game_win + normal_game_lose AS total_games
-                    FROM summoners
-                ) AS s2
-                WHERE s2.total_games > (s1.normal_game_win + s1.normal_game_lose)) + 1 AS rank
-        FROM summoners AS s1
+        SELECT normal_game_win + normal_game_lose AS total_games
+        FROM summoners
         WHERE id = ?''', (summoner.id,))
-
 
         result = db.fetchone()
 
         if result is None:
             print(f"No result found for summoner with ID: {summoner.id}")
-            return False, -1
+            return False, 0
 
-        total_games = result[1]
-        rank = result[2]
+        total_games = result[0]
 
-        # 동일한 게임 수를 가진 소환사가 있는지 확인하는 쿼리
+        # 나보다 게임 수가 많은 소환사 수 계산
+        db.execute('''
+        SELECT COUNT(*)
+        FROM summoners
+        WHERE normal_game_win + normal_game_lose > ?''', (total_games,))
+
+        higher_rank_count = db.fetchone()[0]
+
+        # 나와 동일한 게임 수를 가진 소환사 수 계산
         db.execute('''
         SELECT COUNT(*)
         FROM summoners
         WHERE normal_game_win + normal_game_lose = ?''', (total_games,))
 
-        count = db.fetchone()[0]
+        same_rank_count = db.fetchone()[0]
 
-        if count > 1:
-            # 공동 등수가 있는 경우
-            return True, rank
+        # 공동 등수 계산
+        rank = higher_rank_count + 1  # 더 높은 사람 수 + 1로 등수 계산
+        if same_rank_count > 1:
+            return True, rank  # 공동 등수가 있는 경우
         else:
-            # 공동 등수가 없는 경우
-            return False, rank
+            return False, rank  # 공동 등수가 없는 경우
+
     except sqlite3.Error as e:
         print(f"An error occurred: {e}")
-        return False, -1
+        return False, 0
     finally:
         # 커서 및 연결 닫기
         db.close()
         conn.close()
+
