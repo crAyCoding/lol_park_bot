@@ -76,6 +76,9 @@ async def confirm_twenty_recruit(ctx):
     if lolpark.twenty_summoner_list is None:
         return
 
+    for line, summoners in lolpark.twenty_summoner_list.items():
+        lolpark.twenty_summoner_list[line] = summoners[:4]
+
     line_names = lolpark.line_names
 
     async def show_next_line(index):
