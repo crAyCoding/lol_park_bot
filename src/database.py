@@ -254,7 +254,7 @@ async def get_summoner_record_message(summoner):
 
     if normal_game_count < 5:
         return (f'### {functions.get_nickname(summoner.nickname)}\n\n'
-                f'일반 내전 참여 횟수 : {normal_game_count}회\n'
+                f'일반 내전 참여 횟수 : {normal_game_count}회\n\n'
                 f'내전 횟수 5회 미만인 소환사는 전적 검색 기능을 제공하지 않습니다.')
 
     record_message = f''

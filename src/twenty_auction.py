@@ -76,9 +76,6 @@ async def confirm_twenty_recruit(ctx):
     if lolpark.twenty_summoner_list is None:
         return
 
-    for line, summoners in lolpark.twenty_summoner_list.items():
-        lolpark.twenty_summoner_list[line] = summoners[:4]
-
     line_names = lolpark.line_names
 
     async def show_next_line(index):
@@ -178,6 +175,9 @@ async def twenty_auction(host, team_head_line_number, ctx):
                 break
             remain_summoners = {line: [] for line in lolpark.line_names}
 
+        auction_result_message = await ctx.send(get_auction_result(auction_dict, remain_scores))
+        auction_remain_message = await ctx.send(get_auction_remain_user(auction_summoners, remain_summoners))
+
         # 랜덤으로 라인을 선택
         chosen_line = random.choice(available_lines)
 
@@ -187,12 +187,11 @@ async def twenty_auction(host, team_head_line_number, ctx):
         # 해당 소환사를 라인에서 삭제
         auction_summoners[chosen_line].remove(chosen_summoner)
 
-        auction_result_message = await ctx.send(get_auction_result(auction_dict, remain_scores))
-        auction_remain_message = await ctx.send(get_auction_remain_user(auction_summoners, remain_summoners))
-
         await ctx.send(f'### 현재 경매 대상 : [{chosen_line}] {chosen_summoner.nickname}')
 
         def check(message):
+            if message.author == bot.user:
+                return False
             message_author = Summoner(message.author)
             if message_author != host or message.channel != ctx.channel:
                 return False

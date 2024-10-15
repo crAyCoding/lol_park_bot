@@ -99,6 +99,9 @@ async def close_twenty_game(ctx):
     await ctx.send(f'{game_members}인 내전 모집이 완료되었습니다. 결과를 확인해주세요')
     await ctx.send(f'20인내전경매 채널에서 !경매 를 통해 경매를 시작할 수 있습니다.')
 
+    for line, summoners in lolpark.twenty_summoner_list.items():
+        lolpark.twenty_summoner_list[line] = summoners[:4]
+
     # 초기화
     lolpark.twenty_view = None
 
