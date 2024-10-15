@@ -193,7 +193,8 @@ async def twenty_auction(host, team_head_line_number, ctx):
         await ctx.send(f'### 현재 경매 대상 : [{chosen_line}] {chosen_summoner.nickname}')
 
         def check(message):
-            if Summoner(message.author) != host or message.channel != ctx.channel:
+            message_author = Summoner(message.author)
+            if message_author != host or message.channel != ctx.channel:
                 return False
 
             msg_content = message.content
