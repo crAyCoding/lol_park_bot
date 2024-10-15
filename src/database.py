@@ -250,13 +250,13 @@ async def get_summoner_record_message(summoner):
     normal_game_count = await get_normal_game_count(summoner)
     normal_game_win_count = await get_normal_game_win_count(summoner)
     normal_game_lose_count = await get_normal_game_lose_count(summoner)
-    normal_game_count_rank = await get_summoner_game_count_rank(summoner)
+    is_joint, normal_game_count_rank = await get_summoner_game_count_rank(summoner)
 
     record_message = f''
     record_message += f'### {functions.get_nickname(summoner.nickname)}\n\n'
     record_message += f'일반 내전 참여 횟수 : {normal_game_count}회\n'
     record_message += (f'일반 내전 전적 : {normal_game_win_count + normal_game_lose_count}전 '
-                       f'({normal_game_count_rank}등) '
+                       f'{"공동 " if is_joint else ""}{normal_game_count_rank}등 '
                        f'{normal_game_win_count}승 {normal_game_lose_count}패, '
                        f'승률 : {functions.calculate_win_rate(normal_game_win_count, normal_game_lose_count)}')
 
@@ -320,22 +320,40 @@ async def get_summoner_game_count_rank(summoner):
     db = conn.cursor()
 
     try:
+        # 현재 소환사의 총 게임 수와 순위를 계산하는 쿼리
         db.execute('''
-        SELECT id, 
+        SELECT id,
                normal_game_win + normal_game_lose AS total_games,
-               (SELECT COUNT(DISTINCT normal_game_win + normal_game_lose)
-                FROM summoners AS s2
-                WHERE s2.normal_game_win + s2.normal_game_lose > s1.normal_game_win + s1.normal_game_lose) + 1 AS rank
+               (SELECT COUNT(DISTINCT s2.total_games)
+                FROM (SELECT normal_game_win + normal_game_lose AS total_games 
+                      FROM summoners) AS s2
+                WHERE s2.total_games > s1.total_games) + 1 AS rank
         FROM summoners AS s1
         WHERE id = ?''', (summoner.id,))
 
         result = db.fetchone()
 
-        # 결과 출력
         if result:
-            return result[2]
+            total_games = result[1]
+            rank = result[2]
+
+            # 동일한 게임 수를 가진 소환사가 있는지 확인하는 쿼리
+            db.execute('''
+            SELECT COUNT(*)
+            FROM summoners
+            WHERE normal_game_win + normal_game_lose = ?''', (total_games,))
+
+            count = db.fetchone()[0]
+
+            if count > 1:
+                # 공동 등수가 있는 경우
+                return True, rank
+            else:
+                # 공동 등수가 없는 경우
+                return False, rank
         else:
-            return -1
+            return False, 0
+
     except sqlite3.Error as e:
         print(f"An error occurred: {e}")
         return None
@@ -343,3 +361,4 @@ async def get_summoner_game_count_rank(summoner):
         # 커서 및 연결 닫기
         db.close()
         conn.close()
+
