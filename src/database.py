@@ -284,7 +284,7 @@ def get_top_ten_normal_game_players():
         SELECT display_name, normal_game_count, normal_game_win, normal_game_lose
         FROM summoners
         ORDER BY (normal_game_win + normal_game_lose) DESC
-        LIMIT 10
+        LIMIT 100
         ''')
 
         top_players = db.fetchall()

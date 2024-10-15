@@ -217,8 +217,8 @@ async def twenty_auction(host, team_head_line_number, ctx):
         elif user_message.content == '종료':
             end_flag = True
         else:
-            team_number = int(user_message.content.split()[0])
-            auction_score = int(user_message.content.split()[1])
+            team_number = int(user_message.content.split(' ')[0][0])
+            auction_score = int(user_message.content.split(' ')[1])
 
             auction_dict[f'{team_number}팀'][chosen_line] = (chosen_summoner, auction_score)
             remain_scores[team_number - 1] -= auction_score
