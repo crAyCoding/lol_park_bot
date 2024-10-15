@@ -61,7 +61,6 @@ async def confirm_twenty_recruit(ctx):
                 return
 
             # 현재 메시지를 삭제
-            await interaction.response.defer()
             await interaction.message.delete()
 
             # Confirm 버튼이 눌리면 다음 라인 출력
@@ -159,7 +158,7 @@ async def twenty_auction(host, team_head_line_number, ctx):
     remain_scores = [summoner.score for summoner in auction_summoners[team_head_line_name]]
 
     # 경매 인원에서 팀장 삭제
-    del auction_summoners[team_head_line_number]
+    del auction_summoners[team_head_line_name]
 
     # 강제 종료 플래그
     end_flag = False
