@@ -245,6 +245,7 @@ async def twenty_auction(host, team_head_line_number, ctx):
         await send_random_record_update_person(ctx, auction_dict)
         # 초기화
         lolpark.twenty_summoner_list = None
+        lolpark.twenty_host = None
 
 
 def add_auction_team_head(auction_list, team_head_line_number):
@@ -256,8 +257,8 @@ def add_auction_team_head(auction_list, team_head_line_number):
 
 def get_auction_result(auction_dict, remain_scores):
     auction_result = f'```\n'
-    for (team_number, team_info) in auction_dict.items():
-        auction_result += f'{team_number}팀 ( 남은 점수 : {remain_scores[team_number-1]}점 )\n'
+    for (i, (team_number, team_info)) in enumerate(auction_dict.items()):
+        auction_result += f'{team_number} ( 남은 점수 : {remain_scores[i]}점 )\n'
         for (line_name, summoner) in team_info.items():
             if summoner[1] == -1:
                 auction_result += f'{line_name} : {summoner[0].nickname} [팀장]'

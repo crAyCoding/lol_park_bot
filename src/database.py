@@ -314,12 +314,14 @@ async def get_summoner_most_normal_game_message():
     return most_normal_game_message
 
 
-# 특정 소환사의 전적 등수 확인
 async def get_summoner_game_count_rank(summoner):
     conn = sqlite3.connect(lolpark.summoners_db)
     db = conn.cursor()
 
     try:
+        # summoner.id가 올바르게 전달되는지 확인
+        print(f"Summoner ID: {summoner.id}")
+
         # 현재 소환사의 총 게임 수와 순위를 계산하는 쿼리
         db.execute('''
         SELECT id,
@@ -340,6 +342,9 @@ async def get_summoner_game_count_rank(summoner):
         total_games = result[1]
         rank = result[2]
 
+        # 결과 확인
+        print(f"Total games: {total_games}, Rank: {rank}")
+
         # 동일한 게임 수를 가진 소환사가 있는지 확인하는 쿼리
         db.execute('''
         SELECT COUNT(*)
@@ -347,6 +352,9 @@ async def get_summoner_game_count_rank(summoner):
         WHERE normal_game_win + normal_game_lose = ?''', (total_games,))
 
         count = db.fetchone()[0]
+
+        # count 확인
+        print(f"Count of summoners with total games {total_games}: {count}")
 
         if count > 1:
             # 공동 등수가 있는 경우
@@ -361,4 +369,3 @@ async def get_summoner_game_count_rank(summoner):
         # 커서 및 연결 닫기
         db.close()
         conn.close()
-

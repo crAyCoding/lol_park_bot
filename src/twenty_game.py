@@ -99,7 +99,6 @@ async def close_twenty_game(ctx):
     await ctx.send(f'20인내전경매 채널에서 !경매 를 통해 경매를 시작할 수 있습니다.')
 
     # 초기화
-    lolpark.twenty_host = None
     lolpark.twenty_view = None
 
 
