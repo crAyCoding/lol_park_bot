@@ -333,27 +333,27 @@ async def get_summoner_game_count_rank(summoner):
 
         result = db.fetchone()
 
-        if result:
-            total_games = result[1]
-            rank = result[2]
+        if result is None:
+            print(f"No result found for summoner with ID: {summoner.id}")
+            return False, -1
 
-            # 동일한 게임 수를 가진 소환사가 있는지 확인하는 쿼리
-            db.execute('''
-            SELECT COUNT(*)
-            FROM summoners
-            WHERE normal_game_win + normal_game_lose = ?''', (total_games,))
+        total_games = result[1]
+        rank = result[2]
 
-            count = db.fetchone()[0]
+        # 동일한 게임 수를 가진 소환사가 있는지 확인하는 쿼리
+        db.execute('''
+        SELECT COUNT(*)
+        FROM summoners
+        WHERE normal_game_win + normal_game_lose = ?''', (total_games,))
 
-            if count > 1:
-                # 공동 등수가 있는 경우
-                return True, rank
-            else:
-                # 공동 등수가 없는 경우
-                return False, rank
+        count = db.fetchone()[0]
+
+        if count > 1:
+            # 공동 등수가 있는 경우
+            return True, rank
         else:
-            return False, 0
-
+            # 공동 등수가 없는 경우
+            return False, rank
     except sqlite3.Error as e:
         print(f"An error occurred: {e}")
         return False, -1
