@@ -252,10 +252,10 @@ async def get_summoner_record_message(summoner):
     normal_game_lose_count = await get_normal_game_lose_count(summoner)
     is_joint, normal_game_count_rank = await get_summoner_game_count_rank(summoner)
 
-    if normal_game_count < 5:
+    if normal_game_count < 3:
         return (f'### {functions.get_nickname(summoner.nickname)}\n\n'
                 f'일반 내전 참여 횟수 : {normal_game_count}회\n\n'
-                f'내전 횟수 5회 미만인 소환사는 전적 검색 기능을 제공하지 않습니다.')
+                f'내전 횟수 3회 미만인 소환사는 전적 검색 기능을 제공하지 않습니다.')
 
     record_message = f''
     record_message += f'### {functions.get_nickname(summoner.nickname)}\n\n'
