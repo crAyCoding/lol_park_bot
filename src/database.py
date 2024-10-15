@@ -323,11 +323,15 @@ async def get_summoner_game_count_rank(summoner):
         db.execute('''
         SELECT id,
                normal_game_win + normal_game_lose AS total_games,
-               (SELECT COUNT(DISTINCT (s2.normal_game_win + s2.normal_game_lose))
-                FROM summoners AS s2
-                WHERE (s2.normal_game_win + s2.normal_game_lose) > (s1.normal_game_win + s1.normal_game_lose)) + 1 AS rank
+               (SELECT COUNT(*)
+                FROM (
+                    SELECT DISTINCT normal_game_win + normal_game_lose AS total_games
+                    FROM summoners
+                ) AS s2
+                WHERE s2.total_games > (s1.normal_game_win + s1.normal_game_lose)) + 1 AS rank
         FROM summoners AS s1
         WHERE id = ?''', (summoner.id,))
+
 
         result = db.fetchone()
 
