@@ -266,6 +266,7 @@ def get_auction_result(auction_dict, remain_scores):
                 auction_result += f'{line_name} : {summoner[0].nickname} [팀장]\n'
             else:
                 auction_result += f'{line_name} : {summoner[0].nickname} > {summoner[1]}\n'
+        auction_result += f'\n'
     auction_result += f'```'
 
     return auction_result
@@ -274,7 +275,7 @@ def get_auction_result(auction_dict, remain_scores):
 def get_auction_remain_user(auction_summoners, remain_summoners):
     def format_summoners(summoners_dict):
         result = ''
-        for line_name, summoners in summoners_dict:
+        for line_name, summoners in summoners_dict.items():
             if summoners:
                 result += f'{line_name}\n'
                 result += ''.join(f'{summoner.nickname}\n' for summoner in summoners)
