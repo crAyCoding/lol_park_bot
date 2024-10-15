@@ -260,8 +260,10 @@ def get_auction_result(auction_dict, remain_scores):
     for (i, (team_number, team_info)) in enumerate(auction_dict.items()):
         auction_result += f'{team_number} ( 남은 점수 : {remain_scores[i]}점 )\n'
         for (line_name, summoner) in team_info.items():
-            if summoner[1] == -1:
-                auction_result += f'{line_name} : {summoner[0].nickname} [팀장]'
+            if summoner is None:
+                auction_result += f'{line_name} : \n'
+            elif summoner[1] == -1:
+                auction_result += f'{line_name} : {summoner[0].nickname} [팀장]\n'
             else:
                 auction_result += f'{line_name} : {summoner[0].nickname} > {summoner[1]}\n'
     auction_result += f'```'
