@@ -256,7 +256,7 @@ async def get_summoner_record_message(summoner):
     record_message += f'### {functions.get_nickname(summoner.nickname)}\n\n'
     record_message += f'일반 내전 참여 횟수 : {normal_game_count}회\n'
     record_message += (f'일반 내전 전적 : {normal_game_win_count + normal_game_lose_count}전 '
-                       f'{"공동 " if is_joint else ""}{normal_game_count_rank}등 '
+                       f'({"공동 " if is_joint else ""}{normal_game_count_rank}등) '
                        f'{normal_game_win_count}승 {normal_game_lose_count}패, '
                        f'승률 : {functions.calculate_win_rate(normal_game_win_count, normal_game_lose_count)}')
 
@@ -300,16 +300,16 @@ async def get_summoner_most_normal_game_message():
     for index, result in enumerate(top_ten, 1):
         if index == 1:
             most_normal_game_message += (f'# 🥇 : {functions.get_nickname(result[0])}, '
-                                         f'{result[1]}회 {result[2] + result[3]}판\n\n')
+                                         f'{result[1]}회 {result[2] + result[3]}게임\n\n')
         elif index == 2:
             most_normal_game_message += (f'## 🥈 : {functions.get_nickname(result[0])}, '
-                                         f'{result[1]}회 {result[2] + result[3]}판\n\n')
+                                         f'{result[1]}회 {result[2] + result[3]}게임\n\n')
         elif index == 3:
             most_normal_game_message += (f'## 🥉 : {functions.get_nickname(result[0])}, '
-                                         f'{result[1]}회 {result[2] + result[3]}판\n\n')
+                                         f'{result[1]}회 {result[2] + result[3]}게임\n\n')
         else:
             most_normal_game_message += (f'### {index}위 : {functions.get_nickname(result[0])}, '
-                                         f'{result[1]}회 {result[2] + result[3]}판\n\n')
+                                         f'{result[1]}회 {result[2] + result[3]}게임\n\n')
 
     return most_normal_game_message
 
@@ -319,9 +319,6 @@ async def get_summoner_game_count_rank(summoner):
     db = conn.cursor()
 
     try:
-        # summoner.id가 올바르게 전달되는지 확인
-        print(f"Summoner ID: {summoner.id}")
-
         # 현재 소환사의 총 게임 수와 순위를 계산하는 쿼리
         db.execute('''
         SELECT id,
@@ -341,9 +338,6 @@ async def get_summoner_game_count_rank(summoner):
         total_games = result[1]
         rank = result[2]
 
-        # 결과 확인
-        print(f"Total games: {total_games}, Rank: {rank}")
-
         # 동일한 게임 수를 가진 소환사가 있는지 확인하는 쿼리
         db.execute('''
         SELECT COUNT(*)
@@ -351,9 +345,6 @@ async def get_summoner_game_count_rank(summoner):
         WHERE normal_game_win + normal_game_lose = ?''', (total_games,))
 
         count = db.fetchone()[0]
-
-        # count 확인
-        print(f"Count of summoners with total games {total_games}: {count}")
 
         if count > 1:
             # 공동 등수가 있는 경우

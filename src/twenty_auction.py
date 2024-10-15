@@ -193,7 +193,7 @@ async def twenty_auction(host, team_head_line_number, ctx):
         await ctx.send(f'### 현재 경매 대상 : [{chosen_line}] {chosen_summoner.nickname}')
 
         def check(message):
-            if message.author != host or message.channel != ctx.channel:
+            if Summoner(message.author) != host or message.channel != ctx.channel:
                 return False
 
             msg_content = message.content
@@ -276,15 +276,16 @@ def get_auction_result(auction_dict, remain_scores):
 
 
 def get_auction_remain_user(auction_summoners, remain_summoners):
-    def format_summoners(summoners_dict):
-        result = ''
-        for line_name, summoners in summoners_dict.items():
-            if summoners:
-                result += f'{line_name}\n'
-                result += ''.join(f'{summoner.nickname}\n' for summoner in summoners)
-        return result
+    remain_result = '```\n남은 유저 목록\n\n'
+    for line_name in auction_summoners.keys():
+        remain_result += f'{line_name}\n'
+        for auction_summoner in auction_summoners[line_name]:
+            remain_result += f'{auction_summoner.nickname}\n'
+        for remain_summoner in remain_summoners[line_name]:
+            remain_result += f'{remain_summoner.nickname} (유찰)\n'
+        remain_result += '\n'
+    remain_result += '```'
 
-    remain_result = '```\n' + format_summoners(auction_summoners) + '```\n```\n' + format_summoners(remain_summoners) + '```\n'
     return remain_result
 
 
