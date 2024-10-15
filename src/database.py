@@ -356,7 +356,7 @@ async def get_summoner_game_count_rank(summoner):
 
     except sqlite3.Error as e:
         print(f"An error occurred: {e}")
-        return None
+        return False, -1
     finally:
         # 커서 및 연결 닫기
         db.close()
