@@ -107,7 +107,6 @@ async def end_normal_game(ctx):
     lolpark.normal_game_log = None
     lolpark.normal_game_channel = None
     lolpark.normal_game_creator = None
-    lolpark.is_normal_game = False
 
     return False
 

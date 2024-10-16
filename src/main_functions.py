@@ -36,8 +36,6 @@ async def end_game(ctx):
     channel_id = ctx.channel.id
 
     if channel_id == lolpark.normal_game_channel and lolpark.is_normal_game:
-        lolpark.normal_game_log = None
-        lolpark.normal_game_channel = None
         lolpark.is_normal_game = await normal_game.end_normal_game(ctx)
 
 
