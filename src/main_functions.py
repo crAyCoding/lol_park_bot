@@ -64,8 +64,8 @@ async def reset_game(ctx):
                               channels.GAME_C_RECRUIT_CHANNEL_ID, channels.GAME_D_RECRUIT_CHANNEL_ID,
                               channels.GAME_E_RECRUIT_CHANNEL_ID, channels.GAME_F_RECRUIT_CHANNEL_ID,]
 
-    if user_id != managers.MASULSA:
-        await ctx.send('개발자만 가능해요~ 안돼요~ 돌아가요~')
+    if not (user_id == managers.MASULSA or user_id == managers.JUYE):
+        await ctx.send('개발자와 서버장만 가능해요~ 안돼요~ 돌아가요~')
         return None
 
     if channel_id in normal_channel_id_list:
@@ -93,7 +93,7 @@ async def recommend_discord():
     evening_time = datetime.combine(now.date(), datetime.strptime("11:00", "%H:%M").time())
 
     # 현재 시간이 오전 8시를 지났고 오후 8시를 안 지났다면 evening_time까지 대기, 그렇지 않으면 morning_time으로 대기
-    if now > evening_time:
+    if now > morning_time:
         # 만약 오후 8시가 지났다면 다음날 오전 8시로 설정
         morning_time += timedelta(days=1)
         evening_time += timedelta(days=1)

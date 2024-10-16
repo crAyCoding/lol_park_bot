@@ -106,7 +106,7 @@ async def record_normal_game_in_main(ctx):
 
 
 async def manually_add_summoner_win(ctx, members):
-    if ctx.author.id != managers.MASULSA:
+    if not (ctx.author.id == managers.MASULSA or ctx.author.id == managers.JUYE):
         return
 
     for member in members:
@@ -115,7 +115,7 @@ async def manually_add_summoner_win(ctx, members):
 
 
 async def manually_add_summoner_lose(ctx, members):
-    if ctx.author.id != managers.MASULSA:
+    if not (ctx.author.id == managers.MASULSA or ctx.author.id == managers.JUYE):
         return
 
     for member in members:

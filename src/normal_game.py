@@ -398,7 +398,7 @@ async def finalize_team(ctx, teams, board_message, summoners, host):
             press_user = Summoner(interaction.user)
             if press_user != host:
                 await (interaction.response.edit_message
-                       (content=f'## {get_nickname(host.nickname)}님이 누른 것만 인식합니다. '
+                       (content=f'{board_message}\n## {get_nickname(host.nickname)}님이 누른 것만 인식합니다. '
                                 f'{get_nickname(press_user.nickname)}님 누르지 말아주세요.',
                         view=self.view))
                 return
