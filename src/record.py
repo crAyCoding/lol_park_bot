@@ -4,6 +4,7 @@ import database
 import lolpark
 import normal_game
 import managers
+import functions
 from summoner import Summoner
 
 
@@ -112,6 +113,7 @@ async def manually_add_summoner_win(ctx, members):
     for member in members:
         summoner = Summoner(member)
         await database.add_normal_game_win_count(summoner, 1)
+        print(f'{functions.get_nickname(summoner.nickname)}님의 승리가 추가되었습니다.')
 
 
 async def manually_add_summoner_lose(ctx, members):
@@ -121,3 +123,4 @@ async def manually_add_summoner_lose(ctx, members):
     for member in members:
         summoner = Summoner(member)
         await database.add_normal_game_lose_count(summoner, 1)
+        print(f'{functions.get_nickname(summoner.nickname)}님의 패배가 추가되었습니다.')
