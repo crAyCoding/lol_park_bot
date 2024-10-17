@@ -38,7 +38,7 @@ async def make_fearless_game(ctx, message='3판 2선 모이면 바로 시작'):
     role = discord.utils.get(ctx.guild.roles, name=role_name)
 
     lolpark.fearless_game_creator = Summoner(ctx.author)
-    await ctx.send(f'{get_nickname(ctx.author.display_name)} 님이 내전을 모집합니다!\n'
+    await ctx.send(f'{get_nickname(ctx.author.display_name)} 님이 피어리스 내전을 모집합니다!\n'
                    f'[ {message} ]\n{role.mention}')
 
 
