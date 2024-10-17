@@ -33,6 +33,8 @@ async def make_twenty_game(ctx, message):
             # 위 두 사항에 해당되지 않는 경우, 해당 라인에 참여시키고 메세지 출력
             if not is_valid_push:
                 button.label = f"{line_name} : {len(lolpark.twenty_summoner_list[line_name])}"
+                button.style = discord.ButtonStyle.red \
+                    if len(lolpark.twenty_summoner_list[line_name]) >= 4 else discord.ButtonStyle.gray
                 await interaction.response.edit_message(content=get_twenty_recruit_board(message),
                                                         view=lolpark.twenty_view)
                 return

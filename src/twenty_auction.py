@@ -174,6 +174,7 @@ async def twenty_auction(host, team_head_line_number, ctx):
             if all(not v for v in remain_summoners.values()):
                 break
             remain_summoners = {line: [] for line in lolpark.line_names}
+            continue
 
         auction_result_message = await ctx.send(get_auction_result(auction_dict, remain_scores))
         auction_remain_message = await ctx.send(get_auction_remain_user(auction_summoners, remain_summoners))
@@ -276,6 +277,8 @@ def get_auction_result(auction_dict, remain_scores):
 def get_auction_remain_user(auction_summoners, remain_summoners):
     remain_result = '```\n남은 유저 목록\n\n'
     for line_name in auction_summoners.keys():
+        if not auction_summoners[line_name] and not remain_summoners[line_name]:
+            continue
         remain_result += f'{line_name}\n'
         for auction_summoner in auction_summoners[line_name]:
             remain_result += f'{auction_summoner.nickname}\n'
