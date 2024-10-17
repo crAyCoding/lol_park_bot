@@ -451,15 +451,9 @@ async def add_normal_game_to_database(summoners):
 async def move_summoners(channel, teams):
     channel_id = channel.id
     guild = channel.guild
-    normal_game_recruit_channel_id_list = [channels.GAME_A_RECRUIT_CHANNEL_ID, channels.GAME_B_RECRUIT_CHANNEL_ID,
-                                           channels.GAME_C_RECRUIT_CHANNEL_ID, channels.GAME_D_RECRUIT_CHANNEL_ID,
-                                           channels.GAME_E_RECRUIT_CHANNEL_ID, channels.GAME_F_RECRUIT_CHANNEL_ID]
-    blue_team_channel_id_list = [channels.GAME_A_TEAM_1_CHANNEL_ID, channels.GAME_B_TEAM_1_CHANNEL_ID,
-                                 channels.GAME_C_TEAM_1_CHANNEL_ID, channels.GAME_D_TEAM_1_CHANNEL_ID,
-                                 channels.GAME_E_TEAM_1_CHANNEL_ID, channels.GAME_F_TEAM_1_CHANNEL_ID]
-    red_team_channel_id_list = [channels.GAME_A_TEAM_2_CHANNEL_ID, channels.GAME_B_TEAM_2_CHANNEL_ID,
-                                channels.GAME_C_TEAM_2_CHANNEL_ID, channels.GAME_D_TEAM_2_CHANNEL_ID,
-                                channels.GAME_E_TEAM_2_CHANNEL_ID, channels.GAME_F_TEAM_2_CHANNEL_ID]
+    normal_game_recruit_channel_id_list = channels.NORMAL_GAME_CHANNEL_ID_LIST
+    blue_team_channel_id_list = channels.NORMAL_GAME_TEAM_1_CHANNEL_ID_LIST
+    red_team_channel_id_list = channels.NORMAL_GAME_TEAM_2_CHANNEL_ID_LIST
 
     for i, recruit_channel_id in enumerate(normal_game_recruit_channel_id_list):
         if channel_id == recruit_channel_id:
