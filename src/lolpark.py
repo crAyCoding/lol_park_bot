@@ -24,6 +24,9 @@ twenty_summoner_list = None
 # 20인 내전 뷰
 twenty_view = None
 
+# 20인 내전 뷰를 담은 메세지
+twenty_view_message = None
+
 # 20인 내전 호스트
 twenty_host = None
 

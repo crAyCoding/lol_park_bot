@@ -35,8 +35,10 @@ async def make_twenty_game(ctx, message):
                 button.label = f"{line_name} : {len(lolpark.twenty_summoner_list[line_name])}"
                 button.style = discord.ButtonStyle.red \
                     if len(lolpark.twenty_summoner_list[line_name]) >= 4 else discord.ButtonStyle.gray
-                await interaction.response.edit_message(content=get_twenty_recruit_board(message),
-                                                        view=lolpark.twenty_view)
+                lolpark.twenty_view_message = await ctx.send(content=f'{get_twenty_recruit_board(message)}\n'
+                                                                     f'이미 모집된 라인(버튼이 빨간색인 경우)에 참여를 원하는 경우, '
+                                                                     f'버튼을 누르시면 자동으로 대기 목록에 추가됩니다.',
+                                                             view=lolpark.twenty_view)
                 return
             lolpark.twenty_summoner_list[line_name].append(user)
             button.label = f"{line_name} : {len(lolpark.twenty_summoner_list[line_name])}"
@@ -44,8 +46,10 @@ async def make_twenty_game(ctx, message):
             button.style = discord.ButtonStyle.red \
                 if len(lolpark.twenty_summoner_list[line_name]) >= 4 else discord.ButtonStyle.gray
 
-            await interaction.response.edit_message(content=get_twenty_recruit_board(message),
-                                                    view=lolpark.twenty_view)
+            lolpark.twenty_view_message = await ctx.send(content=f'{get_twenty_recruit_board(message)}\n'
+                                                                 f'이미 모집된 라인(버튼이 빨간색인 경우)에 참여를 원하는 경우, '
+                                                                 f'버튼을 누르시면 자동으로 대기 목록에 추가됩니다.',
+                                                         view=lolpark.twenty_view)
         return callback
 
     class TwentyView(View):
@@ -71,9 +75,11 @@ async def make_twenty_game(ctx, message):
     role_name = '내전'
     role = discord.utils.get(ctx.guild.roles, name=role_name)
 
-    await ctx.send(content=get_twenty_recruit_board(message), view=lolpark.twenty_view)
-    await ctx.send(f'20인 내전 {message}\n{role.mention}')
-    await ctx.send(f'이미 모집된 라인(버튼이 빨간색인 경우)에 참여를 원하는 경우, 버튼을 누르시면 자동으로 대기 목록에 추가됩니다.')
+    lolpark.twenty_view_message = await ctx.send(content=f'{get_twenty_recruit_board(message)}\n'
+                                                         f'20인 내전 {message}\n{role.mention}\n'
+                                                         f'이미 모집된 라인(버튼이 빨간색인 경우)에 참여를 원하는 경우, '
+                                                         f'버튼을 누르시면 자동으로 대기 목록에 추가됩니다.',
+                                                 view=lolpark.twenty_view)
 
 
 async def close_twenty_game(ctx):
@@ -101,13 +107,16 @@ async def close_twenty_game(ctx):
         await ctx.send(f'{waiting_people_list}')
 
     await ctx.send(f'{game_members}인 내전 모집이 완료되었습니다. 결과를 확인해주세요')
-    await ctx.send(f'20인내전경매 채널에서 !경매 를 통해 경매를 시작할 수 있습니다.')
+    await ctx.send(f'<#1287070975640211557> 채널에서 !경매 를 통해 경매를 시작할 수 있습니다.')
 
     for line, summoners in lolpark.twenty_summoner_list.items():
         lolpark.twenty_summoner_list[line] = summoners[:4]
 
     # 초기화
     lolpark.twenty_view = None
+    if lolpark.twenty_view_message:
+        await lolpark.twenty_view_message.delete()
+        lolpark.twenty_view_message = None
 
 
 async def end_twenty_game(ctx):
@@ -126,6 +135,9 @@ async def end_twenty_game(ctx):
     lolpark.twenty_summoner_list = None
     lolpark.twenty_host = None
     lolpark.twenty_view = None
+    if lolpark.twenty_view_message:
+        await lolpark.twenty_view_message.delete()
+        lolpark.twenty_view_message = None
 
     return False
 
