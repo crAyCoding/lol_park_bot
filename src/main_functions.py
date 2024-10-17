@@ -24,6 +24,9 @@ async def make_game(ctx, message):
     if channel_id in channels.NORMAL_GAME_CHANNEL_ID_LIST and not lolpark.is_normal_game:
         lolpark.is_normal_game = await normal_game.make_normal_game(ctx, message)
 
+    if channel_id == channels.GAME_FEARLESS_A_RECRUIT_CHANNEL_ID:
+        await normal_game.make_fearless_game(ctx, message)
+
     if channel_id == channels.TWENTY_RECRUIT_CHANNEL_ID:
         await twenty_game.make_twenty_game(ctx, message)
 
