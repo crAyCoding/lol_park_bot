@@ -31,25 +31,18 @@ async def make_twenty_game(ctx, message):
                         break
 
             # 위 두 사항에 해당되지 않는 경우, 해당 라인에 참여시키고 메세지 출력
-            if not is_valid_push:
-                button.label = f"{line_name} : {len(lolpark.twenty_summoner_list[line_name])}"
-                button.style = discord.ButtonStyle.red \
-                    if len(lolpark.twenty_summoner_list[line_name]) >= 4 else discord.ButtonStyle.gray
-                lolpark.twenty_view_message = await ctx.send(content=f'{get_twenty_recruit_board(message)}\n'
-                                                                     f'이미 모집된 라인(버튼이 빨간색인 경우)에 참여를 원하는 경우, '
-                                                                     f'버튼을 누르시면 자동으로 대기 목록에 추가됩니다.',
-                                                             view=lolpark.twenty_view)
-                return
-            lolpark.twenty_summoner_list[line_name].append(user)
+            if is_valid_push:
+                lolpark.twenty_summoner_list[line_name].append(user)
             button.label = f"{line_name} : {len(lolpark.twenty_summoner_list[line_name])}"
             # 4표 이상이면 버튼 색 빨간색으로 설정
             button.style = discord.ButtonStyle.red \
                 if len(lolpark.twenty_summoner_list[line_name]) >= 4 else discord.ButtonStyle.gray
 
-            lolpark.twenty_view_message = await ctx.send(content=f'{get_twenty_recruit_board(message)}\n'
-                                                                 f'이미 모집된 라인(버튼이 빨간색인 경우)에 참여를 원하는 경우, '
-                                                                 f'버튼을 누르시면 자동으로 대기 목록에 추가됩니다.',
-                                                         view=lolpark.twenty_view)
+            interaction.response.edit_message(content=f'{get_twenty_recruit_board(message)}\n'
+                                                      f'이미 모집된 라인(버튼이 빨간색인 경우)에 참여를 원하는 경우, '
+                                                      f'버튼을 누르시면 자동으로 대기 목록에 추가됩니다.',
+                                              view=lolpark.twenty_view)
+
         return callback
 
     class TwentyView(View):
