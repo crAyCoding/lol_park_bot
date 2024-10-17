@@ -40,31 +40,12 @@ async def command_end(ctx):
 # 메세지 입력 시 마다 수행
 @bot.event
 async def on_message(message):
-    channel_id = message.channel.id
-
-    recognize_message_list = ['ㅅ', 't', 'T', '손', '발', 'ㅅㅅ', 'ㅅㅅㅅ', 'ㅅㅅㅅㅅ']
 
     # 봇 메세지는 메세지로 인식 X
     if message.author == bot.user:
         return
 
-    # 내전이 열려 있을 경우, 손 든 사람 모집
-    if (lolpark.is_normal_game and channel_id == lolpark.normal_game_channel
-            and message.content in recognize_message_list):
-        user = Summoner(message.author)
-        if user in lolpark.normal_game_log:
-            lolpark.normal_game_log[user].append(message.id)
-        else:
-            lolpark.normal_game_log[user] = [message.id]
-        # 참여자 수가 10명이면 내전 자동 마감
-        if len(lolpark.normal_game_log) == 10:
-            await close_normal_game(message.channel, list(lolpark.normal_game_log.keys()), lolpark.normal_game_creator)
-
-            # 내전 변수 초기화, 명단 확정 후에 진행
-            lolpark.normal_game_log = None
-            lolpark.normal_game_channel = None
-            lolpark.normal_game_creator = None
-            lolpark.is_normal_game = False
+    await main_functions.recruit_game_members(message)
 
     await bot.process_commands(message)
 
@@ -72,21 +53,12 @@ async def on_message(message):
 # 메세지 삭제 시 마다 수행
 @bot.event
 async def on_message_delete(message):
-    channel_id = message.channel.id
 
     # 봇 메세지는 메세지로 인식 X
     if message.author == bot.user:
         return
 
-    # 내전 모집에서 채팅 지우면 로그에서 삭제
-    if lolpark.is_normal_game and channel_id == lolpark.normal_game_channel:
-        user = Summoner(message.author)
-        if user not in lolpark.normal_game_log:
-            return
-        lolpark.normal_game_log[user] = [mid for mid in lolpark.normal_game_log[user] if mid != message.id]
-        # 만약 채팅이 더 남아 있지 않으면 로그에서 유저 삭제
-        if not lolpark.normal_game_log[user]:
-            del lolpark.normal_game_log[user]
+    main_functions.delete_member_in_log(message)
 
 
 @bot.command(name='비상탈출')

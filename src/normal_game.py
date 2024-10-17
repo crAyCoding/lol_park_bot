@@ -27,6 +27,21 @@ async def make_normal_game(ctx, message='3판 2선 모이면 바로 시작'):
     return True
 
 
+async def make_fearless_game(ctx, message='3판 2선 모이면 바로 시작'):
+    # 피어리스 내전 모집
+
+    user = Summoner(ctx.author)
+    lolpark.fearless_game_log = {user: [ctx.message.id]}
+
+    # 내전 역할 가져오기
+    role_name = '내전'
+    role = discord.utils.get(ctx.guild.roles, name=role_name)
+
+    lolpark.fearless_game_creator = Summoner(ctx.author)
+    await ctx.send(f'{get_nickname(ctx.author.display_name)} 님이 내전을 모집합니다!\n'
+                   f'[ {message} ]\n{role.mention}')
+
+
 async def close_normal_game(ctx, summoners, host):
     # 일반 내전 마감
     class GameMember:
@@ -109,6 +124,23 @@ async def end_normal_game(ctx):
     lolpark.normal_game_creator = None
 
     return False
+
+
+async def end_fearless_game(ctx):
+    # 피어리스 내전 쫑
+
+    if lolpark.fearless_game_creator != Summoner(ctx.author):
+        return
+
+    # 내전 역할 가져오기
+    role_name = '내전'
+    role = discord.utils.get(ctx.guild.roles, name=role_name)
+
+    await ctx.send(f'피어리스 내전 쫑내겠습니다~\n{role.mention}')
+
+    # 초기화
+    lolpark.fearless_game_log = None
+    lolpark.fearless_game_creator = None
 
 
 async def handle_game_team(ctx, sorted_summoners, summoners, host):
@@ -480,3 +512,9 @@ async def reset_normal_game(ctx):
     lolpark.normal_game_log = None
     lolpark.normal_game_channel = None
     await ctx.send("일반 내전을 초기화했습니다.")
+
+
+async def reset_fearless_game(ctx):
+    lolpark.fearless_game_creator = False
+    lolpark.fearless_game_log = None
+    await ctx.send("피어리스 내전을 초기화했습니다.")
