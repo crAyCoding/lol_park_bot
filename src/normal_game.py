@@ -455,19 +455,27 @@ async def move_summoners(channel, teams):
     blue_team_channel_id_list = channels.NORMAL_GAME_TEAM_1_CHANNEL_ID_LIST
     red_team_channel_id_list = channels.NORMAL_GAME_TEAM_2_CHANNEL_ID_LIST
 
+    blue_team_channel = None
+    red_team_channel = None
+
+    if channel_id == channels.GAME_FEARLESS_A_RECRUIT_CHANNEL_ID:
+        blue_team_channel = bot.get_channel(channels.GAME_FEARLESS_A_TEAM_1_CHANNEL_ID)
+        red_team_channel = bot.get_channel(channels.GAME_FEARLESS_A_TEAM_2_CHANNEL_ID)
+
     for i, recruit_channel_id in enumerate(normal_game_recruit_channel_id_list):
         if channel_id == recruit_channel_id:
             blue_team_channel = bot.get_channel(blue_team_channel_id_list[i])
-            for summoner in teams[0]:
-                member = guild.get_member(summoner.id)
-                if member.voice is not None:
-                    await member.move_to(blue_team_channel)
             red_team_channel = bot.get_channel(red_team_channel_id_list[i])
-            for summoner in teams[1]:
-                member = guild.get_member(summoner.id)
-                if member.voice is not None:
-                    await member.move_to(red_team_channel)
 
+    for summoner in teams[0]:
+        member = guild.get_member(summoner.id)
+        if member.voice is not None and blue_team_channel is not None:
+            await member.move_to(blue_team_channel)
+
+    for summoner in teams[1]:
+        member = guild.get_member(summoner.id)
+        if member.voice is not None and red_team_channel is not None:
+            await member.move_to(red_team_channel)
 
 async def send_random_record_update_person(ctx, teams):
     blue_team = teams[0]
