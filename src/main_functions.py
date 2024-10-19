@@ -171,7 +171,8 @@ async def recruit_game_members(message):
             lolpark.is_normal_game = False
 
     # 피어리스 내전이 열려 있을 경우, 손 든 사람 모집
-    if lolpark.fearless_game_log is not None and message.content in recognize_message_list:
+    if (lolpark.fearless_game_log is not None and message.content in recognize_message_list
+            and channel_id == channels.GAME_FEARLESS_A_RECRUIT_CHANNEL_ID):
         user = Summoner(message.author)
         if user in lolpark.fearless_game_log:
             lolpark.fearless_game_log[user].append(message.id)
@@ -201,7 +202,7 @@ def delete_member_in_log(message):
             del lolpark.normal_game_log[user]
 
     # 피어리스 내전 모집에서 채팅 지우면 로그에서 삭제
-    if lolpark.fearless_game_log is not None:
+    if lolpark.fearless_game_log is not None and channel_id == channels.GAME_FEARLESS_A_RECRUIT_CHANNEL_ID:
         user = Summoner(message.author)
         if user not in lolpark.fearless_game_log:
             return
