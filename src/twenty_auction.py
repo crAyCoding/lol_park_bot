@@ -242,9 +242,10 @@ async def twenty_auction(host, team_head_line_number, ctx):
                        f'4강전은 남은 점수가 높은 팀이 첫번째 판 진영 선택권을 가집니다. 점수가 동일한 경우 주사위를 굴려 진행해주시면 됩니다.'
                        f'완료된 경매에서는 되돌리기가 불가능합니다. 이 점 참고바랍니다.'
                        f'모두 화이팅입니다!')
+        # 러시안 룰렛 집행
+        await send_random_record_update_person(ctx, auction_dict)
         # 사람들 각자 팀 채널로 강제
         await move_summoners_in_twenty(ctx, auction_dict)
-        await send_random_record_update_person(ctx, auction_dict)
         # 초기화
         lolpark.twenty_summoner_list = None
         lolpark.twenty_host = None
@@ -298,6 +299,9 @@ def get_auction_warning():
     warning_text += f'진행자 및 팀장을 제외한 모든 인원은 마이크를 꺼주시길 바랍니다.\n'
     warning_text += f'경매가 시작되면 랜덤으로 한명씩 출력되며, 그 사람에 대하여 경매를 진행해주시면 됩니다.\n'
     warning_text += f'경매가 완료되면, 진행자는 채팅에 팀 번호와 경매 점수를 입력해주시면 됩니다. ex) 1팀 80\n'
+    warning_text += f'라인에 남은 인원이 한 명인경우, 해당 인원은 해당 라인이 공석인 팀에 자동으로 편입됩니다.\n'
+    warning_text += (f'예를 들어, 서폿 3명이 모두 뽑히고 `쓰레기` 상현 님만 남았다면 남은 팀에 상현님이 들어갑니다. '
+                     f'(해당 팀에게 X를 눌러 조의를 표하십시오)\n')
     warning_text += f'유찰의 경우 자동으로 유찰 대기열에 추가되며, 경매가 종료된 이후 유찰 대기열로 경매를 추가 진행합니다.\n'
     warning_text += (f'혹여 오류가 발생했거나 입력을 잘못한 경우, `!종료`를 통해 강제 종료할 수 있습니다. '
                      f'이후 다시 `!경매`를 통해 경매를 재진행할 수 있습니다.\n')

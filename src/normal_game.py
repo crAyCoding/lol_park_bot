@@ -416,8 +416,8 @@ async def finalize_team(ctx, teams, board_message, summoners, host):
             await ctx.send(f'https://banpick.kr/')
             await ctx.send(f'밴픽은 위 사이트에서 진행해주시면 됩니다.')
             await ctx.send(f'## 사용자 설정 방 제목 : 롤파크 / 비밀번호 : 0921')
-            await move_summoners(ctx, teams)
             await send_random_record_update_person(ctx, teams)
+            await move_summoners(ctx, teams)
             await add_normal_game_to_database(summoners)
             add_final_teams(teams)
 
@@ -477,6 +477,7 @@ async def move_summoners(channel, teams):
         if member.voice is not None and red_team_channel is not None:
             await member.move_to(red_team_channel)
 
+
 async def send_random_record_update_person(ctx, teams):
     blue_team = teams[0]
     red_team = teams[1]
@@ -488,7 +489,9 @@ async def send_random_record_update_person(ctx, teams):
                    f'블루 팀 승리 시 : <@{blue_person.id}>\n'
                    f'레드 팀 승리 시 : <@{red_person.id}>\n'
                    f'스크린샷 업로드 후, `몇판 게임, 몇 대 몇` 이라고 꼭 남겨주세요.\n'
-                   f'ex) 3판 2선 , 2승 1패')
+                   f'ex) 3판 2선 , 2승 1패\n'
+                   f'해당 메세지 출력 이후 각 팀 디스코드로 자동 이동됩니다. 오류가 나지 않게 가만히 계셔주시면 감사하겠습니다.\n'
+                   f'혹여 30초 내에 이동되지 않는 경우 수동으로 옮겨주시고 개발자에게 DM 부탁드립니다.')
 
 
 def get_game_board(teams):
