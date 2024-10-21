@@ -123,9 +123,10 @@ async def manually_add_teams_record(ctx, members):
 
     teams = [[], []]
     for index, member in enumerate(members, 1):
+        summoner = Summoner(member)
         if index <= 5:
-            teams[0].append(member)
+            teams[0].append(summoner)
         else:
-            teams[1].append(member)
+            teams[1].append(summoner)
 
     await record_normal_game_in_main(teams)
