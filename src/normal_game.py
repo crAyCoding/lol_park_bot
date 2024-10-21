@@ -419,7 +419,7 @@ async def finalize_team(ctx, teams, board_message, summoners, host):
             # 맞는 음성 채널로 이동
             await move_summoners(ctx, teams)
             # 기록 보드 자동 출력
-            await add_normal_game_to_database(summoners)
+            await add_normal_game_to_database(summoners, teams)
 
     class EditButton(discord.ui.Button):
         def __init__(self):
