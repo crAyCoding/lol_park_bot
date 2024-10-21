@@ -55,6 +55,7 @@ async def show_summoner_record(ctx, member):
         summoner = Summoner(member)
 
     if channel_id == channels.RECORD_SERVER_ID:
+        await database.add_summoner(summoner)
         record_message = await database.get_summoner_record_message(summoner)
         await ctx.send(record_message)
 
