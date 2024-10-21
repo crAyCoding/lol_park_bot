@@ -91,8 +91,8 @@ async def command_game_ghost(ctx):
 
 
 @bot.command(name='기록')
-async def command_record(ctx):
-    await record.record_normal_game_in_main(ctx)
+async def command_record(ctx, *members: discord.Member):
+    await record.manually_add_teams_record(ctx, members)
 
 
 @bot.command(name='승리')

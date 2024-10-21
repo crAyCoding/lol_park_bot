@@ -115,3 +115,17 @@ async def manually_add_summoner_lose(ctx, members):
         summoner = Summoner(member)
         await database.add_normal_game_lose_count(summoner, 1)
         print(f'{functions.get_nickname(summoner.nickname)}님의 패배가 추가되었습니다.')
+
+
+async def manually_add_teams_record(ctx, members):
+    if not (ctx.author.id == managers.MASULSA or ctx.author.id == managers.JUYE):
+        return
+
+    teams = [[], []]
+    for index, member in enumerate(members, 1):
+        if index <= 5:
+            teams[0].append(member)
+        else:
+            teams[1].append(member)
+
+    await record_normal_game_in_main(teams)
