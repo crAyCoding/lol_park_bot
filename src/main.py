@@ -3,6 +3,7 @@ import discord
 from dotenv import load_dotenv
 
 import lolpark
+import database
 from discord.ext import commands
 from normal_game import close_normal_game
 from summoner import Summoner
@@ -111,7 +112,7 @@ async def command_reset(ctx):
 
 
 def main() -> None:
-    # database.create_table()
+    database.create_table()
     bot.run(token=TOKEN)
 
 

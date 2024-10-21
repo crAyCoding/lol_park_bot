@@ -31,4 +31,4 @@ twenty_view_message = None
 twenty_host = None
 
 # 데이터베이스 파일 저장소
-summoners_db = '/app/src/october_summoners.db'
+summoners_db = '/database/summoners.db'

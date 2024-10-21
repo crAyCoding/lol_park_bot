@@ -43,6 +43,6 @@ jobs:
         
           sudo docker run -d -p 80:80 --name discord-container \
             -e DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }} \
-            -v /home/ec2-user/lol_park_bot/src/october_summoners.db:/app/src/october_summoners.db \
+            -v /home/ec2-user/database/summoners.db:/app/src/database/summoners.db \
             discord-image
         EOF
