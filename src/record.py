@@ -6,19 +6,10 @@ import normal_game
 import managers
 import functions
 from summoner import Summoner
+from bot import bot
 
 
-async def record_normal_game_in_main(ctx):
-    channel_id = ctx.channel.id
-
-    if channel_id != channels.RECORD_UPDATE_SERVER_ID:
-        return None
-
-    if lolpark.finalized_normal_game_team_list is None:
-        await ctx.send('모집된 내전이 없습니다.')
-        return None
-
-    teams = lolpark.finalized_normal_game_team_list[0]
+async def record_normal_game_in_main(teams):
 
     class RecordUpdateView(discord.ui.View):
         def __init__(self, ctx, teams):
@@ -54,9 +45,11 @@ async def record_normal_game_in_main(ctx):
             if press_user.id not in managers.ID_LIST:
                 await interaction.response.defer()
                 return
+            self.disabled = True
             self.record_view.red_win_count += 1
             self.label = f"레드팀 승리 : {self.record_view.red_win_count}"
             await interaction.response.edit_message(content=normal_game.get_game_board(teams), view=self.view)
+            self.disabled = False
 
     class FinalizeButton(discord.ui.Button):
         def __init__(self, record_view, ctx, teams):
@@ -71,7 +64,8 @@ async def record_normal_game_in_main(ctx):
                 await interaction.response.defer()
                 return
             await interaction.message.delete()
-            await database.record_normal_game(self.teams, self.record_view.blue_win_count, self.record_view.red_win_count)
+            await database.record_normal_game(self.teams,
+                                              self.record_view.blue_win_count, self.record_view.red_win_count)
             await self.ctx.send(f'내전 승/패가 기록되었습니다.')
 
     class ResetButton(discord.ui.Button):
@@ -98,12 +92,9 @@ async def record_normal_game_in_main(ctx):
             # 메시지 업데이트
             await interaction.response.edit_message(content=normal_game.get_game_board(teams), view=self.view)
 
-    view = RecordUpdateView(ctx=ctx, teams=teams)
-    await ctx.send(content=normal_game.get_game_board(teams), view=view)
-
-    lolpark.finalized_normal_game_team_list.pop(0)
-    if not lolpark.finalized_normal_game_team_list:
-        lolpark.finalized_normal_game_team_list = None
+    normal_game_update_channel = bot.get_channel(channels.RECORD_UPDATE_SERVER_ID)
+    view = RecordUpdateView(ctx=normal_game_update_channel, teams=teams)
+    await normal_game_update_channel.send(content=normal_game.get_game_board(teams), view=view)
 
 
 async def manually_add_summoner_win(ctx, members):

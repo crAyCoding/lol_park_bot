@@ -2,6 +2,7 @@ import lolpark
 import channels
 import random
 import discord
+import record
 from discord.ui import Button
 from functions import *
 from summoner import Summoner
@@ -419,7 +420,6 @@ async def finalize_team(ctx, teams, board_message, summoners, host):
             await move_summoners(ctx, teams)
             # 기록 보드 자동 출력
             await add_normal_game_to_database(summoners)
-            add_final_teams(teams)
 
     class EditButton(discord.ui.Button):
         def __init__(self):
@@ -441,11 +441,12 @@ async def finalize_team(ctx, teams, board_message, summoners, host):
                    view=final_team_view)
 
 
-async def add_normal_game_to_database(summoners):
+async def add_normal_game_to_database(summoners, teams):
     for summoner in summoners:
         await add_summoner(summoner)
         await update_summoner(summoner)
         await add_normal_game_count(summoner)
+    await record.record_normal_game_in_main(teams)
 
 
 async def move_summoners(channel, teams):
@@ -507,12 +508,6 @@ def get_game_board(teams):
         board += f'{red_member.nickname}\n'
     board += f'```'
     return board
-
-
-def add_final_teams(teams):
-    if lolpark.finalized_normal_game_team_list is None:
-        lolpark.finalized_normal_game_team_list = []
-    lolpark.finalized_normal_game_team_list.append(teams)
 
 
 async def reset_normal_game(ctx):
