@@ -45,11 +45,9 @@ async def record_normal_game_in_main(teams):
             if press_user.id not in managers.ID_LIST:
                 await interaction.response.defer()
                 return
-            self.disabled = True
             self.record_view.red_win_count += 1
             self.label = f"레드팀 승리 : {self.record_view.red_win_count}"
             await interaction.response.edit_message(content=normal_game.get_game_board(teams), view=self.view)
-            self.disabled = False
 
     class FinalizeButton(discord.ui.Button):
         def __init__(self, record_view, ctx, teams):
