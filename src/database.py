@@ -67,7 +67,7 @@ async def add_normal_game_lose_count(summoner, count):
         conn.close()
 
 
-def add_summoner(summoner):
+async def add_summoner(summoner):
     conn = sqlite3.connect(lolpark.summoners_db)
     db = conn.cursor()
     try:
@@ -82,7 +82,7 @@ def add_summoner(summoner):
             normal_game_lose, twenty_game_count, twenty_game_win, twenty_game_final) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''',
-            (summoner.id, summoner.nickname, summoner.score, summoner.rank, 0, 0, 0, 0, 0, 0))
+                       (summoner.id, summoner.nickname, summoner.score, summoner.rank, 0, 0, 0, 0, 0, 0))
             conn.commit()
             return True
         else:
@@ -95,12 +95,12 @@ def add_summoner(summoner):
 
 
 # id를 통해 display_name, score, rank 값 업데이트
-def update_summoner(summoner):
+async def update_summoner(summoner):
     conn = sqlite3.connect(lolpark.summoners_db)
     db = conn.cursor()
 
     try:
-        # id가 일치하는 행의 game_count를 1 증가
+        # display_name, score, rank 등 변경 사항 기록
         db.execute('''
         UPDATE summoners
         SET display_name = ?, score = ?, rank = ?
@@ -369,4 +369,3 @@ async def get_summoner_game_count_rank(summoner):
         # 커서 및 연결 닫기
         db.close()
         conn.close()
-

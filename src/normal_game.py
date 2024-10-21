@@ -413,11 +413,11 @@ async def finalize_team(ctx, teams, board_message, summoners, host):
             self.view.clear_items()
 
             await interaction.response.edit_message(content=f'{board_message}', view=self.view)
-            await ctx.send(f'https://banpick.kr/')
-            await ctx.send(f'밴픽은 위 사이트에서 진행해주시면 됩니다.')
-            await ctx.send(f'## 사용자 설정 방 제목 : 롤파크 / 비밀번호 : 0921')
+            # 내전 모집 완료 후 메세지 출력
             await send_random_record_update_person(ctx, teams)
+            # 맞는 음성 채널로 이동
             await move_summoners(ctx, teams)
+            # 기록 보드 자동 출력
             await add_normal_game_to_database(summoners)
             add_final_teams(teams)
 
@@ -443,8 +443,8 @@ async def finalize_team(ctx, teams, board_message, summoners, host):
 
 async def add_normal_game_to_database(summoners):
     for summoner in summoners:
-        add_summoner(summoner)
-        update_summoner(summoner)
+        await add_summoner(summoner)
+        await update_summoner(summoner)
         await add_normal_game_count(summoner)
 
 
@@ -485,7 +485,10 @@ async def send_random_record_update_person(ctx, teams):
     blue_person = random.choice(blue_team)
     red_person = random.choice(red_team)
 
-    await ctx.send(f'### 이번 내전의 스크린샷을 <#1290946711153414205> 에 첨부할 서버원입니다.\n\n'
+    await ctx.send(f'https://banpick.kr/ \n'
+                   f'밴픽은 위 사이트에서 진행해주시면 됩니다.\n'
+                   f'## 사용자 설정 방 제목 : 롤파크 / 비밀번호 : 0921\n'
+                   f'### 이번 내전의 스크린샷을 <#1290946711153414205> 에 첨부할 서버원입니다.\n\n'
                    f'블루 팀 승리 시 : <@{blue_person.id}>\n'
                    f'레드 팀 승리 시 : <@{red_person.id}>\n'
                    f'스크린샷 업로드 후, `몇판 게임, 몇 대 몇` 이라고 꼭 남겨주세요.\n'
