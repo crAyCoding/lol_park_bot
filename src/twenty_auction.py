@@ -514,7 +514,7 @@ async def send_twenty_winner_message(winner_team):
                            f'### {winner_team}\n\n')
     for line, (summoner, score) in lolpark.auction_dict[winner_team].items():
         if score == -1:
-            winner_team_message += f'{line} : {summoner.nickname} > 팀장'
+            winner_team_message += f'{line} : {summoner.nickname} > 팀장\n'
         else:
-            winner_team_message += f'{line} : {summoner.nickname} > {score}'
+            winner_team_message += f'{line} : {summoner.nickname} > {score}\n'
     await twenty_winner_record_channel.send(winner_team_message)

@@ -200,7 +200,7 @@ async def record_twenty_semi_final(team_1, team_2, team_3, team_4):
             await database.record_game_win_lose(self.teams, 'twenty_game',
                                                 self.record_view.team_1_win_count, self.record_view.team_2_win_count)
             await self.ctx.send(f'20인 내전 4강 승/패가 기록되었습니다. '
-                                f'{self.team_1} {self.record_view.team_1_win_count} :'
+                                f'{self.team_1} {self.record_view.team_1_win_count} : '
                                 f'{self.record_view.team_2_win_count} {self.team_2}')
             if self.record_view.team_1_win_count > self.record_view.team_2_win_count:
                 lolpark.twenty_final_teams.append(self.team_1)
@@ -321,7 +321,7 @@ async def record_twenty_final(team_1, team_2):
                 for summoner in [summoner[0] for summoner in lolpark.auction_dict[team_1].values()]:
                     await database.add_database_count(summoner, 'twenty_game_winner')
                 await self.ctx.send(f'{self.team_1} 우승이 기록되었습니다. '
-                                    f'{self.team_1} {self.record_view.team_1_win_count} :'
+                                    f'{self.team_1} {self.record_view.team_1_win_count} : '
                                     f'{self.record_view.team_2_win_count} {self.team_2}')
                 await twenty_auction.send_twenty_winner_message(self.team_1)
             else:
