@@ -140,8 +140,8 @@ async def record_twenty_semi_final(team_1, team_2, team_3, team_4):
             self.add_item(Team1WinButton(self, team_1, team_2))
             self.add_item(Team2WinButton(self, team_1, team_2))
             self.add_item(FinalizeButton(self, ctx,
-                                         [[summoner for summoner in lolpark.auction_dict[team_1].values()],
-                                          [summoner for summoner in lolpark.auction_dict[team_2].values()]],
+                                         [[summoner[0] for summoner in lolpark.auction_dict[team_1].values()],
+                                          [summoner[0] for summoner in lolpark.auction_dict[team_2].values()]],
                                          team_1, team_2))
             self.add_item(ResetButton(self, team_1, team_2))
 
@@ -158,7 +158,7 @@ async def record_twenty_semi_final(team_1, team_2, team_3, team_4):
                 await interaction.response.defer()
                 return
             self.record_view.team_1_win_count += 1
-            self.label = f"{self.team_1} 승리 : {self.record_view.team_1_win_count}"
+            self.label = f"{self.team_1} 승 : {self.record_view.team_1_win_count}"
             await interaction.response.edit_message(content=twenty_game.get_twenty_game_board(self.team_1, self.team_2),
                                                     view=self.view)
 
@@ -175,7 +175,7 @@ async def record_twenty_semi_final(team_1, team_2, team_3, team_4):
                 await interaction.response.defer()
                 return
             self.record_view.team_2_win_count += 1
-            self.label = f"{self.team_2} 승리 : {self.record_view.team_2_win_count}"
+            self.label = f"{self.team_2} 승 : {self.record_view.team_2_win_count}"
             await interaction.response.edit_message(content=twenty_game.get_twenty_game_board(self.team_1, self.team_2),
                                                     view=self.view)
 
@@ -229,9 +229,9 @@ async def record_twenty_semi_final(team_1, team_2, team_3, team_4):
             for child in self.record_view.children:
                 if isinstance(child, discord.ui.Button):
                     if team_1 in child.label:
-                        child.label = f'{team_1} 승리 : 0'
+                        child.label = f'{team_1} 승 : 0'
                     elif team_2 in child.label:
-                        child.label = f'{team_2} 승리 : 0'
+                        child.label = f'{team_2} 승 : 0'
 
             # 메시지 업데이트
             await interaction.response.edit_message(content=twenty_game.get_twenty_game_board(self.team_1, self.team_2),
@@ -256,8 +256,8 @@ async def record_twenty_final(team_1, team_2):
             self.add_item(Team1WinButton(self, team_1, team_2))
             self.add_item(Team2WinButton(self, team_1, team_2))
             self.add_item(FinalizeButton(self, ctx,
-                                         [[summoner for summoner in lolpark.auction_dict[team_1].values()],
-                                          [summoner for summoner in lolpark.auction_dict[team_2].values()]],
+                                         [[summoner[0] for summoner in lolpark.auction_dict[team_1].values()],
+                                          [summoner[0] for summoner in lolpark.auction_dict[team_2].values()]],
                                          team_1, team_2))
             self.add_item(ResetButton(self, team_1, team_2))
 
@@ -274,7 +274,7 @@ async def record_twenty_final(team_1, team_2):
                 await interaction.response.defer()
                 return
             self.record_view.team_1_win_count += 1
-            self.label = f"{self.team_1} 승리 : {self.record_view.team_1_win_count}"
+            self.label = f"{self.team_1} 승 : {self.record_view.team_1_win_count}"
             await interaction.response.edit_message(content=twenty_game.get_twenty_game_board(self.team_1, self.team_2),
                                                     view=self.view)
 
@@ -291,7 +291,7 @@ async def record_twenty_final(team_1, team_2):
                 await interaction.response.defer()
                 return
             self.record_view.team_2_win_count += 1
-            self.label = f"{self.team_2} 승리 : {self.record_view.team_2_win_count}"
+            self.label = f"{self.team_2} 승 : {self.record_view.team_2_win_count}"
             await interaction.response.edit_message(content=twenty_game.get_twenty_game_board(self.team_1, self.team_2),
                                                     view=self.view)
 
@@ -341,17 +341,17 @@ async def record_twenty_final(team_1, team_2):
             for child in self.record_view.children:
                 if isinstance(child, discord.ui.Button):
                     if team_1 in child.label:
-                        child.label = f'{team_1} 승리 : 0'
+                        child.label = f'{team_1} 승 : 0'
                     elif team_2 in child.label:
-                        child.label = f'{team_2} 승리 : 0'
+                        child.label = f'{team_2} 승 : 0'
 
             # 메시지 업데이트
             await interaction.response.edit_message(content=twenty_game.get_twenty_game_board(self.team_1, self.team_2),
                                                     view=self.view)
 
     twenty_game_update_channel = bot.get_channel(channels.TWENTY_RECORD_UPDATE_SERVER_ID)
-    team_1_summoners = [summoner for summoner in lolpark.auction_dict[team_1].values()]
-    team_2_summoners = [summoner for summoner in lolpark.auction_dict[team_2].values()]
+    team_1_summoners = [summoner[0] for summoner in lolpark.auction_dict[team_1].values()]
+    team_2_summoners = [summoner[0] for summoner in lolpark.auction_dict[team_2].values()]
 
     # 결승 진출자들 결승 진출 횟수 1 증가
     for summoner in team_1_summoners:
