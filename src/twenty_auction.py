@@ -406,8 +406,9 @@ async def send_select_team_message(ctx, dice_winner_team):
 
             await self.ctx.send(
                 f'{dice_winner_team}이 {self.label}을 선택했습니다.\n'
-                f'# {dice_winner_team} vs {self.label}\n\n'
-                f'# {remain_teams_list[0]} vs {remain_teams_list[1]}'
+                f'# 20인 내전 4강\n\n'
+                f'## {dice_winner_team} vs {self.label}\n\n'
+                f'## {remain_teams_list[0]} vs {remain_teams_list[1]}'
             )
             await record.record_twenty_semi_final(self.dice_winner_team, self.label,
                                                   remain_teams_list[0], remain_teams_list[1])

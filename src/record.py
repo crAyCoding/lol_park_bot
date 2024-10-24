@@ -1,3 +1,5 @@
+import random
+
 import discord
 import channels
 import database
@@ -206,8 +208,22 @@ async def record_twenty_semi_final(team_1, team_2, team_3, team_4):
                 final_team_2 = lolpark.twenty_final_teams[1]
                 lolpark.twenty_final_teams = None
                 twenty_auction_channel = bot.get_channel(channels.TWENTY_AUCTION_CHANNEL_ID)
-                await twenty_auction_channel.send(f'{final_team_1}과 {final_team_2}의 결승전을 진행합니다.\n'
-                                                      f'진영 선택권은 {final_team_1}이 가져갑니다.')
+                await twenty_auction_channel.send(f'# 20인내전 결승\n\n'
+                                                  f'## {final_team_1} vs {final_team_2}')
+                while True:
+                    random_number1, random_number2 = random.randint(1, 6), random.randint(1, 6)
+
+                    await twenty_auction_channel.send(
+                        f'{final_team_1} > {random_number1} :'
+                        f' {random_number2} < {final_team_2}')
+
+                    if random_number1 > random_number2:
+                        await twenty_auction_channel.send(f'## 진영 선택권은 {final_team_1}이 가져갑니다.')
+                        break
+                    elif random_number1 < random_number2:
+                        await twenty_auction_channel.send(f'## 진영 선택권은 {final_team_2}이 가져갑니다.')
+                        break
+
                 await record_twenty_final(final_team_1, final_team_2)
 
     class ResetButton(discord.ui.Button):
@@ -313,11 +329,11 @@ async def record_twenty_final(team_1, team_2):
             await database.record_game_win_lose(self.teams, 'twenty_game',
                                                 self.record_view.team_1_win_count, self.record_view.team_2_win_count)
             if self.record_view.team_1_win_count > self.record_view.team_2_win_count:
-                for summoner in [summoner for summoner in lolpark.auction_dict[team_1].values()]:
+                for summoner in [summoner[0] for summoner in lolpark.auction_dict[team_1].values()]:
                     await database.add_database_count(summoner, 'twenty_game_winner')
                 await self.ctx.send(f'{self.team_1} 우승이 기록되었습니다.')
             else:
-                for summoner in [summoner for summoner in lolpark.auction_dict[team_2].values()]:
+                for summoner in [summoner[0] for summoner in lolpark.auction_dict[team_2].values()]:
                     await database.add_database_count(summoner, 'twenty_game_winner')
                 await self.ctx.send(f'{self.team_2} 우승이 기록되었습니다.')
             lolpark.auction_dict = None
@@ -340,10 +356,10 @@ async def record_twenty_final(team_1, team_2):
             # 각 버튼 라벨 초기화
             for child in self.record_view.children:
                 if isinstance(child, discord.ui.Button):
-                    if team_1 in child.label:
-                        child.label = f'{team_1} 승 : 0'
-                    elif team_2 in child.label:
-                        child.label = f'{team_2} 승 : 0'
+                    if self.team_1 in child.label:
+                        child.label = f'{self.team_1} 승 : 0'
+                    elif self.team_2 in child.label:
+                        child.label = f'{self.team_2} 승 : 0'
 
             # 메시지 업데이트
             await interaction.response.edit_message(content=twenty_game.get_twenty_game_board(self.team_1, self.team_2),
