@@ -48,7 +48,7 @@ async def on_message(message):
 
     await main_functions.recruit_game_members(message)
 
-    msg = check_message(message)
+    msg = check_message(message.content)
 
     if msg:
         await message.channel.send(msg)
