@@ -5,7 +5,6 @@ from dotenv import load_dotenv
 import lolpark
 import database
 from discord.ext import commands
-from normal_game import close_normal_game
 from summoner import Summoner
 from message_command import check_message
 from bot import bot

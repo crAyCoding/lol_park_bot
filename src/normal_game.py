@@ -6,7 +6,7 @@ import record
 from discord.ui import Button
 from functions import *
 from summoner import Summoner
-from database import add_summoner, update_summoner, add_normal_game_count
+from database import add_summoner, update_summoner, add_database_count
 from bot import bot
 
 
@@ -445,7 +445,7 @@ async def add_normal_game_to_database(summoners, teams):
     for summoner in summoners:
         await add_summoner(summoner)
         await update_summoner(summoner)
-        await add_normal_game_count(summoner)
+        await add_database_count(summoner, 'normal_game_count')
     await record.record_normal_game_in_main(teams)
 
 
