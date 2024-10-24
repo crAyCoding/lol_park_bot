@@ -404,7 +404,7 @@ async def send_select_team_message(ctx, dice_winner_team):
             teams_list = ['1팀', '2팀', '3팀', '4팀']
             remain_teams_list = [team for team in teams_list if team not in [dice_winner_team, self.label]]
 
-            await self.ctx.send_message(
+            await self.ctx.send(
                 f'{dice_winner_team}이 {self.label}을 선택했습니다.\n'
                 f'# {dice_winner_team} vs {self.label}\n\n'
                 f'# {remain_teams_list[0]} vs {remain_teams_list[1]}'
