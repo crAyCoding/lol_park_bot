@@ -3,6 +3,7 @@ import random
 import discord
 import discord.ui
 import twenty_game
+import record
 import lolpark
 import functions
 from discord.ui import Button, View, Modal
@@ -152,7 +153,7 @@ async def twenty_auction(host, team_head_line_number, ctx):
     team_head_line_name = lolpark.line_names[team_head_line_number]
     # 팀장의 score는 -1로 설정
     for i, (team, _) in enumerate(auction_dict.items(), 1):
-        auction_dict[team][team_head_line_name] = ((auction_summoners[team_head_line_name][i-1]), -1)
+        auction_dict[team][team_head_line_name] = ((auction_summoners[team_head_line_name][i - 1]), -1)
 
     # 팀 남은 점수
     remain_scores = [summoner.score for summoner in auction_summoners[team_head_line_name]]
@@ -237,15 +238,37 @@ async def twenty_auction(host, team_head_line_number, ctx):
         await ctx.send(f'경매를 강제 종료하였습니다. !경매를 통해 재시작할 수 있습니다.')
     else:
         await ctx.send(get_auction_result(auction_dict, remain_scores))
-        team_max_score = remain_scores.index(max(remain_scores)) + 1
-        await ctx.send(f'경매가 완료되었습니다. {team_max_score}팀 팀장은 팀과 회의를 진행한 뒤 20인내전채팅 채널에 붙을 팀을 적어주시면 됩니다.'
-                       f'4강전은 남은 점수가 높은 팀이 첫번째 판 진영 선택권을 가집니다. 점수가 동일한 경우 주사위를 굴려 진행해주시면 됩니다.'
-                       f'완료된 경매에서는 되돌리기가 불가능합니다. 이 점 참고바랍니다.'
-                       f'모두 화이팅입니다!')
+        team_max_score = max(remain_scores)
+        max_score_teams = []
+        dice_winner_team = ''
+        for i, score in enumerate(remain_scores):
+            if score == team_max_score:
+                max_score_teams.append(f'{i + 1}팀')
+        if len(max_score_teams) > 1:
+            is_same = True
+            while is_same:
+                dice_result = ''
+                max_dice = -1
+                for team in max_score_teams:
+                    if dice_result:
+                        dice_result += ', '
+                    dice = random.randint(1, 6)
+                    dice_result += f'{team} : {dice}'
+                    if max_dice < dice:
+                        max_dice = dice
+                        is_same = False
+                        dice_winner_team = team
+                    elif max_dice == dice:
+                        is_same = True
+                await ctx.send(dice_result)
+        else:
+            dice_winner_team = max_score_teams[0]
         # 러시안 룰렛 집행
         await send_random_record_update_person(ctx, auction_dict)
-        # 사람들 각자 팀 채널로 강제
+        # 사람들 각자 팀 채널로 강제 이동
         await move_summoners_in_twenty(ctx, auction_dict)
+        # 어디랑 붙을지 정하기
+        await send_select_team_message(ctx, auction_dict, dice_winner_team)
         # 초기화
         lolpark.twenty_summoner_list = None
         lolpark.twenty_host = None
@@ -341,4 +364,50 @@ async def send_random_record_update_person(ctx, auction_dict):
                    f'3팀 승리 시 : <@{team_3_person[0].id}>\n'
                    f'4팀 승리 시 : <@{team_4_person[0].id}>\n'
                    f'스크린샷 업로드 후, `몇팀 vs 몇팀, 몇승 몇패` 라고 꼭 남겨주세요.\n'
-                   f'ex) 1팀 vs 2팀, 2승 1패')
+                   f'ex) 1팀 vs 2팀, 2승 1패\n'
+                   f'### 각 팀으로 자동 이동됩니다. 봇 오류 방지를 위해 미리 움직이지 마시길 바랍니다.')
+
+
+async def send_select_team_message(ctx, auction_dict, dice_winner_team):
+
+    class TeamSelectionView(discord.ui.View):
+        def __init__(self, auction_dict, dice_winner_team):
+            super().__init__(timeout=3600)  # View의 시간 제한을 두지 않음
+            dice_winner_team_head = None
+            for summoner in auction_dict[dice_winner_team]:
+                if summoner[1] == -1:
+                    dice_winner_team_head = summoner[0]
+
+            # dice_winner_team을 제외한 나머지 팀들의 버튼을 생성
+            for team in auction_dict.keys():
+                if team != dice_winner_team:
+                    self.add_item(TeamButton(team, dice_winner_team, dice_winner_team_head, auction_dict))
+
+    class TeamButton(discord.ui.Button):
+        def __init__(self, team_name, dice_winner_team, dice_winner_team_head, auction_dict):
+            super().__init__(label=team_name, style=discord.ButtonStyle.primary)
+            self.dice_winner_team_head = dice_winner_team_head
+            self.dice_winner_team = dice_winner_team
+            self.auction_dict = auction_dict
+
+        async def callback(self, interaction: discord.Interaction):
+            press_user = Summoner(interaction.user)
+            if press_user.id != self.dice_winner_team_head:
+                await interaction.response.defer()
+                return
+            await interaction.message.delete()
+            teams_list = ['1팀', '2팀', '3팀', '4팀']
+            remain_teams_list = [team for team in teams_list if team not in [dice_winner_team, self.label]]
+
+            await interaction.response.send_message(
+                f'{dice_winner_team}이 {self.label}을 선택했습니다.\n'
+                f'# {dice_winner_team} vs {self.label}\n\n'
+                f'# {remain_teams_list[0]} vs {remain_teams_list[1]}'
+            )
+            await record.record_twenty_game(self.auction_dict,
+                                            self.dice_winner_team, self.label,
+                                            remain_teams_list[0], remain_teams_list[1])
+
+    team_selection_view = TeamSelectionView(auction_dict, dice_winner_team)
+    await ctx.send(content=f'{dice_winner_team} 팀장님, 상대할 팀을 선택해주세요.', view=team_selection_view)
+

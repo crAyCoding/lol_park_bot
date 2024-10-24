@@ -102,10 +102,10 @@ async def recommend_discord():
         morning_time += timedelta(days=1)
         evening_time += timedelta(days=1)
 
-    if now < morning_time:
-        target_time = morning_time
-    else:
+    if now < evening_time:
         target_time = evening_time
+    else:
+        target_time = morning_time
 
     time_to_wait = (target_time - now).total_seconds()  # 초 단위로 기다릴 시간 계산
     await asyncio.sleep(time_to_wait)  # 해당 시간까지 대기
