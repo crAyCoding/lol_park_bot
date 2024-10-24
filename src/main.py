@@ -82,7 +82,7 @@ async def command_auction(ctx):
 
 @bot.command(name='테스트')
 async def command_test(ctx, *members: discord.Member):
-    await main_functions.start_test(ctx)
+    await main_functions.start_test(ctx, members)
     return None
 
 
