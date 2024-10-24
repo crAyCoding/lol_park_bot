@@ -217,3 +217,12 @@ def calculate_win_rate(a: int, b: int) -> str:
 
     # 소수점 둘째 자리까지 포맷팅
     return f"{win_rate:.2f}%"
+
+
+def get_summoners_from_auction_dict(auction_dict):
+    summoners = {}
+    for team, positions in auction_dict.items():
+        summoners[team] = []
+        for line, (summoner, score) in positions.items():
+            summoners[team].append(summoner)
+    return summoners

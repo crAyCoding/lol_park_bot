@@ -41,7 +41,7 @@ async def update_summoner(summoner):
     try:
         query = 'UPDATE summoners SET display_name = ?, score = ?, rank = ? WHERE id = ?'
         # display_name, score, rank 등 변경 사항 기록
-        db.execute(__sql=query, __parameters=(summoner.nickname, summoner.score, summoner.rank, summoner.id,))
+        db.execute(query, (summoner.nickname, summoner.score, summoner.rank, summoner.id,))
         # 변경사항 저장
         conn.commit()
     except sqlite3.Error as e:
@@ -58,7 +58,7 @@ async def add_database_count(summoner, value: str, count=1):
     try:
         query = f'UPDATE summoners SET {value} = {value} + {count} WHERE id = ?'
         # id가 일치하는 행의 value를 1 증가
-        db.execute(__sql=query, __parameters=(summoner.id,))
+        db.execute(query, (summoner.id,))
         # 변경사항 저장
         conn.commit()
         # 업데이트된 행이 있는지 확인
@@ -105,7 +105,7 @@ async def get_database_value(summoner, value):
     try:
         query = f'SELECT {value} FROM summoners WHERE id = ?'
         # id에 따른 game_count 조회
-        db.execute(__sql=query, __parameters=(summoner.id,))
+        db.execute(query, (summoner.id,))
         result = db.fetchone()
 
         # 결과 확인

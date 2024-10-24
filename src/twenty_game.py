@@ -270,13 +270,13 @@ async def reset_twenty_game(ctx):
     await ctx.send('20인 내전을 초기화했습니다.')
 
 
-def get_twenty_game_board(auction_dict, team_1, team_2):
+def get_twenty_game_board(team_1, team_2):
     board = f'```\n'
     board += f'{team_1}\n\n'
-    for team_1_member in [pair[0] for pair in auction_dict[team_1]]:
-        board += f'{team_1_member.nickname}\n'
+    for line, (summoner, score) in lolpark.auction_dict[team_1].items():
+        board += f'{line} : {summoner.nickname} > {score if score != -1 else "팀장"}\n'
     board += f'\n{team_2}\n\n'
-    for team_2_member in [pair[0] for pair in auction_dict[team_2]]:
-        board += f'{team_2_member.nickname}\n'
+    for line, (summoner, score) in lolpark.auction_dict[team_2].items():
+        board += f'{line} : {summoner.nickname} > {score if score != -1 else "팀장"}\n'
     board += f'```'
     return board

@@ -30,5 +30,14 @@ twenty_view_message = None
 # 20인 내전 호스트
 twenty_host = None
 
+# 20인 경매 dictionary
+auction_dict = None
+
+# 20인 경매 summoner만 담은 dictionary
+auction_summoners_dict = None
+
+# 20인 내전 결승 진출 팀 목록
+twenty_final_teams = None
+
 # 데이터베이스 파일 저장소
 summoners_db = '/database/summoners.db'

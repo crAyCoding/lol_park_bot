@@ -6,6 +6,7 @@ import twenty_game
 import record
 import lolpark
 import functions
+import database
 from discord.ui import Button, View, Modal
 from bot import bot
 
@@ -144,7 +145,8 @@ async def twenty_auction(host, team_head_line_number, ctx):
         auction_summoners[line_name] = functions.sort_game_members(summoners)
 
     # 경매 dict
-    auction_dict = {f'{i}팀': {line: None for line in lolpark.line_names} for i in range(1, 5)}
+    lolpark.auction_dict = {f'{i}팀': {line: None for line in lolpark.line_names} for i in range(1, 5)}
+    lolpark.twenty_final_teams = []
 
     # 유찰 목록
     remain_summoners = {line: [] for line in lolpark.line_names}
@@ -152,8 +154,8 @@ async def twenty_auction(host, team_head_line_number, ctx):
     # 팀장 추가
     team_head_line_name = lolpark.line_names[team_head_line_number]
     # 팀장의 score는 -1로 설정
-    for i, (team, _) in enumerate(auction_dict.items(), 1):
-        auction_dict[team][team_head_line_name] = ((auction_summoners[team_head_line_name][i - 1]), -1)
+    for i, (team, _) in enumerate(lolpark.auction_dict.items(), 1):
+        lolpark.auction_dict[team][team_head_line_name] = ((auction_summoners[team_head_line_name][i - 1]), -1)
 
     # 팀 남은 점수
     remain_scores = [summoner.score for summoner in auction_summoners[team_head_line_name]]
@@ -177,7 +179,7 @@ async def twenty_auction(host, team_head_line_number, ctx):
             remain_summoners = {line: [] for line in lolpark.line_names}
             continue
 
-        auction_result_message = await ctx.send(get_auction_result(auction_dict, remain_scores))
+        auction_result_message = await ctx.send(get_auction_result(remain_scores))
         auction_remain_message = await ctx.send(get_auction_remain_user(auction_summoners, remain_summoners))
 
         # 랜덤으로 라인을 선택
@@ -219,7 +221,7 @@ async def twenty_auction(host, team_head_line_number, ctx):
             team_number = int(user_message.content.split(' ')[0][0])
             auction_score = int(user_message.content.split(' ')[1])
 
-            auction_dict[f'{team_number}팀'][chosen_line] = (chosen_summoner, auction_score)
+            lolpark.auction_dict[f'{team_number}팀'][chosen_line] = (chosen_summoner, auction_score)
             remain_scores[team_number - 1] -= auction_score
 
             # 라인에 남은 인원이 한 명뿐인 경우
@@ -227,7 +229,7 @@ async def twenty_auction(host, team_head_line_number, ctx):
                 last_summoner = (auction_summoners[chosen_line] or remain_summoners[chosen_line])[0]
                 auction_summoners[chosen_line] = []
                 remain_summoners[chosen_line] = []
-                for team_info in auction_dict.values():
+                for team_info in lolpark.auction_dict.values():
                     if team_info.get(chosen_line) is None:
                         team_info[chosen_line] = (last_summoner, 0)
 
@@ -237,7 +239,8 @@ async def twenty_auction(host, team_head_line_number, ctx):
     if end_flag:
         await ctx.send(f'경매를 강제 종료하였습니다. !경매를 통해 재시작할 수 있습니다.')
     else:
-        await ctx.send(get_auction_result(auction_dict, remain_scores))
+        lolpark.auction_summoners_dict = functions.get_summoners_from_auction_dict(lolpark.auction_dict)
+        await ctx.send(get_auction_result(remain_scores))
         team_max_score = max(remain_scores)
         max_score_teams = []
         dice_winner_team = ''
@@ -264,11 +267,13 @@ async def twenty_auction(host, team_head_line_number, ctx):
         else:
             dice_winner_team = max_score_teams[0]
         # 러시안 룰렛 집행
-        await send_random_record_update_person(ctx, auction_dict)
+        await send_random_record_update_person(ctx)
+        # 소환사 등록
+        await add_twenty_summoners()
         # 사람들 각자 팀 채널로 강제 이동
-        await move_summoners_in_twenty(ctx, auction_dict)
+        await move_summoners_in_twenty(ctx)
         # 어디랑 붙을지 정하기
-        await send_select_team_message(ctx, auction_dict, dice_winner_team)
+        await send_select_team_message(ctx, dice_winner_team)
         # 초기화
         lolpark.twenty_summoner_list = None
         lolpark.twenty_host = None
@@ -281,9 +286,9 @@ def add_auction_team_head(auction_list, team_head_line_number):
     auction_list.update(dict(zip(team_names, sorted_team_head)))
 
 
-def get_auction_result(auction_dict, remain_scores):
+def get_auction_result(remain_scores):
     auction_result = f'```\n'
-    for (i, (team_number, team_info)) in enumerate(auction_dict.items()):
+    for (i, (team_number, team_info)) in enumerate(lolpark.auction_dict.items()):
         auction_result += f'{team_number} ( 남은 점수 : {remain_scores[i]}점 )\n'
         for (line_name, summoner) in team_info.items():
             if summoner is None:
@@ -333,12 +338,12 @@ def get_auction_warning():
     return warning_text
 
 
-async def move_summoners_in_twenty(ctx, auction_dict):
+async def move_summoners_in_twenty(ctx):
     twenty_team_channel_list = [channels.AUCTION_TEAM_1_CHANNEL_ID, channels.AUCTION_TEAM_2_CHANNEL_ID,
                                 channels.AUCTION_TEAM_3_CHANNEL_ID, channels.AUCTION_TEAM_4_CHANNEL_ID]
     guild = ctx.guild
 
-    for i, (team_number, team_info) in enumerate(auction_dict.items()):
+    for i, (team_number, team_info) in enumerate(lolpark.auction_dict.items()):
         discord_channel = bot.get_channel(twenty_team_channel_list[i])
         for (line_name, twenty_summoner) in team_info.items():
             summoner = twenty_summoner[0]
@@ -347,11 +352,11 @@ async def move_summoners_in_twenty(ctx, auction_dict):
                 await member.move_to(discord_channel)
 
 
-async def send_random_record_update_person(ctx, auction_dict):
-    team_1 = list(auction_dict['1팀'].values())
-    team_2 = list(auction_dict['2팀'].values())
-    team_3 = list(auction_dict['3팀'].values())
-    team_4 = list(auction_dict['4팀'].values())
+async def send_random_record_update_person(ctx):
+    team_1 = list(lolpark.auction_dict['1팀'].values())
+    team_2 = list(lolpark.auction_dict['2팀'].values())
+    team_3 = list(lolpark.auction_dict['3팀'].values())
+    team_4 = list(lolpark.auction_dict['4팀'].values())
 
     team_1_person = random.choice(team_1)
     team_2_person = random.choice(team_2)
@@ -369,26 +374,25 @@ async def send_random_record_update_person(ctx, auction_dict):
                    f'ex) 1팀 vs 2팀, 2승 1패\n')
 
 
-async def send_select_team_message(ctx, auction_dict, dice_winner_team):
+async def send_select_team_message(ctx, dice_winner_team):
     class TeamSelectionView(discord.ui.View):
-        def __init__(self, auction_dict, dice_winner_team):
+        def __init__(self, dice_winner_team):
             super().__init__(timeout=3600)  # View의 시간 제한을 두지 않음
             dice_winner_team_head = None
-            for summoner in auction_dict[dice_winner_team]:
+            for summoner in lolpark.auction_dict[dice_winner_team].values():
                 if summoner[1] == -1:
                     dice_winner_team_head = summoner[0]
 
             # dice_winner_team을 제외한 나머지 팀들의 버튼을 생성
-            for team in auction_dict.keys():
+            for team in lolpark.auction_dict.keys():
                 if team != dice_winner_team:
-                    self.add_item(TeamButton(team, dice_winner_team, dice_winner_team_head, auction_dict))
+                    self.add_item(TeamButton(team, dice_winner_team, dice_winner_team_head))
 
     class TeamButton(discord.ui.Button):
-        def __init__(self, team_name, dice_winner_team, dice_winner_team_head, auction_dict):
+        def __init__(self, team_name, dice_winner_team, dice_winner_team_head):
             super().__init__(label=team_name, style=discord.ButtonStyle.primary)
             self.dice_winner_team_head = dice_winner_team_head
             self.dice_winner_team = dice_winner_team
-            self.auction_dict = auction_dict
 
         async def callback(self, interaction: discord.Interaction):
             press_user = Summoner(interaction.user)
@@ -404,9 +408,78 @@ async def send_select_team_message(ctx, auction_dict, dice_winner_team):
                 f'# {dice_winner_team} vs {self.label}\n\n'
                 f'# {remain_teams_list[0]} vs {remain_teams_list[1]}'
             )
-            await record.record_twenty_game(self.auction_dict,
-                                            self.dice_winner_team, self.label,
-                                            remain_teams_list[0], remain_teams_list[1])
+            await record.record_twenty_semi_final(self.dice_winner_team, self.label,
+                                                  remain_teams_list[0], remain_teams_list[1])
 
-    team_selection_view = TeamSelectionView(auction_dict, dice_winner_team)
+    team_selection_view = TeamSelectionView(dice_winner_team)
     await ctx.send(content=f'{dice_winner_team} 팀장님, 상대할 팀을 선택해주세요.', view=team_selection_view)
+
+
+async def add_twenty_summoners():
+    for team, summoners in lolpark.auction_summoners_dict.items():
+        for summoner in summoners:
+            await database.add_summoner(summoner)
+            await database.update_summoner(summoner)
+            await database.add_database_count(summoner, 'twenty_game_count')
+
+
+async def test_twenty_auction_record(ctx, members):
+    # 경매 dict
+    lolpark.auction_dict = {f'{i}팀': {line: None for line in lolpark.line_names} for i in range(1, 5)}
+    remain_scores = [100, 30, 20, 10]
+    lolpark.twenty_final_teams = []
+
+    lolpark.auction_dict['1팀']['탑']: (members[0], -1)
+    lolpark.auction_dict['1팀']['정글']: (members[1], 10)
+    lolpark.auction_dict['1팀']['미드']: (members[2], 20)
+    lolpark.auction_dict['1팀']['원딜']: (members[3], 30)
+    lolpark.auction_dict['1팀']['서폿']: (members[4], 40)
+    lolpark.auction_dict['2팀']['탑']: (members[0], -1)
+    lolpark.auction_dict['2팀']['정글']: (members[1], 10)
+    lolpark.auction_dict['2팀']['미드']: (members[2], 20)
+    lolpark.auction_dict['2팀']['원딜']: (members[3], 30)
+    lolpark.auction_dict['2팀']['서폿']: (members[4], 40)
+    lolpark.auction_dict['2팀']['탑']: (members[0], -1)
+    lolpark.auction_dict['3팀']['정글']: (members[1], 10)
+    lolpark.auction_dict['3팀']['미드']: (members[2], 20)
+    lolpark.auction_dict['3팀']['원딜']: (members[3], 30)
+    lolpark.auction_dict['3팀']['서폿']: (members[4], 40)
+    lolpark.auction_dict['4팀']['탑']: (members[0], -1)
+    lolpark.auction_dict['4팀']['정글']: (members[1], 10)
+    lolpark.auction_dict['4팀']['미드']: (members[2], 20)
+    lolpark.auction_dict['4팀']['원딜']: (members[3], 30)
+    lolpark.auction_dict['4팀']['서폿']: (members[4], 40)
+
+    lolpark.auction_summoners_dict = functions.get_summoners_from_auction_dict(lolpark.auction_dict)
+    await ctx.send(get_auction_result(remain_scores))
+    team_max_score = max(remain_scores)
+    max_score_teams = []
+    dice_winner_team = ''
+    for i, score in enumerate(remain_scores):
+        if score == team_max_score:
+            max_score_teams.append(f'{i + 1}팀')
+    if len(max_score_teams) > 1:
+        is_same = True
+        while is_same:
+            dice_result = ''
+            max_dice = -1
+            for team in max_score_teams:
+                if dice_result:
+                    dice_result += ', '
+                dice = random.randint(1, 6)
+                dice_result += f'{team} : {dice}'
+                if max_dice < dice:
+                    max_dice = dice
+                    is_same = False
+                    dice_winner_team = team
+                elif max_dice == dice:
+                    is_same = True
+            await ctx.send(dice_result)
+    else:
+        dice_winner_team = max_score_teams[0]
+    # 러시안 룰렛 집행
+    await send_random_record_update_person(ctx)
+    # 소환사 등록
+    await add_twenty_summoners()
+    # 어디랑 붙을지 정하기
+    await send_select_team_message(ctx, dice_winner_team)
