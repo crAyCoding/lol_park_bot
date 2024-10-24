@@ -7,6 +7,7 @@ import database
 from discord.ext import commands
 from normal_game import close_normal_game
 from summoner import Summoner
+from message_command import check_message
 from bot import bot
 import main_functions
 import record
@@ -48,7 +49,12 @@ async def on_message(message):
 
     await main_functions.recruit_game_members(message)
 
-    await bot.process_commands(message)
+    msg = check_message(message)
+
+    if msg:
+        await message.channel.send(msg)
+    else:
+        await bot.process_commands(message)
 
 
 # 메세지 삭제 시 마다 수행
