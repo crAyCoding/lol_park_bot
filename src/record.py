@@ -205,6 +205,9 @@ async def record_twenty_semi_final(team_1, team_2, team_3, team_4):
                 final_team_1 = lolpark.twenty_final_teams[0]
                 final_team_2 = lolpark.twenty_final_teams[1]
                 lolpark.twenty_final_teams = None
+                twenty_auction_channel = bot.get_channel(channels.TWENTY_AUCTION_CHANNEL_ID)
+                await twenty_auction_channel.send(f'{final_team_1}과 {final_team_2}의 결승전을 진행합니다.\n'
+                                                      f'진영 선택권은 {final_team_1}이 가져갑니다.')
                 await record_twenty_final(final_team_1, final_team_2)
 
     class ResetButton(discord.ui.Button):
@@ -239,7 +242,7 @@ async def record_twenty_semi_final(team_1, team_2, team_3, team_4):
     second_game_view = RecordUpdateView(twenty_game_update_channel, team_3, team_4)
     await twenty_game_update_channel.send(content=twenty_game.get_twenty_game_board(team_1, team_2),
                                           view=first_game_view)
-    await twenty_game_update_channel.send(content=twenty_game.get_twenty_game_board(team_1, team_2),
+    await twenty_game_update_channel.send(content=twenty_game.get_twenty_game_board(team_3, team_4),
                                           view=second_game_view)
 
 

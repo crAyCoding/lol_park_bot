@@ -376,7 +376,7 @@ async def send_random_record_update_person(ctx):
 
 async def send_select_team_message(ctx, dice_winner_team):
     class TeamSelectionView(discord.ui.View):
-        def __init__(self, dice_winner_team):
+        def __init__(self, dice_winner_team, ctx):
             super().__init__(timeout=3600)  # View의 시간 제한을 두지 않음
             dice_winner_team_head = None
             for summoner in lolpark.auction_dict[dice_winner_team].values():
@@ -386,13 +386,14 @@ async def send_select_team_message(ctx, dice_winner_team):
             # dice_winner_team을 제외한 나머지 팀들의 버튼을 생성
             for team in lolpark.auction_dict.keys():
                 if team != dice_winner_team:
-                    self.add_item(TeamButton(team, dice_winner_team, dice_winner_team_head))
+                    self.add_item(TeamButton(team, dice_winner_team, dice_winner_team_head, ctx))
 
     class TeamButton(discord.ui.Button):
-        def __init__(self, team_name, dice_winner_team, dice_winner_team_head):
+        def __init__(self, team_name, dice_winner_team, dice_winner_team_head, ctx):
             super().__init__(label=team_name, style=discord.ButtonStyle.primary)
             self.dice_winner_team_head = dice_winner_team_head
             self.dice_winner_team = dice_winner_team
+            self.ctx = ctx
 
         async def callback(self, interaction: discord.Interaction):
             press_user = Summoner(interaction.user)
@@ -403,7 +404,7 @@ async def send_select_team_message(ctx, dice_winner_team):
             teams_list = ['1팀', '2팀', '3팀', '4팀']
             remain_teams_list = [team for team in teams_list if team not in [dice_winner_team, self.label]]
 
-            await interaction.response.send_message(
+            await self.ctx.send_message(
                 f'{dice_winner_team}이 {self.label}을 선택했습니다.\n'
                 f'# {dice_winner_team} vs {self.label}\n\n'
                 f'# {remain_teams_list[0]} vs {remain_teams_list[1]}'
@@ -411,7 +412,7 @@ async def send_select_team_message(ctx, dice_winner_team):
             await record.record_twenty_semi_final(self.dice_winner_team, self.label,
                                                   remain_teams_list[0], remain_teams_list[1])
 
-    team_selection_view = TeamSelectionView(dice_winner_team)
+    team_selection_view = TeamSelectionView(dice_winner_team, ctx)
     await ctx.send(content=f'{dice_winner_team} 팀장님, 상대할 팀을 선택해주세요.', view=team_selection_view)
 
 
