@@ -358,18 +358,18 @@ async def send_random_record_update_person(ctx, auction_dict):
     team_3_person = random.choice(team_3)
     team_4_person = random.choice(team_4)
 
-    await ctx.send(f'### 이번 20인 내전의 스크린샷을 <#1295312942459523112> 에 첨부할 서버원입니다.\n\n'
+    await ctx.send(f'## 각 팀으로 자동 이동됩니다. 봇 오류 방지를 위해 미리 움직이지 마시길 바랍니다.'
+                   f'### 이번 20인 내전 4강 결과의 스크린샷을 <#1295312942459523112> 에 첨부할 서버원입니다.\n\n'
                    f'1팀 승리 시 : <@{team_1_person[0].id}>\n'
                    f'2팀 승리 시 : <@{team_2_person[0].id}>\n'
                    f'3팀 승리 시 : <@{team_3_person[0].id}>\n'
                    f'4팀 승리 시 : <@{team_4_person[0].id}>\n'
                    f'스크린샷 업로드 후, `몇팀 vs 몇팀, 몇승 몇패` 라고 꼭 남겨주세요.\n'
-                   f'ex) 1팀 vs 2팀, 2승 1패\n'
-                   f'### 각 팀으로 자동 이동됩니다. 봇 오류 방지를 위해 미리 움직이지 마시길 바랍니다.')
+                   f'### 결승 전적 기록을 위해 4강 결과는 4강 종료 직후에 올려주시길 바랍니다.'
+                   f'ex) 1팀 vs 2팀, 2승 1패\n')
 
 
 async def send_select_team_message(ctx, auction_dict, dice_winner_team):
-
     class TeamSelectionView(discord.ui.View):
         def __init__(self, auction_dict, dice_winner_team):
             super().__init__(timeout=3600)  # View의 시간 제한을 두지 않음
@@ -410,4 +410,3 @@ async def send_select_team_message(ctx, auction_dict, dice_winner_team):
 
     team_selection_view = TeamSelectionView(auction_dict, dice_winner_team)
     await ctx.send(content=f'{dice_winner_team} 팀장님, 상대할 팀을 선택해주세요.', view=team_selection_view)
-
