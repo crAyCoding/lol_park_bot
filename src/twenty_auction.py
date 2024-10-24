@@ -485,3 +485,36 @@ async def test_twenty_auction_record(ctx, members):
     await add_twenty_summoners()
     # 어디랑 붙을지 정하기
     await send_select_team_message(ctx, dice_winner_team)
+
+
+async def send_twenty_final_message(final_team_1, final_team_2):
+    twenty_auction_channel = bot.get_channel(channels.TWENTY_AUCTION_CHANNEL_ID)
+    await twenty_auction_channel.send(f'# 20인내전 결승\n\n'
+                                      f'## {final_team_1} vs {final_team_2}')
+    while True:
+        random_number1, random_number2 = random.randint(1, 6), random.randint(1, 6)
+
+        await twenty_auction_channel.send(
+            f'{final_team_1} > {random_number1} :'
+            f' {random_number2} < {final_team_2}')
+
+        if random_number1 > random_number2:
+            await twenty_auction_channel.send(f'## 진영 선택권은 {final_team_1}이 가져갑니다.')
+            break
+        elif random_number1 < random_number2:
+            await twenty_auction_channel.send(f'## 진영 선택권은 {final_team_2}이 가져갑니다.')
+            break
+
+
+async def send_twenty_winner_message(winner_team):
+    today = datetime.today()
+    month_day = today.strftime("%m월 %d일")
+    twenty_winner_record_channel = bot.get_channel(channels.TWENTY_WINNER_RECORD_CHANNEL_ID)
+    winner_team_message = (f'## {month_day} 20인 내전 우승\n\n'
+                           f'### {winner_team}\n\n')
+    for line, (summoner, score) in lolpark.auction_dict[winner_team].items():
+        if score == -1:
+            winner_team_message += f'{line} : {summoner.nickname} > 팀장'
+        else:
+            winner_team_message += f'{line} : {summoner.nickname} > {score}'
+    await twenty_winner_record_channel.send(winner_team_message)
