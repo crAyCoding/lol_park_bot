@@ -486,6 +486,9 @@ async def send_random_record_update_person(ctx, teams):
     blue_person = random.choice(blue_team)
     red_person = random.choice(red_team)
 
+    await add_database_count(blue_person, 'russian_roulette')
+    await add_database_count(red_person, 'russian_roulette')
+
     await ctx.send(f'https://banpick.kr/ \n'
                    f'밴픽은 위 사이트에서 진행해주시면 됩니다.\n'
                    f'## 해당 메세지 출력 이후 각 팀 디스코드로 자동 이동됩니다. 오류가 나지 않게 가만히 계셔주시면 감사하겠습니다.\n'

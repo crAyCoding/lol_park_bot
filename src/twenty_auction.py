@@ -363,6 +363,11 @@ async def send_random_record_update_person(ctx):
     team_3_person = random.choice(team_3)
     team_4_person = random.choice(team_4)
 
+    await database.add_database_count(team_1_person, 'russian_roulette')
+    await database.add_database_count(team_2_person, 'russian_roulette')
+    await database.add_database_count(team_3_person, 'russian_roulette')
+    await database.add_database_count(team_4_person, 'russian_roulette')
+
     await ctx.send(f'## 각 팀으로 자동 이동됩니다. 봇 오류 방지를 위해 미리 움직이지 마시길 바랍니다.\n'
                    f'### 이번 20인 내전 4강 결과의 스크린샷을 <#1295312942459523112> 에 첨부할 서버원입니다.\n\n'
                    f'1팀 승리 시 : <@{team_1_person[0].id}>\n'
