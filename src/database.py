@@ -21,7 +21,7 @@ async def add_summoner(summoner):
             INSERT INTO summoners (id, display_name, score, rank, normal_game_count, normal_game_win, 
             normal_game_lose, twenty_game_count, twenty_game_winner, twenty_game_final, twenty_game_win, twenty_game_lose,
             russian_roulette) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''',
                        (summoner.id, summoner.nickname, summoner.score, summoner.rank, 0, 0, 0, 0, 0, 0, 0, 0, 0))
             conn.commit()
