@@ -486,6 +486,8 @@ async def send_random_record_update_person(ctx, teams):
     blue_person = random.choice(blue_team)
     red_person = random.choice(red_team)
 
+    await add_summoner(blue_person)
+    await add_summoner(red_person)
     await add_database_count(blue_person, 'russian_roulette')
     await add_database_count(red_person, 'russian_roulette')
 
