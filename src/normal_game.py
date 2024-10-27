@@ -445,7 +445,6 @@ async def add_normal_game_to_database(summoners, teams):
     for summoner in summoners:
         await add_summoner(summoner)
         await update_summoner(summoner)
-        await add_database_count(summoner, 'normal_game_count')
     await record.record_normal_game_in_main(teams)
 
 

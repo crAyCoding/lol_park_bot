@@ -111,6 +111,11 @@ async def command_lose_manual(ctx, *members: discord.Member):
     await record.manually_add_summoner_lose(ctx, members)
 
 
+@bot.command(name='증가')
+async def command_lose_manual(ctx, *members: discord.Member):
+    await record.manually_add_summoner_normal_game_count(ctx, members)
+
+
 @bot.command(name='초기화')
 async def command_reset(ctx):
     await main_functions.reset_game(ctx)

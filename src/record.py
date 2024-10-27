@@ -65,6 +65,10 @@ async def record_normal_game_in_main(teams):
                 await interaction.response.defer()
                 return
             await interaction.message.delete()
+            for summoner in teams[0]:
+                await database.add_database_count(summoner, 'normal_game_count')
+            for summoner in teams[1]:
+                await database.add_database_count(summoner, 'normal_game_count')
             await database.record_game_win_lose(self.teams, 'normal_game',
                                                 self.record_view.blue_win_count, self.record_view.red_win_count)
             await self.ctx.send(f'내전 승/패가 기록되었습니다.')
@@ -371,3 +375,13 @@ async def record_twenty_final(team_1, team_2):
     final_game_view = RecordUpdateView(twenty_game_update_channel, team_1, team_2)
     await twenty_game_update_channel.send(content=twenty_game.get_twenty_game_board(team_1, team_2),
                                           view=final_game_view)
+
+
+async def manually_add_summoner_normal_game_count(ctx, members):
+    if not (ctx.author.id == managers.MASULSA or ctx.author.id == managers.JUYE):
+        return
+
+    for member in members:
+        summoner = Summoner(member)
+        await database.add_database_count(summoner, 'normal_game_count', 1)
+        print(f'{functions.get_nickname(summoner.nickname)}님의 내전 횟수가 추가되었습니다.')

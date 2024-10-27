@@ -38,9 +38,7 @@ async def make_twenty_game(ctx, message):
             button.style = discord.ButtonStyle.red \
                 if len(lolpark.twenty_summoner_list[line_name]) >= 4 else discord.ButtonStyle.gray
 
-            await interaction.response.edit_message(content=f'{get_twenty_recruit_board(message)}\n'
-                                                            f'이미 모집된 라인(버튼이 빨간색인 경우)에 참여를 원하는 경우, '
-                                                            f'버튼을 누르시면 자동으로 대기 목록에 추가됩니다.',
+            await interaction.response.edit_message(content=f'{get_twenty_recruit_board(message)}\n',
                                                     view=lolpark.twenty_view)
 
         return callback
@@ -68,11 +66,12 @@ async def make_twenty_game(ctx, message):
     role_name = '내전'
     role = discord.utils.get(ctx.guild.roles, name=role_name)
 
-    lolpark.twenty_view_message = await ctx.send(content=f'{get_twenty_recruit_board(message)}\n'
-                                                         f'20인 내전 {message}\n{role.mention}\n'
-                                                         f'이미 모집된 라인(버튼이 빨간색인 경우)에 참여를 원하는 경우, '
-                                                         f'버튼을 누르시면 자동으로 대기 목록에 추가됩니다.',
+    lolpark.twenty_view_message = await ctx.send(content=f'{get_twenty_recruit_board(message)}\n',
                                                  view=lolpark.twenty_view)
+    await ctx.send(f'20인 내전 {message}\n{role.mention}\n'
+                   f'이미 모집된 라인(버튼이 빨간색인 경우)에 참여를 원하는 경우, '
+                   f'버튼을 누르시면 자동으로 대기 목록에 추가됩니다.'
+                   f'## 20인 내전은 최대 6게임이 진행될 수 있습니다. 시간이 안되시는 분은 참여 지양해주시길 바랍니다.')
 
 
 async def close_twenty_game(ctx):
