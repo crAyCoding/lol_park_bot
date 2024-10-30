@@ -364,6 +364,10 @@ async def send_random_record_update_person(ctx):
     team_3_person = random.choice(team_3)
     team_4_person = random.choice(team_4)
 
+    await database.add_summoner(team_1_person)
+    await database.add_summoner(team_2_person)
+    await database.add_summoner(team_3_person)
+    await database.add_summoner(team_4_person)
     await database.add_database_count(team_1_person, 'russian_roulette')
     await database.add_database_count(team_2_person, 'russian_roulette')
     await database.add_database_count(team_3_person, 'russian_roulette')
@@ -486,7 +490,7 @@ async def test_twenty_auction_record(ctx, members):
     else:
         dice_winner_team = max_score_teams[0]
     # 러시안 룰렛 집행
-    await send_random_record_update_person(ctx)
+    # await send_random_record_update_person(ctx)
     # 소환사 등록
     await add_twenty_summoners()
     # 어디랑 붙을지 정하기
