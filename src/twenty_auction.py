@@ -7,6 +7,7 @@ import record
 import lolpark
 import functions
 import database
+import managers
 from discord.ui import Button, View, Modal
 from bot import bot
 
@@ -407,7 +408,7 @@ async def send_select_team_message(ctx, dice_winner_team):
 
         async def callback(self, interaction: discord.Interaction):
             press_user = Summoner(interaction.user)
-            if press_user != self.dice_winner_team_head:
+            if press_user != self.dice_winner_team_head and press_user.id != managers.MASULSA:
                 await interaction.response.defer()
                 return
             await interaction.message.delete()

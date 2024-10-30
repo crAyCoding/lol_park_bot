@@ -210,6 +210,10 @@ async def record_twenty_semi_final(team_1, team_2, team_3, team_4):
                 lolpark.twenty_final_teams.append(self.team_1)
             else:
                 lolpark.twenty_final_teams.append(self.team_2)
+            for summoner in lolpark.auction_dict[self.team_1].values():
+                await database.add_database_count(summoner[0], 'twenty_game_count')
+            for summoner in lolpark.auction_dict[self.team_2].values():
+                await database.add_database_count(summoner[0], 'twenty_game_count')
             if len(lolpark.twenty_final_teams) == 2:
                 final_team_1 = lolpark.twenty_final_teams[0]
                 final_team_2 = lolpark.twenty_final_teams[1]
