@@ -16,20 +16,21 @@ from summoner import Summoner
 
 async def confirm_twenty_recruit(ctx):
     class LineView(discord.ui.View):
-        def __init__(self, line_name, next_line_callback):
+        def __init__(self, line_name, next_line_callback, ctx):
             super().__init__(timeout=3600)
             self.line_name = line_name
             self.next_line_callback = next_line_callback  # 다음 라인을 출력하는 콜백 함수
             for i, summoner in enumerate(lolpark.twenty_summoner_list[line_name]):
-                self.add_item(EditButton(line_name, summoner.nickname, i))
+                self.add_item(EditButton(line_name, summoner.nickname, i, ctx))
             self.add_item(ConfirmButton(self))  # ConfirmButton을 View에 추가
 
     class EditButton(discord.ui.Button):
-        def __init__(self, line_name, summoner, index):
+        def __init__(self, line_name, summoner, index, ctx):
             super().__init__(label=f"{summoner}", style=discord.ButtonStyle.gray)
             self.line_name = line_name
             self.summoner = summoner
             self.index = index
+            self.ctx = ctx
 
         async def callback(self, interaction: discord.Interaction):
             press_user = Summoner(interaction.user)
@@ -41,8 +42,8 @@ async def confirm_twenty_recruit(ctx):
 
             # 현재 버튼에 해당하는 소환사를 press_user로 교체
             origin_summoner = lolpark.twenty_summoner_list[self.line_name][self.index]
-            await interaction.followup.send(f'{functions.get_nickname(origin_summoner.nickname)}님이 '
-                                            f'{functions.get_nickname(press_user.nickname)}님으로 변경되었습니다.')
+            await self.ctx.send(f'{functions.get_nickname(origin_summoner.nickname)}님이 '
+                                f'{functions.get_nickname(press_user.nickname)}님으로 변경되었습니다.')
             lolpark.twenty_summoner_list[self.line_name][self.index] = press_user
             updated_summoners_text = get_line_summoners_text(self.line_name)
             self.label = f"{press_user.nickname}"
@@ -69,9 +70,9 @@ async def confirm_twenty_recruit(ctx):
             if self.view.next_line_callback:
                 await self.view.next_line_callback()
 
-    async def show_line(line_name, next_line_callback):
+    async def show_line(line_name, next_line_callback, channel):
         # 특정 라인의 정보를 보여주는 함수
-        view = LineView(line_name, next_line_callback=next_line_callback)
+        view = LineView(line_name, next_line_callback, channel)
         summoners_text = get_line_summoners_text(line_name)
         await ctx.send(content=summoners_text, view=view)
 
@@ -82,7 +83,7 @@ async def confirm_twenty_recruit(ctx):
 
     async def show_next_line(index):
         if index < len(line_names):
-            await show_line(line_names[index], next_line_callback=lambda: show_next_line(index + 1))
+            await show_line(line_names[index], next_line_callback=lambda: show_next_line(index + 1), channel=ctx)
         else:
             await run_twenty_auction(ctx)
 
