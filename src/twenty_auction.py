@@ -433,7 +433,6 @@ async def add_twenty_summoners():
         for summoner in summoners:
             await database.add_summoner(summoner)
             await database.update_summoner(summoner)
-            await database.add_database_count(summoner, 'twenty_game_count')
 
 
 async def test_twenty_auction_record(ctx, members):
