@@ -139,7 +139,7 @@ async def finalize_normal_game_record(ctx, blue_win_count, red_win_count, summon
                     await self.message.edit(view=self)  # 버튼의 라벨 업데이트
                 await asyncio.sleep(1)
                 self.remaining_time -= 1
-            self.stop()
+            await self.on_timeout()
 
         async def on_timeout(self):
             # 타임아웃 시 버튼을 삭제
@@ -151,6 +151,7 @@ async def finalize_normal_game_record(ctx, blue_win_count, red_win_count, summon
             for summoner in self.teams[1]:
                 await database.add_database_count(summoner, 'normal_game_count')
             await database.record_game_win_lose(self.teams, 'normal_game', self.blue_win_count, self.red_win_count)
+            self.stop()
 
     class UndoButton(discord.ui.Button):
         def __init__(self, finalize_view):
