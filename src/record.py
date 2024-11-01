@@ -201,8 +201,8 @@ async def manually_add_teams_record(ctx, members):
         return
 
     guild = ctx.guild
-    masulsa = guild.get_member(managers.MASULSA)
-    juye = guild.get_member(managers.JUYE)
+    masulsa = Summoner(guild.get_member(managers.MASULSA))
+    juye = Summoner(guild.get_member(managers.JUYE))
 
     teams = [[], []]
     summoners = [masulsa, juye]
@@ -213,7 +213,6 @@ async def manually_add_teams_record(ctx, members):
             teams[0].append(summoner)
         else:
             teams[1].append(summoner)
-
     await record_normal_game(ctx, summoners, teams)
 
 
