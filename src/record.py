@@ -13,12 +13,14 @@ from summoner import Summoner
 from bot import bot
 
 
-async def record_normal_game_in_main(teams):
+async def record_normal_game(ctx, summoners, teams):
     class RecordUpdateView(discord.ui.View):
-        def __init__(self, ctx, teams):
+        def __init__(self, ctx, summoners, teams):
             super().__init__(timeout=86400)
             self.blue_win_count = 0
             self.red_win_count = 0
+            self.summoners = summoners
+            self.ctx = ctx
             self.add_item(BlueWinButton(self))
             self.add_item(RedWinButton(self))
             self.add_item(FinalizeButton(self, ctx, teams))
@@ -31,11 +33,15 @@ async def record_normal_game_in_main(teams):
 
         async def callback(self, interaction: discord.Interaction):
             press_user = Summoner(interaction.user)
-            if press_user.id not in managers.ID_LIST:
+            if press_user not in self.record_view.summoners:
+                await self.record_view.ctx.send(f'내전에 참여한 사람만 누를 수 있습니다. '
+                                                f'{functions.get_nickname(press_user.nickname)}님 누르지 말아주세요.')
                 await interaction.response.defer()
                 return
             self.record_view.blue_win_count += 1
             self.label = f"블루팀 승리 : {self.record_view.blue_win_count}"
+            await self.record_view.ctx.send(f'{functions.get_nickname(press_user.nickname)}님이 '
+                                            f'블루팀 승리 +1 버튼을 눌렀습니다.')
             await interaction.response.edit_message(content=normal_game.get_game_board(teams), view=self.view)
 
     class RedWinButton(discord.ui.Button):
@@ -45,11 +51,15 @@ async def record_normal_game_in_main(teams):
 
         async def callback(self, interaction: discord.Interaction):
             press_user = Summoner(interaction.user)
-            if press_user.id not in managers.ID_LIST:
+            if press_user not in self.record_view.summoners:
+                await self.record_view.ctx.send(f'내전에 참여한 사람만 누를 수 있습니다. '
+                                                f'{functions.get_nickname(press_user.nickname)}님 누르지 말아주세요.')
                 await interaction.response.defer()
                 return
             self.record_view.red_win_count += 1
             self.label = f"레드팀 승리 : {self.record_view.red_win_count}"
+            await self.record_view.ctx.send(f'{functions.get_nickname(press_user.nickname)}님이 '
+                                            f'레드팀 승리 +1 버튼을 눌렀습니다.')
             await interaction.response.edit_message(content=normal_game.get_game_board(teams), view=self.view)
 
     class FinalizeButton(discord.ui.Button):
@@ -61,17 +71,15 @@ async def record_normal_game_in_main(teams):
 
         async def callback(self, interaction: discord.Interaction):
             press_user = Summoner(interaction.user)
-            if press_user.id not in managers.ID_LIST:
+            if press_user not in self.record_view.summoners:
+                await self.record_view.ctx.send(f'내전에 참여한 사람만 누를 수 있습니다. '
+                                                f'{functions.get_nickname(press_user.nickname)}님 누르지 말아주세요.')
                 await interaction.response.defer()
                 return
+            await finalize_normal_game_record(self.record_view.ctx, self.record_view.blue_win_count,
+                                              self.record_view.red_win_count, self.record_view.summoners,
+                                              self.record_view.teams)
             await interaction.message.delete()
-            for summoner in teams[0]:
-                await database.add_database_count(summoner, 'normal_game_count')
-            for summoner in teams[1]:
-                await database.add_database_count(summoner, 'normal_game_count')
-            await database.record_game_win_lose(self.teams, 'normal_game',
-                                                self.record_view.blue_win_count, self.record_view.red_win_count)
-            await self.ctx.send(f'내전 승/패가 기록되었습니다.')
 
     class ResetButton(discord.ui.Button):
         def __init__(self, record_view):
@@ -80,7 +88,9 @@ async def record_normal_game_in_main(teams):
 
         async def callback(self, interaction: discord.Interaction):
             press_user = Summoner(interaction.user)
-            if press_user.id not in managers.ID_LIST:
+            if press_user not in self.record_view.summoners:
+                await self.record_view.ctx.send(f'내전에 참여한 사람만 누를 수 있습니다. '
+                                                f'{functions.get_nickname(press_user.nickname)}님 누르지 말아주세요.')
                 await interaction.response.defer()
                 return
             self.record_view.blue_win_count = 0
@@ -94,12 +104,57 @@ async def record_normal_game_in_main(teams):
                     elif '레드팀' in child.label:
                         child.label = '레드팀 승리 : 0'
 
+            await self.record_view.ctx.send(f'{functions.get_nickname(press_user.nickname)}님이 '
+                                            f'초기화 버튼을 눌렀습니다.')
             # 메시지 업데이트
             await interaction.response.edit_message(content=normal_game.get_game_board(teams), view=self.view)
 
-    normal_game_update_channel = bot.get_channel(channels.RECORD_UPDATE_SERVER_ID)
-    view = RecordUpdateView(ctx=normal_game_update_channel, teams=teams)
-    await normal_game_update_channel.send(content=normal_game.get_game_board(teams), view=view)
+    view = RecordUpdateView(ctx=ctx, summoners=summoners, teams=teams)
+    await ctx.send(content=normal_game.get_game_board(teams), view=view)
+
+
+async def finalize_normal_game_record(ctx, blue_win_count, red_win_count, summoners, teams):
+    class RecordFinalizeView(discord.ui.View):
+        def __init__(self, ctx, blue_win_count, red_win_count, summoners, teams):
+            super().__init__(timeout=60)
+            self.add_item(UndoButton(self))
+            self.ctx = ctx
+            self.blue_win_count = blue_win_count
+            self.red_win_count = red_win_count
+            self.summoners = summoners
+            self.teams = teams
+            self.message = None
+
+        async def on_timeout(self):
+            self.clear_items()
+            await self.message.edit(view=self)
+            for summoner in teams[0]:
+                await database.add_database_count(summoner, 'normal_game_count')
+            for summoner in teams[1]:
+                await database.add_database_count(summoner, 'normal_game_count')
+            await database.record_game_win_lose(self.teams, 'normal_game',
+                                                self.blue_win_count, self.red_win_count)
+
+    class UndoButton(discord.ui.Button):
+        def __init__(self, finalize_view):
+            super().__init__(label=f"결과 수정하기", style=discord.ButtonStyle.primary)
+            self.finalize_view = finalize_view
+
+        async def callback(self, interaction: discord.Interaction):
+            press_user = Summoner(interaction.user)
+            if press_user not in self.finalize_view.summoners:
+                await self.finalize_view.ctx.send(f'내전에 참여한 사람만 누를 수 있습니다. '
+                                                  f'{functions.get_nickname(press_user.nickname)}님 누르지 말아주세요.')
+                await interaction.response.defer()
+                return
+            await self.finalize_view.ctx.send(f'{functions.get_nickname(press_user.nickname)}님이 '
+                                              f'결과 수정 버튼을 눌렀습니다.')
+            await interaction.message.delete()
+            await record_normal_game(self.finalize_view.ctx, self.finalize_view.summoners, self.finalize_view.teams)
+
+    finalize_view = RecordFinalizeView(ctx, blue_win_count, red_win_count, summoners, teams)
+    finalize_view.message = await ctx.send(content=normal_game.get_result_board(teams, blue_win_count, red_win_count),
+                                           view=finalize_view)
 
 
 async def manually_add_summoner_win(ctx, members):
@@ -122,19 +177,22 @@ async def manually_add_summoner_lose(ctx, members):
         print(f'{functions.get_nickname(summoner.nickname)}님의 패배가 추가되었습니다.')
 
 
+# 일반 내전 기록 수동 추가
 async def manually_add_teams_record(ctx, members):
     if not (ctx.author.id == managers.MASULSA or ctx.author.id == managers.JUYE):
         return
 
     teams = [[], []]
+    summoners = []
     for index, member in enumerate(members, 1):
         summoner = Summoner(member)
+        summoners.append(summoner)
         if index <= 5:
             teams[0].append(summoner)
         else:
             teams[1].append(summoner)
 
-    await record_normal_game_in_main(teams)
+    await record_normal_game(ctx, summoners, teams)
 
 
 # 20인 내전 4강 기록

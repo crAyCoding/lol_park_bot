@@ -415,11 +415,11 @@ async def finalize_team(ctx, teams, board_message, summoners, host):
 
             await interaction.response.edit_message(content=f'{board_message}', view=self.view)
             # 내전 모집 완료 후 메세지 출력
-            await send_random_record_update_person(ctx, teams)
+            await send_normal_game_message(ctx)
             # 맞는 음성 채널로 이동
             await move_summoners(ctx, teams)
             # 기록 보드 자동 출력
-            await add_normal_game_to_database(summoners, teams)
+            await add_normal_game_to_database(ctx, summoners, teams)
 
     class EditButton(discord.ui.Button):
         def __init__(self):
@@ -441,11 +441,11 @@ async def finalize_team(ctx, teams, board_message, summoners, host):
                    view=final_team_view)
 
 
-async def add_normal_game_to_database(summoners, teams):
+async def add_normal_game_to_database(ctx, summoners, teams):
     for summoner in summoners:
         await add_summoner(summoner)
         await update_summoner(summoner)
-    await record.record_normal_game_in_main(teams)
+    await record.record_normal_game(ctx, summoners, teams)
 
 
 async def move_summoners(channel, teams):
@@ -478,36 +478,35 @@ async def move_summoners(channel, teams):
             await member.move_to(red_team_channel)
 
 
-async def send_random_record_update_person(ctx, teams):
-    blue_team = teams[0]
-    red_team = teams[1]
+async def send_normal_game_message(ctx):
 
-    blue_person = random.choice(blue_team)
-    red_person = random.choice(red_team)
-
-    await add_summoner(blue_person)
-    await add_summoner(red_person)
-    await add_database_count(blue_person, 'russian_roulette')
-    await add_database_count(red_person, 'russian_roulette')
-
-    await ctx.send(f'https://banpick.kr/ \n'
+    await ctx.send(f'## https://banpick.kr/ \n'
                    f'밴픽은 위 사이트에서 진행해주시면 됩니다.\n'
                    f'## 해당 메세지 출력 이후 각 팀 디스코드로 자동 이동됩니다. 오류가 나지 않게 가만히 계셔주시면 감사하겠습니다.\n'
-                   f'## 사용자 설정 방 제목 : 롤파크 / 비밀번호 : 0921\n'
-                   f'### 이번 내전의 스크린샷을 <#1290946711153414205> 에 첨부할 서버원입니다.\n\n'
-                   f'블루 팀 승리 시 : <@{blue_person.id}>\n'
-                   f'레드 팀 승리 시 : <@{red_person.id}>\n'
-                   f'스크린샷 업로드 후, `몇판 게임, 몇 대 몇` 이라고 꼭 남겨주세요.\n'
-                   f'ex) 3판 2선 , 2승 1패\n'
-                   f'혹여 30초 내에 이동되지 않는 경우 수동으로 옮겨주시고 개발자에게 DM 부탁드립니다.')
+                   f'혹여 30초 내에 이동되지 않는 경우 수동으로 옮겨주시고 개발자에게 DM 부탁드립니다.'
+                   f'## 사용자 설정 방 제목 : 롤파크 / 비밀번호 : 0921\n')
 
 
 def get_game_board(teams):
     board = f'```\n'
-    board += f'🟦  블루진영\n\n'
+    board += f'🟦  블루팀\n\n'
     for blue_member in teams[0]:
         board += f'{blue_member.nickname}\n'
-    board += f'\n🟥  레드진영\n\n'
+    board += f'\n🟥  레드팀\n\n'
+    for red_member in teams[1]:
+        board += f'{red_member.nickname}\n'
+    board += f'```'
+    return board
+
+
+def get_result_board(teams, blue_win_count, red_win_count):
+    blue_result = '승' if blue_win_count > red_win_count else '패' if blue_win_count < red_win_count else '무'
+    red_result = '승' if blue_win_count < red_win_count else '패' if blue_win_count > red_win_count else '무'
+    board = f'```\n'
+    board += f'🟦  블루팀 ({blue_result}) {blue_win_count}승 {red_win_count}패\n\n'
+    for blue_member in teams[0]:
+        board += f'{blue_member.nickname}\n'
+    board += f'\n🟥  레드팀 ({red_result}) {red_win_count}승 {blue_win_count}패\n\n'
     for red_member in teams[1]:
         board += f'{red_member.nickname}\n'
     board += f'```'
