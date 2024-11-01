@@ -78,12 +78,12 @@ async def record_normal_game(ctx, summoners, teams):
                                                 f'{functions.get_nickname(press_user.nickname)}님 누르지 말아주세요.')
                 await interaction.response.defer()
                 return
+            await interaction.message.delete()
             await self.record_view.ctx.send(f'{functions.get_nickname(press_user.nickname)}님이 '
                                             f'확정 버튼을 눌렀습니다.')
             await finalize_normal_game_record(self.record_view.ctx, self.record_view.blue_win_count,
                                               self.record_view.red_win_count, self.record_view.summoners,
                                               self.record_view.teams)
-            await interaction.message.delete()
 
     class ResetButton(discord.ui.Button):
         def __init__(self, record_view):
@@ -139,6 +139,7 @@ async def finalize_normal_game_record(ctx, blue_win_count, red_win_count, summon
                     await self.message.edit(view=self)  # 버튼의 라벨 업데이트
                 await asyncio.sleep(1)
                 self.remaining_time -= 1
+            self.stop()
 
         async def on_timeout(self):
             # 타임아웃 시 버튼을 삭제
