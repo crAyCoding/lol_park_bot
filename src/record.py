@@ -9,6 +9,7 @@ import twenty_game
 import twenty_auction
 import managers
 import functions
+import asyncio
 from summoner import Summoner
 from bot import bot
 
@@ -77,6 +78,8 @@ async def record_normal_game(ctx, summoners, teams):
                                                 f'{functions.get_nickname(press_user.nickname)}님 누르지 말아주세요.')
                 await interaction.response.defer()
                 return
+            await self.record_view.ctx.send(f'{functions.get_nickname(press_user.nickname)}님이 '
+                                            f'확정 버튼을 눌렀습니다.')
             await finalize_normal_game_record(self.record_view.ctx, self.record_view.blue_win_count,
                                               self.record_view.red_win_count, self.record_view.summoners,
                                               self.record_view.teams)
@@ -116,46 +119,60 @@ async def record_normal_game(ctx, summoners, teams):
 
 async def finalize_normal_game_record(ctx, blue_win_count, red_win_count, summoners, teams):
     class RecordFinalizeView(discord.ui.View):
-        def __init__(self, ctx, blue_win_count, red_win_count, summoners, teams):
-            super().__init__(timeout=60)
-            self.add_item(UndoButton(self))
+        def __init__(self, ctx, blue_win_count, red_win_count, summoners, teams, timeout=60):
+            super().__init__(timeout=timeout)
             self.ctx = ctx
             self.blue_win_count = blue_win_count
             self.red_win_count = red_win_count
             self.summoners = summoners
             self.teams = teams
+            self.remaining_time = timeout
+            self.undo_button = UndoButton(self)
+            self.add_item(self.undo_button)
             self.message = None
 
+        async def start_timer(self):
+            # 타이머 시작
+            while self.remaining_time > 0:
+                self.undo_button.label = f"결과 수정하기 (남은 시간: {self.remaining_time}초)"
+                if self.message:
+                    await self.message.edit(view=self)  # 버튼의 라벨 업데이트
+                await asyncio.sleep(1)
+                self.remaining_time -= 1
+
         async def on_timeout(self):
+            # 타임아웃 시 버튼을 삭제
             self.clear_items()
-            await self.message.edit(view=self)
-            for summoner in teams[0]:
+            if self.message:
+                await self.message.edit(view=self)
+            for summoner in self.teams[0]:
                 await database.add_database_count(summoner, 'normal_game_count')
-            for summoner in teams[1]:
+            for summoner in self.teams[1]:
                 await database.add_database_count(summoner, 'normal_game_count')
-            await database.record_game_win_lose(self.teams, 'normal_game',
-                                                self.blue_win_count, self.red_win_count)
+            await database.record_game_win_lose(self.teams, 'normal_game', self.blue_win_count, self.red_win_count)
 
     class UndoButton(discord.ui.Button):
         def __init__(self, finalize_view):
-            super().__init__(label=f"결과 수정하기", style=discord.ButtonStyle.primary)
+            super().__init__(label=f"결과 수정하기 (남은 시간: {finalize_view.remaining_time}초)", style=discord.ButtonStyle.primary)
             self.finalize_view = finalize_view
 
         async def callback(self, interaction: discord.Interaction):
             press_user = Summoner(interaction.user)
             if press_user not in self.finalize_view.summoners:
-                await self.finalize_view.ctx.send(f'내전에 참여한 사람만 누를 수 있습니다. '
-                                                  f'{functions.get_nickname(press_user.nickname)}님 누르지 말아주세요.')
+                await self.finalize_view.ctx.send(
+                    f'내전에 참여한 사람만 누를 수 있습니다. {functions.get_nickname(press_user.nickname)}님 누르지 말아주세요.'
+                )
                 await interaction.response.defer()
                 return
-            await self.finalize_view.ctx.send(f'{functions.get_nickname(press_user.nickname)}님이 '
-                                              f'결과 수정 버튼을 눌렀습니다.')
+            await self.finalize_view.ctx.send(f'{functions.get_nickname(press_user.nickname)}님이 결과 수정 버튼을 눌렀습니다.')
             await interaction.message.delete()
             await record_normal_game(self.finalize_view.ctx, self.finalize_view.summoners, self.finalize_view.teams)
 
     finalize_view = RecordFinalizeView(ctx, blue_win_count, red_win_count, summoners, teams)
-    finalize_view.message = await ctx.send(content=normal_game.get_result_board(teams, blue_win_count, red_win_count),
-                                           view=finalize_view)
+    finalize_view.message = await ctx.send(
+        content=normal_game.get_result_board(teams, blue_win_count, red_win_count), view=finalize_view
+    )
+    await finalize_view.start_timer()  # 타이머 시작
 
 
 async def manually_add_summoner_win(ctx, members):
@@ -183,8 +200,12 @@ async def manually_add_teams_record(ctx, members):
     if not (ctx.author.id == managers.MASULSA or ctx.author.id == managers.JUYE):
         return
 
+    guild = ctx.guild
+    masulsa = guild.get_member(managers.MASULSA)
+    juye = guild.get_member(managers.JUYE)
+
     teams = [[], []]
-    summoners = []
+    summoners = [masulsa, juye]
     for index, member in enumerate(members, 1):
         summoner = Summoner(member)
         summoners.append(summoner)
