@@ -413,7 +413,7 @@ async def finalize_team(ctx, teams, board_message, summoners, host):
                 return
             self.view.clear_items()
 
-            await interaction.response.edit_message(content=f'{board_message}', view=self.view)
+            await interaction.message.delete()
             # 내전 모집 완료 후 메세지 출력
             await send_normal_game_message(ctx)
             # 맞는 음성 채널로 이동
@@ -445,6 +445,8 @@ async def add_normal_game_to_database(ctx, summoners, teams):
     for summoner in summoners:
         await add_summoner(summoner)
         await update_summoner(summoner)
+    await ctx.send(f'내전 종료 이후 결과를 직접 기입해 주세요. 가급적 꼬이지 않게 대표로 한 명만 진행해 주시길 바랍니다.\n'
+                   f'24시간 내에 아무도 기록하지 않을 경우, 내전 전적에 반영되지 않습니다. 이 점 참고 바랍니다.')
     await record.record_normal_game(ctx, summoners, teams)
 
 
