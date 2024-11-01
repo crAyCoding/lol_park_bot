@@ -21,6 +21,7 @@ async def record_normal_game(ctx, summoners, teams):
             self.red_win_count = 0
             self.summoners = summoners
             self.ctx = ctx
+            self.teams = teams
             self.add_item(BlueWinButton(self))
             self.add_item(RedWinButton(self))
             self.add_item(FinalizeButton(self, ctx, teams))
