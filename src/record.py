@@ -151,6 +151,7 @@ async def finalize_normal_game_record(ctx, blue_win_count, red_win_count, summon
             for summoner in self.teams[1]:
                 await database.add_database_count(summoner, 'normal_game_count')
             await database.record_game_win_lose(self.teams, 'normal_game', self.blue_win_count, self.red_win_count)
+            await self.ctx.send(f'내전 기록이 완료되었습니다. 블루팀 {self.blue_win_count} : {self.red_win_count} 레드팀')
             self.stop()
 
     class UndoButton(discord.ui.Button):
