@@ -10,8 +10,8 @@ from database import add_summoner, update_summoner, add_database_count
 from bot import bot
 
 
+# 일반 내전 모집
 async def make_normal_game(ctx, message='3판 2선 모이면 바로 시작'):
-    # 일반 내전 모집
 
     # 내전 채팅 로그 기록 시작, 내전을 연 사람을 로그에 추가
     user = Summoner(ctx.author)
@@ -28,8 +28,8 @@ async def make_normal_game(ctx, message='3판 2선 모이면 바로 시작'):
     return True
 
 
+# 피어리스 내전 모집
 async def make_fearless_game(ctx, message='3판 2선 모이면 바로 시작'):
-    # 피어리스 내전 모집
 
     user = Summoner(ctx.author)
     lolpark.fearless_game_log = {user: [ctx.message.id]}
@@ -43,8 +43,8 @@ async def make_fearless_game(ctx, message='3판 2선 모이면 바로 시작'):
                    f'[ {message} ]\n{role.mention}')
 
 
+# 일반 내전 마감
 async def close_normal_game(ctx, summoners, host):
-    # 일반 내전 마감
     class GameMember:
         def __init__(self, index, summoner):
             self.index = index + 1
@@ -107,8 +107,8 @@ async def close_normal_game(ctx, summoners, host):
     await ctx.send(content=f'내전 모집이 완료되었습니다. 참여 명단을 확인하세요.\n\n{game_members_result}', view=view)
 
 
+# 일반 내전 쫑
 async def end_normal_game(ctx):
-    # 일반 내전 쫑
 
     if lolpark.normal_game_creator != Summoner(ctx.author):
         return True
@@ -127,8 +127,8 @@ async def end_normal_game(ctx):
     return False
 
 
+# 피어리스 내전 쫑
 async def end_fearless_game(ctx):
-    # 피어리스 내전 쫑
 
     if lolpark.fearless_game_creator != Summoner(ctx.author):
         return
@@ -144,6 +144,7 @@ async def end_fearless_game(ctx):
     lolpark.fearless_game_creator = None
 
 
+# 팀장 정하기, 메모장으로 진행, 명단 수정
 async def handle_game_team(ctx, sorted_summoners, summoners, host):
     team_head_list = []
 
@@ -221,9 +222,9 @@ async def handle_game_team(ctx, sorted_summoners, summoners, host):
                            f'팀장 두 분의 닉네임 버튼을 눌러주세요.', view=handle_team_view)
 
 
+# 블루팀 레드팀 고르기
 async def choose_blue_red_game(ctx, team_head_list, members, summoners, host):
     await ctx.send(f'=========================================')
-    # 블루팀 레드팀 고르기
     blue_team = []
     red_team = []
 
@@ -272,9 +273,9 @@ async def choose_blue_red_game(ctx, team_head_list, members, summoners, host):
     await ctx.send(content=f'## {get_nickname(selected.nickname)}님, 진영을 선택해주세요.', view=blue_red_view)
 
 
+# 선뽑, 후뽑 정하기
 async def choose_order_game(ctx, blue_team, red_team, members, summoners, host):
     await ctx.send(f'=========================================')
-    # 선뽑 후뽑 고르기
     teams = [blue_team, red_team]
     order_flag = True
 
@@ -320,6 +321,7 @@ async def choose_order_game(ctx, blue_team, red_team, members, summoners, host):
     await ctx.send(content=f'## {get_nickname(selected.nickname)}님, 뽑는 순서를 정해주세요.', view=order_view)
 
 
+# 팀뽑 진행 (선뽑 한명, 후뽑 두명, 선뽑 두명, 후뽑 두명 뽑기)
 async def choose_game_team(ctx, teams, flag, members, summoners, host):
     await ctx.send(f'=========================================')
 
@@ -333,10 +335,6 @@ async def choose_game_team(ctx, teams, flag, members, summoners, host):
             teams[0].append(summoner)
         else:
             teams[1].append(summoner)
-
-    class RemainMember:
-        def __init__(self, index):
-            self.summoner = members[index].summoner
 
     class ChooseGameView(discord.ui.View):
         def __init__(self):
@@ -391,6 +389,7 @@ async def choose_game_team(ctx, teams, flag, members, summoners, host):
     # await ctx.send(get_game_board(teams))
 
 
+# 이대로 확정 , 명단 수정 (내전 시작 최종 확인)
 async def finalize_team(ctx, teams, board_message, summoners, host):
 
     class FinalTeamView(discord.ui.View):
@@ -441,6 +440,7 @@ async def finalize_team(ctx, teams, board_message, summoners, host):
                    view=final_team_view)
 
 
+# 내전 전적 기록용 보드 출력
 async def add_normal_game_to_database(ctx, summoners, teams):
     for summoner in summoners:
         await add_summoner(summoner)
@@ -450,6 +450,7 @@ async def add_normal_game_to_database(ctx, summoners, teams):
     await record.record_normal_game(ctx, summoners, teams)
 
 
+# 서버원 내전 팀 채널로 이동
 async def move_summoners(channel, teams):
     channel_id = channel.id
     guild = channel.guild
@@ -501,10 +502,11 @@ def get_game_board(teams):
     return board
 
 
-def get_result_board(teams, blue_win_count, red_win_count):
+def get_result_board(teams, blue_win_count, red_win_count, is_record=False):
     blue_result = '승' if blue_win_count > red_win_count else '패' if blue_win_count < red_win_count else '무'
     red_result = '승' if blue_win_count < red_win_count else '패' if blue_win_count > red_win_count else '무'
-    board = f'```\n'
+    board = f'[기록완료]' if is_record else f'[기록대기]\n'
+    board += f'```\n'
     board += f'🟦  블루팀 ({blue_result}) {blue_win_count}승 {red_win_count}패\n\n'
     for blue_member in teams[0]:
         board += f'{blue_member.nickname}\n'
