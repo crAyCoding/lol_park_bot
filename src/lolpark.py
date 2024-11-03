@@ -39,5 +39,8 @@ auction_summoners_dict = None
 # 20인 내전 결승 진출 팀 목록
 twenty_final_teams = None
 
+# 20인 내전 진행 여부
+is_twenty_game = False
+
 # 데이터베이스 파일 저장소
 summoners_db = '/database/summoners.db'

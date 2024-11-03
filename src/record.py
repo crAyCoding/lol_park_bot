@@ -709,6 +709,7 @@ async def finalize_twenty_game_final(ctx, teams, team_1, team_2, team_1_win_coun
                                     f'{self.team_1_win_count} {self.team_1}')
                 await twenty_auction.send_twenty_winner_message(self.team_2)
             lolpark.auction_dict = None
+            lolpark.is_twenty_game = False
             self.stop()
 
     class UndoButton(discord.ui.Button):

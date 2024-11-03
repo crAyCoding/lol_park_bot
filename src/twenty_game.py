@@ -6,8 +6,8 @@ import lolpark
 import functions
 
 
+# 20인 내전 모집
 async def make_twenty_game(ctx, message):
-    # 20인 내전 모집
 
     def create_callback(line_name, button):
         # 버튼 상호작용 함수
@@ -57,10 +57,15 @@ async def make_twenty_game(ctx, message):
                 button.callback = create_callback(lolpark.line_names[line_number], button)
                 self.add_item(button)
 
+    if lolpark.is_twenty_game:
+        await ctx.send(f'20인 내전이 현재 진행 중입니다. 20인 내전 종료 후 다시 열어주세요.')
+        return
+
     # 변수 초기화, 새 내전 생성
     lolpark.twenty_summoner_list = {line_name: [] for line_name in lolpark.line_names}
     lolpark.twenty_view = TwentyView()
     lolpark.twenty_host = Summoner(ctx.author)
+    lolpark.is_twenty_game = True
 
     # 내전 역할 가져오기
     role_name = '내전'
@@ -129,11 +134,10 @@ async def end_twenty_game(ctx):
     lolpark.twenty_summoner_list = None
     lolpark.twenty_host = None
     lolpark.twenty_view = None
+    lolpark.is_twenty_game = False
     if lolpark.twenty_view_message:
         await lolpark.twenty_view_message.delete()
         lolpark.twenty_view_message = None
-
-    return False
 
 
 def get_team_head_number(game_members: int):
