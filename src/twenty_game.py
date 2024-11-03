@@ -281,3 +281,18 @@ def get_twenty_game_board(team_1, team_2):
         board += f'{line} : {summoner.nickname} > {score if score != -1 else "팀장"}\n'
     board += f'```'
     return board
+
+
+def get_result_board(teams, team_1, team_2, team_1_win_count, team_2_win_count, is_record=True):
+    team_1_result = '승' if team_1_win_count > team_2_win_count else '패'
+    team_2_result = '승' if team_1_win_count < team_2_win_count else '패'
+    board = f'[기록완료]' if is_record else f'[기록대기]\n'
+    board += f'```\n'
+    board += f'{team_1} ({team_1_result}) {team_1_win_count}승 {team_2_win_count}패\n\n'
+    for line, (summoner, score) in lolpark.auction_dict[team_1].items():
+        board += f'{line} : {summoner.nickname} > {score if score != -1 else "팀장"}\n'
+    board += f'\n{team_2} ({team_2_result}) {team_2_win_count}승 {team_1_win_count}패\n\n'
+    for line, (summoner, score) in lolpark.auction_dict[team_2].items():
+        board += f'{line} : {summoner.nickname} > {score if score != -1 else "팀장"}\n'
+    board += f'```'
+    return board

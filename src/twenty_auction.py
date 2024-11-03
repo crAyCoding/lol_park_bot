@@ -268,17 +268,14 @@ async def twenty_auction(host, team_head_line_number, ctx):
                 await ctx.send(dice_result)
         else:
             dice_winner_team = max_score_teams[0]
-        # 러시안 룰렛 집행
-        await send_random_record_update_person(ctx)
+        # 안내 메세지 출력
+        await ctx.send(f'## 각 팀으로 자동 이동됩니다. 봇 오류 방지를 위해 가만히 있어주시길 바랍니다.\n')
         # 소환사 등록
         await add_twenty_summoners()
         # 사람들 각자 팀 채널로 강제 이동
         await move_summoners_in_twenty(ctx)
         # 어디랑 붙을지 정하기
         await send_select_team_message(ctx, dice_winner_team)
-        # 초기화
-        lolpark.twenty_summoner_list = None
-        lolpark.twenty_host = None
 
 
 def add_auction_team_head(auction_list, team_head_line_number):
@@ -354,37 +351,6 @@ async def move_summoners_in_twenty(ctx):
                 await member.move_to(discord_channel)
 
 
-async def send_random_record_update_person(ctx):
-    team_1 = list(lolpark.auction_dict['1팀'].values())
-    team_2 = list(lolpark.auction_dict['2팀'].values())
-    team_3 = list(lolpark.auction_dict['3팀'].values())
-    team_4 = list(lolpark.auction_dict['4팀'].values())
-
-    team_1_person = random.choice(team_1)
-    team_2_person = random.choice(team_2)
-    team_3_person = random.choice(team_3)
-    team_4_person = random.choice(team_4)
-
-    await database.add_summoner(team_1_person)
-    await database.add_summoner(team_2_person)
-    await database.add_summoner(team_3_person)
-    await database.add_summoner(team_4_person)
-    await database.add_database_count(team_1_person, 'russian_roulette')
-    await database.add_database_count(team_2_person, 'russian_roulette')
-    await database.add_database_count(team_3_person, 'russian_roulette')
-    await database.add_database_count(team_4_person, 'russian_roulette')
-
-    await ctx.send(f'## 각 팀으로 자동 이동됩니다. 봇 오류 방지를 위해 미리 움직이지 마시길 바랍니다.\n'
-                   f'### 이번 20인 내전 4강 결과의 스크린샷을 <#1295312942459523112> 에 첨부할 서버원입니다.\n\n'
-                   f'1팀 승리 시 : <@{team_1_person[0].id}>\n'
-                   f'2팀 승리 시 : <@{team_2_person[0].id}>\n'
-                   f'3팀 승리 시 : <@{team_3_person[0].id}>\n'
-                   f'4팀 승리 시 : <@{team_4_person[0].id}>\n'
-                   f'스크린샷 업로드 후, `몇팀 vs 몇팀, 몇승 몇패` 라고 꼭 남겨주세요.\n'
-                   f'### 결승 전적 기록을 위해 4강 결과는 4강 종료 직후에 올려주시길 바랍니다.'
-                   f'ex) 1팀 vs 2팀, 2승 1패\n')
-
-
 async def send_select_team_message(ctx, dice_winner_team):
     class TeamSelectionView(discord.ui.View):
         def __init__(self, dice_winner_team, ctx):
@@ -421,8 +387,8 @@ async def send_select_team_message(ctx, dice_winner_team):
                 f'## {dice_winner_team} vs {self.label}\n\n'
                 f'## {remain_teams_list[0]} vs {remain_teams_list[1]}'
             )
-            await record.record_twenty_semi_final(self.dice_winner_team, self.label,
-                                                  remain_teams_list[0], remain_teams_list[1])
+            await record.record_twenty_semi_final(self.ctx, self.dice_winner_team, self.label)
+            await record.record_twenty_semi_final(self.ctx, remain_teams_list[0], remain_teams_list[1])
 
     team_selection_view = TeamSelectionView(dice_winner_team, ctx)
     await ctx.send(content=f'{dice_winner_team} 팀장님, 상대할 팀을 선택해주세요.', view=team_selection_view)
