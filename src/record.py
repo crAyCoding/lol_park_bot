@@ -365,6 +365,9 @@ async def record_twenty_semi_final(ctx, team_1, team_2):
         async def callback(self, interaction: discord.Interaction):
             press_user = Summoner(interaction.user)
             if press_user not in self.record_view.teams[0] and press_user not in self.record_view.teams[1]:
+                await self.record_view.ctx.send(
+                    f'20인 내전의 해당 게임에 참여한 사람만 누를 수 있습니다. '
+                    f'{functions.get_nickname(press_user.nickname)}님 누르지 말아주세요.')
                 await interaction.response.defer()
                 return
             self.record_view.team_1_win_count += 1
@@ -384,6 +387,9 @@ async def record_twenty_semi_final(ctx, team_1, team_2):
         async def callback(self, interaction: discord.Interaction):
             press_user = Summoner(interaction.user)
             if press_user not in self.record_view.teams[0] and press_user not in self.record_view.teams[1]:
+                await self.record_view.ctx.send(
+                    f'20인 내전의 해당 게임에 참여한 사람만 누를 수 있습니다. '
+                    f'{functions.get_nickname(press_user.nickname)}님 누르지 말아주세요.')
                 await interaction.response.defer()
                 return
             self.record_view.team_2_win_count += 1
@@ -405,6 +411,9 @@ async def record_twenty_semi_final(ctx, team_1, team_2):
         async def callback(self, interaction: discord.Interaction):
             press_user = Summoner(interaction.user)
             if press_user not in self.record_view.teams[0] and press_user not in self.record_view.teams[1]:
+                await self.record_view.ctx.send(
+                    f'20인 내전의 해당 게임에 참여한 사람만 누를 수 있습니다. '
+                    f'{functions.get_nickname(press_user.nickname)}님 누르지 말아주세요.')
                 await interaction.response.defer()
                 return
             await interaction.message.delete()
@@ -423,6 +432,9 @@ async def record_twenty_semi_final(ctx, team_1, team_2):
         async def callback(self, interaction: discord.Interaction):
             press_user = Summoner(interaction.user)
             if press_user not in self.record_view.teams[0] and press_user not in self.record_view.teams[1]:
+                await self.record_view.ctx.send(
+                    f'20인 내전의 해당 게임에 참여한 사람만 누를 수 있습니다. '
+                    f'{functions.get_nickname(press_user.nickname)}님 누르지 말아주세요.')
                 await interaction.response.defer()
                 return
             self.record_view.team_1_win_count = 0
@@ -497,7 +509,7 @@ async def finalize_twenty_game_semi_final(ctx, team_1, team_2, teams, team_1_win
                 # 20인 경매 채널에 결승 진영 선택 알림
                 await twenty_auction.send_twenty_final_message(final_team_1, final_team_2)
                 # 결승 기록지 출력
-                await record_twenty_final(final_team_1, final_team_2)
+                await record_twenty_final(self.ctx, final_team_1, final_team_2)
             self.stop()
 
     class UndoButton(discord.ui.Button):
@@ -510,7 +522,7 @@ async def finalize_twenty_game_semi_final(ctx, team_1, team_2, teams, team_1_win
             press_user = Summoner(interaction.user)
             if press_user not in self.finalize_view.teams[0] and press_user not in self.finalize_view.teams[1]:
                 await self.finalize_view.ctx.send(
-                    f'내전에 참여한 사람만 누를 수 있습니다. '
+                    f'20인 내전의 해당 게임에 참여한 사람만 누를 수 있습니다. '
                     f'{functions.get_nickname(press_user.nickname)}님 누르지 말아주세요.'
                 )
                 await interaction.response.defer()
@@ -527,18 +539,15 @@ async def finalize_twenty_game_semi_final(ctx, team_1, team_2, teams, team_1_win
 
 
 # 20인 내전 결승 기록
-async def record_twenty_final(team_1, team_2):
+async def record_twenty_final(ctx, team_1, team_2):
     class RecordUpdateView(discord.ui.View):
-        def __init__(self, ctx, team_1, team_2):
+        def __init__(self, ctx, team_1, team_2, teams):
             super().__init__(timeout=86400)
             self.team_1_win_count = 0
             self.team_2_win_count = 0
             self.add_item(Team1WinButton(self, team_1, team_2))
             self.add_item(Team2WinButton(self, team_1, team_2))
-            self.add_item(FinalizeButton(self, ctx,
-                                         [[summoner[0] for summoner in lolpark.auction_dict[team_1].values()],
-                                          [summoner[0] for summoner in lolpark.auction_dict[team_2].values()]],
-                                         team_1, team_2))
+            self.add_item(FinalizeButton(self, ctx, teams, team_1, team_2))
             self.add_item(ResetButton(self, team_1, team_2))
 
     class Team1WinButton(discord.ui.Button):
@@ -550,7 +559,10 @@ async def record_twenty_final(team_1, team_2):
 
         async def callback(self, interaction: discord.Interaction):
             press_user = Summoner(interaction.user)
-            if press_user.id not in managers.ID_LIST:
+            if press_user not in self.record_view.teams[0] and press_user not in self.record_view.teams[1]:
+                await self.record_view.ctx.send(
+                    f'20인 내전의 해당 게임에 참여한 사람만 누를 수 있습니다. '
+                    f'{functions.get_nickname(press_user.nickname)}님 누르지 말아주세요.')
                 await interaction.response.defer()
                 return
             self.record_view.team_1_win_count += 1
@@ -567,7 +579,10 @@ async def record_twenty_final(team_1, team_2):
 
         async def callback(self, interaction: discord.Interaction):
             press_user = Summoner(interaction.user)
-            if press_user.id not in managers.ID_LIST:
+            if press_user not in self.record_view.teams[0] and press_user not in self.record_view.teams[1]:
+                await self.record_view.ctx.send(
+                    f'20인 내전의 해당 게임에 참여한 사람만 누를 수 있습니다. '
+                    f'{functions.get_nickname(press_user.nickname)}님 누르지 말아주세요.')
                 await interaction.response.defer()
                 return
             self.record_view.team_2_win_count += 1
@@ -586,25 +601,15 @@ async def record_twenty_final(team_1, team_2):
 
         async def callback(self, interaction: discord.Interaction):
             press_user = Summoner(interaction.user)
-            if press_user.id not in managers.ID_LIST:
+            if press_user not in self.record_view.teams[0] and press_user not in self.record_view.teams[1]:
+                await self.record_view.ctx.send(
+                    f'20인 내전의 해당 게임에 참여한 사람만 누를 수 있습니다. '
+                    f'{functions.get_nickname(press_user.nickname)}님 누르지 말아주세요.')
                 await interaction.response.defer()
                 return
             await interaction.message.delete()
-            await database.record_game_win_lose(self.teams, 'twenty_game',
-                                                self.record_view.team_1_win_count, self.record_view.team_2_win_count)
-            if self.record_view.team_1_win_count > self.record_view.team_2_win_count:
-                for summoner in [summoner[0] for summoner in lolpark.auction_dict[team_1].values()]:
-                    await database.add_database_count(summoner, 'twenty_game_winner')
-                await self.ctx.send(f'{self.team_1} 우승이 기록되었습니다. '
-                                    f'{self.team_1} {self.record_view.team_1_win_count} : '
-                                    f'{self.record_view.team_2_win_count} {self.team_2}')
-                await twenty_auction.send_twenty_winner_message(self.team_1)
-            else:
-                for summoner in [summoner[0] for summoner in lolpark.auction_dict[team_2].values()]:
-                    await database.add_database_count(summoner, 'twenty_game_winner')
-                await self.ctx.send(f'{self.team_2} 우승이 기록되었습니다.')
-                await twenty_auction.send_twenty_winner_message(self.team_2)
-            lolpark.auction_dict = None
+            await finalize_twenty_game_final(self.record_view.ctx, self.record_view.teams, self.record_view.team_1,
+                                             self.record_view.team_2, self.record_view.team_1_win_count, self.record_view.team_2_win_count)
 
     class ResetButton(discord.ui.Button):
         def __init__(self, record_view, team_1, team_2):
@@ -615,7 +620,10 @@ async def record_twenty_final(team_1, team_2):
 
         async def callback(self, interaction: discord.Interaction):
             press_user = Summoner(interaction.user)
-            if press_user.id not in managers.ID_LIST:
+            if press_user not in self.record_view.teams[0] and press_user not in self.record_view.teams[1]:
+                await self.record_view.ctx.send(
+                    f'20인 내전의 해당 게임에 참여한 사람만 누를 수 있습니다. '
+                    f'{functions.get_nickname(press_user.nickname)}님 누르지 말아주세요.')
                 await interaction.response.defer()
                 return
             self.record_view.team_1_win_count = 0
@@ -633,7 +641,9 @@ async def record_twenty_final(team_1, team_2):
             await interaction.response.edit_message(content=twenty_game.get_twenty_game_board(self.team_1, self.team_2),
                                                     view=self.view)
 
-    twenty_game_update_channel = bot.get_channel(channels.TWENTY_RECORD_UPDATE_SERVER_ID)
+    teams = [[summoner[0] for summoner in lolpark.auction_dict[team_1].values()],
+             [summoner[0] for summoner in lolpark.auction_dict[team_2].values()]]
+
     team_1_summoners = [summoner[0] for summoner in lolpark.auction_dict[team_1].values()]
     team_2_summoners = [summoner[0] for summoner in lolpark.auction_dict[team_2].values()]
 
@@ -643,9 +653,88 @@ async def record_twenty_final(team_1, team_2):
     for summoner in team_2_summoners:
         await database.add_database_count(summoner, 'twenty_game_final')
 
-    final_game_view = RecordUpdateView(twenty_game_update_channel, team_1, team_2)
-    await twenty_game_update_channel.send(content=twenty_game.get_twenty_game_board(team_1, team_2),
-                                          view=final_game_view)
+    final_game_view = RecordUpdateView(ctx, team_1, team_2, teams)
+    await ctx.send(content=twenty_game.get_twenty_game_board(team_1, team_2),
+                   view=final_game_view)
+
+
+# 20인 내전 결승 기록 확정
+async def finalize_twenty_game_final(ctx, teams, team_1, team_2, team_1_win_count, team_2_win_count):
+    class RecordFinalizeView(discord.ui.View):
+        def __init__(self, ctx, teams, team_1, team_2, team_1_win_count, team_2_win_count, timeout=60):
+            super().__init__(timeout=timeout)
+            self.ctx = ctx
+            self.team_1 = team_1
+            self.team_2 = team_2
+            self.team_1_win_count = team_1_win_count
+            self.team_2_win_count = team_2_win_count
+            self.teams = teams
+            self.remaining_time = timeout
+            self.undo_button = UndoButton(self)
+            self.add_item(self.undo_button)
+            self.message = None
+
+        async def start_timer(self):
+            # 타이머 시작
+            while self.remaining_time > 0:
+                self.undo_button.label = f"결과 수정하기 (남은 시간: {self.remaining_time}초)"
+                if self.message:
+                    await self.message.edit(view=self)  # 버튼의 라벨 업데이트
+                await asyncio.sleep(1)
+                self.remaining_time -= 1
+            await self.on_timeout()
+
+        async def on_timeout(self):
+            # 타임아웃 시 버튼을 삭제
+            self.clear_items()
+            if self.message:
+                await self.message.edit(
+                    content=twenty_game.get_result_board(self.teams, self.team_1, self.team_2,
+                                                         self.team_1_win_count, self.team_2_win_count, is_record=True),
+                    view=finalize_view)
+            await database.record_game_win_lose(self.teams, 'twenty_game',
+                                                self.team_1_win_count, self.team_2_win_count)
+            if self.team_1_win_count > self.team_2_win_count:
+                for summoner in [summoner[0] for summoner in lolpark.auction_dict[team_1].values()]:
+                    await database.add_database_count(summoner, 'twenty_game_winner')
+                await self.ctx.send(f'{self.team_1} 우승이 기록되었습니다. '
+                                    f'{self.team_1} {self.team_1_win_count} : '
+                                    f'{self.team_2_win_count} {self.team_2}')
+                await twenty_auction.send_twenty_winner_message(self.team_1)
+            else:
+                for summoner in [summoner[0] for summoner in lolpark.auction_dict[team_2].values()]:
+                    await database.add_database_count(summoner, 'twenty_game_winner')
+                await self.ctx.send(f'{self.team_2} 우승이 기록되었습니다.'
+                                    f'{self.team_2} {self.team_2_win_count} : '
+                                    f'{self.team_1_win_count} {self.team_1}')
+                await twenty_auction.send_twenty_winner_message(self.team_2)
+            lolpark.auction_dict = None
+            self.stop()
+
+    class UndoButton(discord.ui.Button):
+        def __init__(self, finalize_view):
+            super().__init__(label=f"결과 수정하기 (남은 시간: {finalize_view.remaining_time}초)",
+                             style=discord.ButtonStyle.primary)
+            self.finalize_view = finalize_view
+
+        async def callback(self, interaction: discord.Interaction):
+            press_user = Summoner(interaction.user)
+            if press_user not in self.finalize_view.teams[0] and press_user not in self.finalize_view.teams[1]:
+                await self.finalize_view.ctx.send(
+                    f'20인 내전의 해당 게임에 참여한 사람만 누를 수 있습니다. '
+                    f'{functions.get_nickname(press_user.nickname)}님 누르지 말아주세요.'
+                )
+                await interaction.response.defer()
+                return
+            await self.finalize_view.ctx.send(f'{functions.get_nickname(press_user.nickname)}님이 결과 수정 버튼을 눌렀습니다.')
+            await interaction.message.delete()
+            await record_twenty_semi_final(self.finalize_view.ctx, self.finalize_view.team_1, self.finalize_view.team_2)
+
+    finalize_view = RecordFinalizeView(ctx, teams, team_1, team_2, team_1_win_count, team_2_win_count)
+    finalize_view.message = await ctx.send(
+        content=twenty_game.get_result_board(teams, team_1, team_2, team_1_win_count, team_2_win_count),
+        view=finalize_view)
+    await finalize_view.start_timer()  # 타이머 시작
 
 
 async def manually_add_summoner_normal_game_count(ctx, members):
