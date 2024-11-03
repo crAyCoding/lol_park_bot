@@ -126,6 +126,7 @@ async def record_normal_game(ctx, summoners, teams):
     view.message = await ctx.send(content=normal_game.get_game_board(teams), view=view)
 
 
+# 일반 내전 전적 기록 최종
 async def finalize_normal_game_record(ctx, blue_win_count, red_win_count, summoners, teams):
     class RecordFinalizeView(discord.ui.View):
         def __init__(self, ctx, blue_win_count, red_win_count, summoners, teams, timeout=60):
@@ -157,11 +158,11 @@ async def finalize_normal_game_record(ctx, blue_win_count, red_win_count, summon
                 await self.message.edit(
                     content=normal_game.get_result_board(teams, blue_win_count, red_win_count, is_record=True),
                     view=self)
-            for summoner in self.teams[0]:
-                await database.add_database_count(summoner, 'normal_game_count')
-            for summoner in self.teams[1]:
-                await database.add_database_count(summoner, 'normal_game_count')
+            for team in self.teams:
+                for summoner in team:
+                    await database.add_database_count(summoner, 'normal_game_count')
             await database.record_game_win_lose(self.teams, 'normal_game', self.blue_win_count, self.red_win_count)
+            await record_undo_for_manager(self.teams, self.blue_win_count, self.red_win_count)
             self.stop()
 
     class UndoButton(discord.ui.Button):
@@ -221,6 +222,116 @@ async def manually_add_teams_record(ctx, members):
         else:
             teams[1].append(summoner)
     await record_normal_game(ctx, summoners, teams)
+
+
+# 일반 내전 전적 기록 수정용(관리자용)
+async def record_undo_for_manager(teams, prev_blue_win_count, prev_red_win_count):
+    class RecordUndoView(discord.ui.View):
+        def __init__(self, ctx, teams, prev_blue_win_count, prev_red_win_count):
+            super().__init__(timeout=43200)
+            self.blue_win_count = 0
+            self.red_win_count = 0
+            self.prev_blue_win_count = prev_blue_win_count
+            self.prev_red_win_count = prev_red_win_count
+            self.ctx = ctx
+            self.teams = teams
+            self.add_item(BlueWinButton(self))
+            self.add_item(RedWinButton(self))
+            self.add_item(FinalizeButton(self, ctx, teams))
+            self.add_item(ResetButton(self))
+            self.message = None
+
+        async def on_timeout(self):
+            # 타임아웃 시 버튼을 삭제
+            self.clear_items()
+            if self.message:
+                await self.message.edit(
+                    content=f'{normal_game.get_result_board(self.teams, self.prev_blue_win_count, self.prev_red_win_count, is_record=True)}',
+                    view=self)
+
+    class BlueWinButton(discord.ui.Button):
+        def __init__(self, undo_view):
+            super().__init__(label=f"블루팀 승리 : 0", style=discord.ButtonStyle.primary)
+            self.undo_view = undo_view
+
+        async def callback(self, interaction: discord.Interaction):
+            press_user = Summoner(interaction.user)
+            self.undo_view.blue_win_count += 1
+            self.label = f"블루팀 승리 : {self.undo_view.blue_win_count}"
+            await self.undo_view.ctx.send(f'{functions.get_nickname(press_user.nickname)}님이 '
+                                          f'블루팀 승리 +1 버튼을 눌렀습니다.')
+            await interaction.response.edit_message(content=f'{normal_game.get_result_board(self.undo_view.teams, self.undo_view.prev_blue_win_count, self.undo_view.prev_red_win_count, is_record=True)}',
+                                                    view=self.view)
+
+    class RedWinButton(discord.ui.Button):
+        def __init__(self, undo_view):
+            super().__init__(label=f"레드팀 승리 : 0", style=discord.ButtonStyle.red)
+            self.undo_view = undo_view
+
+        async def callback(self, interaction: discord.Interaction):
+            press_user = Summoner(interaction.user)
+            self.undo_view.red_win_count += 1
+            self.label = f"레드팀 승리 : {self.undo_view.red_win_count}"
+            await self.undo_view.ctx.send(f'{functions.get_nickname(press_user.nickname)}님이 '
+                                          f'레드팀 승리 +1 버튼을 눌렀습니다.')
+            await interaction.response.edit_message(content=f'{normal_game.get_result_board(self.undo_view.teams, self.undo_view.prev_blue_win_count, self.undo_view.prev_red_win_count, is_record=True)}',
+                                                    view=self.view)
+
+    class FinalizeButton(discord.ui.Button):
+        def __init__(self, undo_view, ctx, teams):
+            super().__init__(label=f"이대로 수정", style=discord.ButtonStyle.green)
+            self.undo_view = undo_view
+            self.teams = teams
+            self.ctx = ctx
+
+        async def callback(self, interaction: discord.Interaction):
+            press_user = Summoner(interaction.user)
+            self.view.clear_items()
+            await self.undo_view.ctx.send(f'{functions.get_nickname(press_user.nickname)}님이 '
+                                          f'이대로 수정 버튼을 눌렀습니다.')
+            await interaction.response.edit_message(content=f'{normal_game.get_result_board(self.undo_view.teams, self.undo_view.blue_win_count, self.undo_view.red_win_count, is_record=True)}',
+                                                    view=self.view)
+            for team, win_count, lose_count in zip(self.teams, [self.undo_view.blue_win_count, self.undo_view.red_win_count], [self.undo_view.red_win_count, self.undo_view.blue_win_count]):
+                prev_win_count = -self.undo_view.prev_blue_win_count if team == self.teams[0] else -self.undo_view.prev_red_win_count
+                prev_lose_count = -self.undo_view.prev_red_win_count if team == self.teams[0] else -self.undo_view.prev_blue_win_count
+
+                for summoner in team:
+                    await database.add_database_count(summoner, 'normal_game_win', prev_win_count)
+                    await database.add_database_count(summoner, 'normal_game_win', win_count)
+                    await database.add_database_count(summoner, 'normal_game_lose', prev_lose_count)
+                    await database.add_database_count(summoner, 'normal_game_lose', lose_count)
+
+            await self.undo_view.ctx.send(f'내전 기록이 수정되었습니다.')
+
+    class ResetButton(discord.ui.Button):
+        def __init__(self, undo_view):
+            super().__init__(label=f"초기화", style=discord.ButtonStyle.gray)
+            self.undo_view = undo_view
+
+        async def callback(self, interaction: discord.Interaction):
+            press_user = Summoner(interaction.user)
+            self.undo_view.blue_win_count = 0
+            self.undo_view.red_win_count = 0
+
+            # 각 버튼 라벨 초기화
+            for child in self.undo_view.children:
+                if isinstance(child, discord.ui.Button):
+                    if '블루팀' in child.label:
+                        child.label = '블루팀 승리 : 0'
+                    elif '레드팀' in child.label:
+                        child.label = '레드팀 승리 : 0'
+
+            await self.undo_view.ctx.send(f'{functions.get_nickname(press_user.nickname)}님이 '
+                                          f'초기화 버튼을 눌렀습니다.')
+            # 메시지 업데이트
+            await interaction.response.edit_message(content=f'{normal_game.get_result_board(self.undo_view.teams, self.undo_view.prev_blue_win_count, self.undo_view.prev_red_win_count, is_record=True)}',
+                                                    view=self.view)
+
+    record_undo_channel = bot.get_channel(channels.RECORD_UNDO_SERVER_ID)
+    view = RecordUndoView(ctx=record_undo_channel, teams=teams,
+                          prev_blue_win_count=prev_blue_win_count, prev_red_win_count=prev_red_win_count)
+    view.message = await record_undo_channel.send(content=f'{normal_game.get_result_board(teams, prev_blue_win_count, prev_red_win_count, is_record=True)}',
+                                                  view=view)
 
 
 # 20인 내전 4강 기록
