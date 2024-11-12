@@ -136,12 +136,7 @@ async def start_auction(ctx):
 
 
 async def start_test(ctx, members):
-    channel_id = ctx.channel.id
-
-    if channel_id != channels.TWENTY_AUCTION_CHANNEL_ID:
-        return
-
-    await twenty_auction.test_twenty_auction_record(ctx, members)
+    return
 
 
 async def finalize_game(ctx):

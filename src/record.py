@@ -208,6 +208,12 @@ async def manually_add_teams_record(ctx, members):
     if not (ctx.author.id == managers.MASULSA or ctx.author.id == managers.JUYE):
         return
 
+    channel_id = ctx.channel.id
+
+    if channel_id == channels.TWENTY_AUCTION_CHANNEL_ID:
+        await twenty_auction.test_twenty_auction_record(ctx, members)
+        return
+
     guild = ctx.guild
     masulsa = Summoner(guild.get_member(managers.MASULSA))
     juye = Summoner(guild.get_member(managers.JUYE))
@@ -350,6 +356,7 @@ async def record_twenty_semi_final(ctx, team_1, team_2):
             super().__init__(timeout=86400)
             self.team_1_win_count = 0
             self.team_2_win_count = 0
+            self.teams = teams
             self.add_item(Team1WinButton(self, team_1, team_2))
             self.add_item(Team2WinButton(self, team_1, team_2))
             self.add_item(FinalizeButton(self, ctx, teams, team_1, team_2))
@@ -364,7 +371,9 @@ async def record_twenty_semi_final(ctx, team_1, team_2):
 
         async def callback(self, interaction: discord.Interaction):
             press_user = Summoner(interaction.user)
-            if press_user not in self.record_view.teams[0] and press_user not in self.record_view.teams[1]:
+            if (press_user not in self.record_view.teams[0]
+                    and press_user not in self.record_view.teams[1] and
+                    press_user.id != managers.MASULSA):
                 await self.record_view.ctx.send(
                     f'20인 내전의 해당 게임에 참여한 사람만 누를 수 있습니다. '
                     f'{functions.get_nickname(press_user.nickname)}님 누르지 말아주세요.')
@@ -386,7 +395,9 @@ async def record_twenty_semi_final(ctx, team_1, team_2):
 
         async def callback(self, interaction: discord.Interaction):
             press_user = Summoner(interaction.user)
-            if press_user not in self.record_view.teams[0] and press_user not in self.record_view.teams[1]:
+            if (press_user not in self.record_view.teams[0]
+                    and press_user not in self.record_view.teams[1] and
+                    press_user.id != managers.MASULSA):
                 await self.record_view.ctx.send(
                     f'20인 내전의 해당 게임에 참여한 사람만 누를 수 있습니다. '
                     f'{functions.get_nickname(press_user.nickname)}님 누르지 말아주세요.')
@@ -410,7 +421,9 @@ async def record_twenty_semi_final(ctx, team_1, team_2):
 
         async def callback(self, interaction: discord.Interaction):
             press_user = Summoner(interaction.user)
-            if press_user not in self.record_view.teams[0] and press_user not in self.record_view.teams[1]:
+            if (press_user not in self.record_view.teams[0]
+                    and press_user not in self.record_view.teams[1] and
+                    press_user.id != managers.MASULSA):
                 await self.record_view.ctx.send(
                     f'20인 내전의 해당 게임에 참여한 사람만 누를 수 있습니다. '
                     f'{functions.get_nickname(press_user.nickname)}님 누르지 말아주세요.')
@@ -418,7 +431,7 @@ async def record_twenty_semi_final(ctx, team_1, team_2):
                 return
             await interaction.message.delete()
             await self.record_view.ctx.send(f'{functions.get_nickname(press_user.nickname)}님이 '
-                                            f'{self.team_1}승 +1 버튼을 누르셨습니다.')
+                                            f'이대로 확정 버튼을 누르셨습니다.')
             await finalize_twenty_game_semi_final(self.ctx, self.team_1, self.team_2, self.teams,
                                                   self.record_view.team_1_win_count, self.record_view.team_2_win_count)
 
@@ -431,7 +444,9 @@ async def record_twenty_semi_final(ctx, team_1, team_2):
 
         async def callback(self, interaction: discord.Interaction):
             press_user = Summoner(interaction.user)
-            if press_user not in self.record_view.teams[0] and press_user not in self.record_view.teams[1]:
+            if (press_user not in self.record_view.teams[0]
+                    and press_user not in self.record_view.teams[1] and
+                    press_user.id != managers.MASULSA):
                 await self.record_view.ctx.send(
                     f'20인 내전의 해당 게임에 참여한 사람만 누를 수 있습니다. '
                     f'{functions.get_nickname(press_user.nickname)}님 누르지 말아주세요.')
@@ -447,6 +462,9 @@ async def record_twenty_semi_final(ctx, team_1, team_2):
                         child.label = f'{team_1} 승 : 0'
                     elif team_2 in child.label:
                         child.label = f'{team_2} 승 : 0'
+
+            await self.record_view.ctx.send(f'{functions.get_nickname(press_user.nickname)}님이 '
+                                            f'초기화 버튼을 누르셨습니다.')
 
             # 메시지 업데이트
             await interaction.response.edit_message(content=twenty_game.get_twenty_game_board(self.team_1, self.team_2),
@@ -520,7 +538,8 @@ async def finalize_twenty_game_semi_final(ctx, team_1, team_2, teams, team_1_win
 
         async def callback(self, interaction: discord.Interaction):
             press_user = Summoner(interaction.user)
-            if press_user not in self.finalize_view.teams[0] and press_user not in self.finalize_view.teams[1]:
+            if press_user not in self.finalize_view.teams[0] and press_user not in self.finalize_view.teams[1]\
+                    and press_user.id != managers.MASULSA:
                 await self.finalize_view.ctx.send(
                     f'20인 내전의 해당 게임에 참여한 사람만 누를 수 있습니다. '
                     f'{functions.get_nickname(press_user.nickname)}님 누르지 말아주세요.'
@@ -543,6 +562,8 @@ async def record_twenty_final(ctx, team_1, team_2):
     class RecordUpdateView(discord.ui.View):
         def __init__(self, ctx, team_1, team_2, teams):
             super().__init__(timeout=86400)
+            self.ctx = ctx
+            self.teams = teams
             self.team_1_win_count = 0
             self.team_2_win_count = 0
             self.add_item(Team1WinButton(self, team_1, team_2))
@@ -559,7 +580,9 @@ async def record_twenty_final(ctx, team_1, team_2):
 
         async def callback(self, interaction: discord.Interaction):
             press_user = Summoner(interaction.user)
-            if press_user not in self.record_view.teams[0] and press_user not in self.record_view.teams[1]:
+            if (press_user not in self.record_view.teams[0]
+                    and press_user not in self.record_view.teams[1] and
+                    press_user.id != managers.MASULSA):
                 await self.record_view.ctx.send(
                     f'20인 내전의 해당 게임에 참여한 사람만 누를 수 있습니다. '
                     f'{functions.get_nickname(press_user.nickname)}님 누르지 말아주세요.')
@@ -567,6 +590,8 @@ async def record_twenty_final(ctx, team_1, team_2):
                 return
             self.record_view.team_1_win_count += 1
             self.label = f"{self.team_1} 승 : {self.record_view.team_1_win_count}"
+            await self.record_view.ctx.send(f'{functions.get_nickname(press_user.nickname)}님이 '
+                                            f'{self.team_1} 승 버튼을 누르셨습니다.')
             await interaction.response.edit_message(content=twenty_game.get_twenty_game_board(self.team_1, self.team_2),
                                                     view=self.view)
 
@@ -579,7 +604,9 @@ async def record_twenty_final(ctx, team_1, team_2):
 
         async def callback(self, interaction: discord.Interaction):
             press_user = Summoner(interaction.user)
-            if press_user not in self.record_view.teams[0] and press_user not in self.record_view.teams[1]:
+            if (press_user not in self.record_view.teams[0]
+                    and press_user not in self.record_view.teams[1] and
+                    press_user.id != managers.MASULSA):
                 await self.record_view.ctx.send(
                     f'20인 내전의 해당 게임에 참여한 사람만 누를 수 있습니다. '
                     f'{functions.get_nickname(press_user.nickname)}님 누르지 말아주세요.')
@@ -587,6 +614,8 @@ async def record_twenty_final(ctx, team_1, team_2):
                 return
             self.record_view.team_2_win_count += 1
             self.label = f"{self.team_2} 승 : {self.record_view.team_2_win_count}"
+            await self.record_view.ctx.send(f'{functions.get_nickname(press_user.nickname)}님이 '
+                                            f'{self.team_2} 승 버튼을 누르셨습니다.')
             await interaction.response.edit_message(content=twenty_game.get_twenty_game_board(self.team_1, self.team_2),
                                                     view=self.view)
 
@@ -601,13 +630,17 @@ async def record_twenty_final(ctx, team_1, team_2):
 
         async def callback(self, interaction: discord.Interaction):
             press_user = Summoner(interaction.user)
-            if press_user not in self.record_view.teams[0] and press_user not in self.record_view.teams[1]:
+            if (press_user not in self.record_view.teams[0]
+                    and press_user not in self.record_view.teams[1] and
+                    press_user.id != managers.MASULSA):
                 await self.record_view.ctx.send(
                     f'20인 내전의 해당 게임에 참여한 사람만 누를 수 있습니다. '
                     f'{functions.get_nickname(press_user.nickname)}님 누르지 말아주세요.')
                 await interaction.response.defer()
                 return
             await interaction.message.delete()
+            await self.record_view.ctx.send(f'{functions.get_nickname(press_user.nickname)}님이 '
+                                            f'이대로 확정 버튼을 누르셨습니다.')
             await finalize_twenty_game_final(self.record_view.ctx, self.record_view.teams, self.record_view.team_1,
                                              self.record_view.team_2, self.record_view.team_1_win_count, self.record_view.team_2_win_count)
 
@@ -620,7 +653,9 @@ async def record_twenty_final(ctx, team_1, team_2):
 
         async def callback(self, interaction: discord.Interaction):
             press_user = Summoner(interaction.user)
-            if press_user not in self.record_view.teams[0] and press_user not in self.record_view.teams[1]:
+            if (press_user not in self.record_view.teams[0]
+                    and press_user not in self.record_view.teams[1] and
+                    press_user.id != managers.MASULSA):
                 await self.record_view.ctx.send(
                     f'20인 내전의 해당 게임에 참여한 사람만 누를 수 있습니다. '
                     f'{functions.get_nickname(press_user.nickname)}님 누르지 말아주세요.')
@@ -636,6 +671,9 @@ async def record_twenty_final(ctx, team_1, team_2):
                         child.label = f'{self.team_1} 승 : 0'
                     elif self.team_2 in child.label:
                         child.label = f'{self.team_2} 승 : 0'
+
+            await self.record_view.ctx.send(f'{functions.get_nickname(press_user.nickname)}님이 '
+                                            f'초기화 버튼을 누르셨습니다.')
 
             # 메시지 업데이트
             await interaction.response.edit_message(content=twenty_game.get_twenty_game_board(self.team_1, self.team_2),
@@ -720,7 +758,8 @@ async def finalize_twenty_game_final(ctx, teams, team_1, team_2, team_1_win_coun
 
         async def callback(self, interaction: discord.Interaction):
             press_user = Summoner(interaction.user)
-            if press_user not in self.finalize_view.teams[0] and press_user not in self.finalize_view.teams[1]:
+            if press_user not in self.finalize_view.teams[0] and press_user not in self.finalize_view.teams[1]\
+                    and press_user.id != managers.MASULSA:
                 await self.finalize_view.ctx.send(
                     f'20인 내전의 해당 게임에 참여한 사람만 누를 수 있습니다. '
                     f'{functions.get_nickname(press_user.nickname)}님 누르지 말아주세요.'
