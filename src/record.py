@@ -354,6 +354,7 @@ async def record_twenty_semi_final(ctx, team_1, team_2):
     class RecordUpdateView(discord.ui.View):
         def __init__(self, ctx, team_1, team_2, teams):
             super().__init__(timeout=86400)
+            self.ctx = ctx
             self.team_1_win_count = 0
             self.team_2_win_count = 0
             self.teams = teams
