@@ -270,8 +270,12 @@ def get_twenty_recruit_board(message):
 
 async def reset_twenty_game(ctx):
     lolpark.twenty_summoner_list = None
-    lolpark.twenty_view = None
     lolpark.twenty_host = None
+    lolpark.twenty_view = None
+    lolpark.is_twenty_game = False
+    if lolpark.twenty_view_message:
+        await lolpark.twenty_view_message.delete()
+        lolpark.twenty_view_message = None
     await ctx.send('20인 내전을 초기화했습니다.')
 
 
