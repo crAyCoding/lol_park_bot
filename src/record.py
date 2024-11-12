@@ -383,7 +383,7 @@ async def record_twenty_semi_final(ctx, team_1, team_2):
             self.record_view.team_1_win_count += 1
             self.label = f"{self.team_1} 승 : {self.record_view.team_1_win_count}"
             await self.record_view.ctx.send(f'{functions.get_nickname(press_user.nickname)}님이 '
-                                            f'{self.team_1}승 +1 버튼을 누르셨습니다.')
+                                            f'{self.team_1} 승 버튼을 누르셨습니다.')
             await interaction.response.edit_message(content=twenty_game.get_twenty_game_board(self.team_1, self.team_2),
                                                     view=self.view)
 
@@ -407,7 +407,7 @@ async def record_twenty_semi_final(ctx, team_1, team_2):
             self.record_view.team_2_win_count += 1
             self.label = f"{self.team_2} 승 : {self.record_view.team_2_win_count}"
             await self.record_view.ctx.send(f'{functions.get_nickname(press_user.nickname)}님이 '
-                                            f'{self.team_2}승 +1 버튼을 누르셨습니다.')
+                                            f'{self.team_2} 승 버튼을 누르셨습니다.')
             await interaction.response.edit_message(content=twenty_game.get_twenty_game_board(self.team_1, self.team_2),
                                                     view=self.view)
 
@@ -565,6 +565,8 @@ async def record_twenty_final(ctx, team_1, team_2):
             super().__init__(timeout=86400)
             self.ctx = ctx
             self.teams = teams
+            self.team_1 = team_1
+            self.team_2 = team_2
             self.team_1_win_count = 0
             self.team_2_win_count = 0
             self.add_item(Team1WinButton(self, team_1, team_2))
