@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 
 import lolpark
 import database
+import channels
 from discord.ext import commands
 from summoner import Summoner
 from message_command import check_message
@@ -65,6 +66,21 @@ async def on_message_delete(message):
         return
 
     main_functions.delete_member_in_log(message)
+
+
+# 서버원 상태 바뀔 때 마다 수행
+@bot.event
+async def on_member_update(before, after):
+    # 역할이 추가된 경우를 확인
+    added_roles = [role for role in after.roles if role not in before.roles]
+
+    for role in added_roles:
+        if role.name == "인증":  # 인증 역할 받았을 경우
+            square_channel = bot.get_channel(channels.SQUARE_ID)
+            await square_channel.send(f"{after.mention}님이 새로 오셨습니다! 다들 환영인사 부탁드려요~\n"
+                                      f"<#1287080274135351448> 공지사항 한번 확인 부탁드립니다!\n"
+                                      f"<#1289635540492091527> 서버 규칙도 같이 확인 부탁드려요!\n"
+                                      f"<#1287072284300808276> <#1287072623829843998> 내전 참여하시는거라면 여기 두 채널도 확인 부탁드립니다!")
 
 
 @bot.command(name='비상탈출')
