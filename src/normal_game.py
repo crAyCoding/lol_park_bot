@@ -566,15 +566,15 @@ def get_game_board(teams):
 def get_result_board(teams, blue_win_count, red_win_count, is_record=False):
     blue_result = '승' if blue_win_count > red_win_count else '패' if blue_win_count < red_win_count else '무'
     red_result = '승' if blue_win_count < red_win_count else '패' if blue_win_count > red_win_count else '무'
-    board = f'[기록완료]' if is_record else f'[기록대기]\n'
-    board += f'```\n'
+    board = f'```\n'
     board += f'🟦  블루팀 ({blue_result}) {blue_win_count}승 {red_win_count}패\n\n'
     for blue_member in teams[0]:
         board += f'{blue_member.nickname}\n'
     board += f'\n🟥  레드팀 ({red_result}) {red_win_count}승 {blue_win_count}패\n\n'
     for red_member in teams[1]:
         board += f'{red_member.nickname}\n'
-    board += f'```'
+    board += f'```\n\n'
+    board += f'## [기록완료]' if is_record else f'## [기록대기]\n'
     return board
 
 
