@@ -245,6 +245,7 @@ async def record_undo_for_manager(teams, prev_blue_win_count, prev_red_win_count
             self.add_item(RedWinButton(self))
             self.add_item(FinalizeButton(self, ctx, teams))
             self.add_item(ResetButton(self))
+            self.add_item(GameResetButton(self, ctx, teams))
             self.message = None
 
         async def on_timeout(self):
@@ -340,6 +341,37 @@ async def record_undo_for_manager(teams, prev_blue_win_count, prev_red_win_count
             await interaction.response.edit_message(
                 content=f'{normal_game.get_result_board(self.undo_view.teams, self.undo_view.prev_blue_win_count, self.undo_view.prev_red_win_count, is_record=True)}',
                 view=self.view)
+
+    class GameResetButton(discord.ui.Button):
+        def __init__(self, undo_view, ctx, teams):
+            super().__init__(label=f"전적 기록 삭제", style=discord.ButtonStyle.red)
+            self.undo_view = undo_view
+            self.teams = teams
+            self.ctx = ctx
+
+        async def callback(self, interaction: discord.Interaction):
+            press_user = Summoner(interaction.user)
+            self.view.clear_items()
+            await self.undo_view.ctx.send(f'{functions.get_nickname(press_user.nickname)}님이 '
+                                          f'전적 기록 삭제 버튼을 눌렀습니다.')
+            await interaction.response.edit_message(
+                content=f'{normal_game.get_result_board(self.undo_view.teams, self.undo_view.blue_win_count, self.undo_view.red_win_count, is_record=True)}\n'
+                        f'[기록 삭제됨]',
+                view=self.view)
+            for team, win_count, lose_count in zip(self.teams,
+                                                   [self.undo_view.blue_win_count, self.undo_view.red_win_count],
+                                                   [self.undo_view.red_win_count, self.undo_view.blue_win_count]):
+                prev_win_count = -self.undo_view.prev_blue_win_count if team == self.teams[
+                    0] else -self.undo_view.prev_red_win_count
+                prev_lose_count = -self.undo_view.prev_red_win_count if team == self.teams[
+                    0] else -self.undo_view.prev_blue_win_count
+
+                for summoner in team:
+                    await database.add_database_count(summoner, 'normal_game_win', prev_win_count)
+                    await database.add_database_count(summoner, 'normal_game_lose', prev_lose_count)
+                    await database.add_database_count(summoner, 'normal_game_count', -1)
+
+            await self.undo_view.ctx.send(f'내전 기록을 삭제했습니다.')
 
     record_undo_channel = bot.get_channel(channels.RECORD_UNDO_SERVER_ID)
     view = RecordUndoView(ctx=record_undo_channel, teams=teams,
