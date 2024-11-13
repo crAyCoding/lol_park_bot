@@ -201,6 +201,7 @@ async def handle_game_team(ctx, sorted_summoners, summoners, host):
                 return
             await ctx.send(f'메모장으로 진행합니다.')
             await interaction.message.delete()
+            await finalize_with_notepad(ctx, sorted_summoners, summoners, host)
 
     class UndoButton(discord.ui.Button):
         def __init__(self):
@@ -220,6 +221,66 @@ async def handle_game_team(ctx, sorted_summoners, summoners, host):
     handle_team_view = HandleTeamView()
     await ctx.send(content=f'## {get_nickname(host.nickname)}님, '
                            f'팀장 두 분의 닉네임 버튼을 눌러주세요.', view=handle_team_view)
+
+
+# 메모장으로 진행 시
+async def finalize_with_notepad(ctx, sorted_summoners, summoners, host):
+
+    class NotepadView(discord.ui.View):
+        def __init__(self):
+            super().__init__(timeout=3600)
+            for summoner in sorted_summoners:
+                self.add_item(SummonerButton(summoner))
+            self.add_item(UndoButton())
+            self.summoners = sorted_summoners
+            self.blue_team = []
+
+    class SummonerButton(discord.ui.Button):
+        def __init__(self, summoner):
+            super().__init__(label=f"{summoner.nickname}")
+            self.summoner = summoner
+
+        async def callback(self, interaction: discord.Interaction):
+            press_user = Summoner(interaction.user)
+            if press_user != host:
+                await (interaction.response.edit_message
+                       (content=f'## {get_nickname(host.nickname)}님이 누른 것만 인식합니다. '
+                                f'{get_nickname(press_user.nickname)}님 누르지 말아주세요.',
+                        view=self.view))
+                return
+            self.style = discord.ButtonStyle.primary
+            self.disabled = True
+            self.view.blue_team.append(self.summoner)
+            self.view.summoners.remove(self.summoner)
+            if len(self.view.blue_team) == 5:
+                teams = [self.view.blue_team,self.view.summoners]
+                board_message = get_game_board(teams)
+                await interaction.message.delete()
+                await finalize_team(ctx, teams, board_message, summoners, host)
+                return
+            await (interaction.response.edit_message
+                   (content=f'## {get_nickname(host.nickname)}님, '
+                            f'블루팀 {5 - len(self.view.blue_team)}명의 닉네임 버튼을 눌러주세요.',
+                    view=self.view))
+
+    class UndoButton(discord.ui.Button):
+        def __init__(self):
+            super().__init__(label=f"팀장 선택으로 돌아가기", style=discord.ButtonStyle.red)
+
+        async def callback(self, interaction: discord.Interaction):
+            press_user = Summoner(interaction.user)
+            if press_user != host:
+                await (interaction.response.edit_message
+                       (content=f'## {get_nickname(host.nickname)}님이 누른 것만 인식합니다. '
+                                f'{get_nickname(press_user.nickname)}님 누르지 말아주세요.',
+                        view=self.view))
+                return
+            await interaction.message.delete()
+            await handle_game_team(ctx, sorted_summoners, summoners, host)
+
+    notepad_view = NotepadView()
+    await ctx.send(content=f'## {get_nickname(host.nickname)}님, '
+                           f'블루팀 5명의 닉네임 버튼을 눌러주세요.', view=notepad_view)
 
 
 # 블루팀 레드팀 고르기
