@@ -271,3 +271,33 @@ async def get_summoner_game_count_rank(summoner):
         # 커서 및 연결 닫기
         db.close()
         conn.close()
+
+
+# 20인 내전 참여 가능한지 확인 (내전 3회 이상)
+async def is_valid_twenty(summoner):
+    conn = sqlite3.connect(lolpark.summoners_db)
+    db = conn.cursor()
+
+    try:
+        query = f'SELECT normal_game_count FROM summoners WHERE id = ?'
+        # id에 따른 game_count 조회
+        db.execute(query, (summoner.id,))
+        result = db.fetchone()
+
+        # 결과 확인, 내전 횟수 3 이상이면 True
+        if result:
+            game_count = result[0]
+            if game_count >= 3:
+                return True
+            else:
+                return False
+        else:
+            return False
+
+    except sqlite3.Error as e:
+        print(f"An error occurred: {e}")
+        return False
+    finally:
+        # 커서 및 연결 닫기
+        db.close()
+        conn.close()

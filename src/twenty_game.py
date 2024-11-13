@@ -16,6 +16,12 @@ async def make_twenty_game(ctx, message):
             user = Summoner(interaction.user)
             is_valid_push = True
 
+            # 내전 3회 이상인지 체크, 내전 3회 미만이라면 버튼 처리 X
+            if not database.is_valid_twenty(user):
+                twenty_recruit_channel = bot.get_channel(channels.TWENTY_RECRUIT_CHANNEL_ID)
+                await twenty_recruit_channel.send(f'내전 3회 미만 서버원은 20인 내전 참여가 불가능합니다.')
+                is_valid_push = False
+
             # 같은 라인에 이미 등록했는지 체크, 등록했다면 유저 삭제
             for summoner in lolpark.twenty_summoner_list[line_name]:
                 if summoner == user:
