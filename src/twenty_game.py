@@ -4,6 +4,7 @@ import discord
 from summoner import Summoner
 import lolpark
 import functions
+import database
 
 
 # 20인 내전 모집
