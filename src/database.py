@@ -286,7 +286,7 @@ async def is_valid_twenty(summoner):
 
         # 결과 확인, 내전 횟수 3 이상이면 True
         if result:
-            game_count = result[0]
+            game_count = int(result[0])
             if game_count >= 3:
                 return True
             else:
