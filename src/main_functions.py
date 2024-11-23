@@ -63,11 +63,6 @@ async def show_summoner_record(ctx, member):
 # '!초기화' 입력 시 동작
 async def reset_game(ctx):
     channel_id = ctx.channel.id
-    user_id = ctx.author.id
-
-    if not (user_id == managers.MASULSA or user_id == managers.JUYE):
-        await ctx.send('개발자와 서버장만 가능해요~ 안돼요~ 돌아가요~')
-        return None
 
     if channel_id in channels.NORMAL_GAME_CHANNEL_ID_LIST:
         await normal_game.reset_normal_game(ctx)

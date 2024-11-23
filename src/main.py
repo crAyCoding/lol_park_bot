@@ -113,6 +113,7 @@ async def command_game_ghost(ctx):
 
 
 @bot.command(name='기록')
+@commands.has_role("관리자")
 async def command_record(ctx, *members: discord.Member):
     await record.manually_add_teams_record(ctx, members)
 
@@ -133,6 +134,7 @@ async def command_lose_manual(ctx, *members: discord.Member):
 
 
 @bot.command(name='초기화')
+@commands.has_role("관리자")
 async def command_reset(ctx):
     await main_functions.reset_game(ctx)
 

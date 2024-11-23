@@ -205,21 +205,19 @@ async def manually_add_summoner_win_lose(ctx, members, is_win):
 
 # 일반 내전 기록 수동 추가
 async def manually_add_teams_record(ctx, members):
-    if not (ctx.author.id == managers.MASULSA or ctx.author.id == managers.JUYE):
-        return
-
     channel_id = ctx.channel.id
 
     if channel_id == channels.TWENTY_AUCTION_CHANNEL_ID:
         await twenty_auction.test_twenty_auction_record(ctx, members)
         return
 
-    guild = ctx.guild
-    masulsa = Summoner(guild.get_member(managers.MASULSA))
-    juye = Summoner(guild.get_member(managers.JUYE))
-
     teams = [[], []]
-    summoners = [masulsa, juye]
+    summoners = []
+
+    guild = ctx.guild
+    for id in managers.ID_LIST:
+        summoners.append(Summoner(guild.get_member(id)))
+
     for index, member in enumerate(members, 1):
         summoner = Summoner(member)
         summoners.append(summoner)
