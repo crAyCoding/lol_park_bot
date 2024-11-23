@@ -544,13 +544,16 @@ async def finalize_twenty_game_semi_final(ctx, team_1, team_2, teams, team_1_win
                     view=finalize_view)
             await database.record_game_win_lose(self.teams, 'twenty_game',
                                                 self.team_1_win_count, self.team_2_win_count)
-            if self.team_1_win_count > self.team_2_win_count:
-                lolpark.twenty_final_teams.append(self.team_1)
-            else:
-                lolpark.twenty_final_teams.append(self.team_2)
             for team in self.teams:
                 for summoner in team:
                     await database.add_database_count(summoner, 'twenty_game_count')
+            if self.team_1_win_count > self.team_2_win_count:
+                lolpark.twenty_final_teams.append(self.team_1)
+            elif self.team_1_win_count < self.team_2_win_count:
+                lolpark.twenty_final_teams.append(self.team_2)
+            else:
+                winner_team = await select_twenty_semi_final_winner(self.ctx, self.team_1, self.team_2)
+                
             if len(lolpark.twenty_final_teams) == 2:
                 final_team_1 = lolpark.twenty_final_teams[0]
                 final_team_2 = lolpark.twenty_final_teams[1]
@@ -586,6 +589,29 @@ async def finalize_twenty_game_semi_final(ctx, team_1, team_2, teams, team_1_win
         content=twenty_game.get_result_board(teams, team_1, team_2, team_1_win_count, team_2_win_count),
         view=finalize_view)
     await finalize_view.start_timer()  # 타이머 시작
+
+
+async def select_twenty_semi_final_winner(ctx, team_1, team_2):
+
+    class SelectTwentySemiFinalView(discord.ui.View):
+        def __init__(self, ctx, team_1, team_2):
+            super().__init__(timeout=86400)
+            self.ctx = ctx
+            self.add_item(TeamWinButton(self, team_1))
+            self.add_item(TeamWinButton(self, team_2))
+
+    class TeamWinButton(discord.ui.Button):
+        def __init__(self, team):
+            super().__init__(label=f"{team}", style=discord.ButtonStyle.primary)
+            self.team = team
+
+        async def callback(self, interaction: discord.Interaction):
+            await interaction.message.delete()
+            return self.team
+        
+    select_view = SelectTwentySemiFinalView(ctx, team_1, team_2)
+    await ctx.send(content='## 최종 우승 팀을 결정해주세요.',
+                   view=select_view)
 
 
 # 20인 내전 결승 기록
