@@ -2,6 +2,8 @@ from datetime import datetime
 from discord.ui import Button, View
 import discord
 from summoner import Summoner
+from bot import bot
+import channels
 import lolpark
 import functions
 import database
