@@ -269,7 +269,8 @@ async def twenty_auction(host, team_head_line_number, ctx):
         else:
             dice_winner_team = max_score_teams[0]
         # 안내 메세지 출력
-        await ctx.send(f'## 각 팀으로 자동 이동됩니다. 봇 오류 방지를 위해 가만히 있어주시길 바랍니다.\n')
+        await ctx.send(f'## 각 팀으로 자동 이동됩니다. 봇 오류 방지를 위해 가만히 있어주시길 바랍니다.\n\n'
+                       f'## 1팀, 2팀 이동 후 살짝 지연 현상이 있을 수 있습니다. 작동 오류 아니니 오해 없으시길 바랍니다.')
         # 소환사 등록
         await add_twenty_summoners()
         # 사람들 각자 팀 채널로 강제 이동
