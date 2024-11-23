@@ -140,7 +140,7 @@ async def finalize_game(ctx):
 
 async def recruit_game_members(message):
     channel_id = message.channel.id
-    recognize_message_list = ['ㅅ', 't', 'T', '손', '발', 'ㅅㅅ', 'ㅅㅅㅅ', 'ㅅㅅㅅㅅ']
+    recognize_message_list = ['ㅅ', 't', 'T', '손']
 
     # 내전이 열려 있을 경우, 손 든 사람 모집
     if (lolpark.is_normal_game and channel_id == lolpark.normal_game_channel
