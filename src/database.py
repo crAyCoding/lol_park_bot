@@ -279,6 +279,16 @@ async def is_valid_twenty(summoner):
     db = conn.cursor()
 
     try:
+        pre_query = f'SELECT twenty_game_count FROM summoners WHERE id = ?'
+        # id에 따른 game_count 조회
+        db.execute(pre_query, (summoner.id,))
+        pre_result = db.fetchone()
+
+        if pre_result:
+            game_count = int(pre_result[0])
+            if game_count > 0:
+                return True
+
         query = f'SELECT normal_game_count FROM summoners WHERE id = ?'
         # id에 따른 game_count 조회
         db.execute(query, (summoner.id,))

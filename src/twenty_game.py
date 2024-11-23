@@ -21,8 +21,10 @@ async def make_twenty_game(ctx, message):
 
             # 내전 3회 이상인지 체크, 내전 3회 미만이라면 버튼 처리 X
             if not database.is_valid_twenty(user):
-                twenty_recruit_channel = bot.get_channel(channels.TWENTY_RECRUIT_CHANNEL_ID)
-                await twenty_recruit_channel.send(f'내전 3회 미만 서버원은 20인 내전 참여가 불가능합니다.')
+                await interaction.response.send_message(
+                    content='일반 내전 3회 미만 서버원은 20인 내전 참여가 불가능합니다.',
+                    ephemeral=True  # 이 옵션으로 메시지를 요청한 사용자에게만 보이게 설정
+                )
                 is_valid_push = False
 
             # 같은 라인에 이미 등록했는지 체크, 등록했다면 유저 삭제
