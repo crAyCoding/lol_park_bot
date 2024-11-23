@@ -115,7 +115,7 @@ async def recommend_discord():
     if target_time.time() == morning_time.time():
         await recommend_channel.send(f'좋은 아침입니다! `/추천` 한번씩 부탁드립니다!!\n{role.mention}')
     else:
-        await recommend_channel.send(f'저녁은 맛있게 드셨나요? 아직 안하셨다면 `/추천` 한번씩 부탁드립니다!!\n{role.mention}')
+        await recommend_channel.send(f'좋은 저녁입니다! `/추천` 한번씩 부탁드립니다!!\n{role.mention}')
 
     # 다음 실행을 위해 다시 태스크 생성 (오전 8시, 오후 8시 중 가장 가까운 시간에 맞추기)
     bot.loop.create_task(recommend_discord())
