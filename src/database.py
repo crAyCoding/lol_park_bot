@@ -274,7 +274,7 @@ async def get_summoner_game_count_rank(summoner):
 
 
 # 20인 내전 참여 가능한지 확인 (내전 3회 이상)
-async def is_valid_twenty(summoner):
+def is_valid_twenty(summoner):
     conn = sqlite3.connect(lolpark.summoners_db)
     db = conn.cursor()
 
