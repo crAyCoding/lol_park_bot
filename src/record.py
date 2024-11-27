@@ -553,6 +553,7 @@ async def finalize_twenty_game_semi_final(ctx, team_1, team_2, teams, team_1_win
                 lolpark.twenty_final_teams.append(self.team_2)
             else:
                 winner_team = await select_twenty_semi_final_winner(self.ctx, self.team_1, self.team_2)
+                lolpark.twenty_final_teams.append(winner_team)
                 
             if len(lolpark.twenty_final_teams) == 2:
                 final_team_1 = lolpark.twenty_final_teams[0]

@@ -303,8 +303,8 @@ def get_twenty_game_board(team_1, team_2):
 
 
 def get_result_board(teams, team_1, team_2, team_1_win_count, team_2_win_count, is_record=True):
-    team_1_result = '승' if team_1_win_count > team_2_win_count else '패'
-    team_2_result = '승' if team_1_win_count < team_2_win_count else '패'
+    team_1_result = '승' if team_1_win_count > team_2_win_count else '패' if team_1_win_count < team_2_win_count else '무'
+    team_2_result = '승' if team_1_win_count < team_2_win_count else '패' if team_1_win_count > team_2_win_count else '무'
     board = f'[기록완료]' if is_record else f'[기록대기]\n'
     board += f'```\n'
     board += f'{team_1} ({team_1_result}) {team_1_win_count}승 {team_2_win_count}패\n\n'
