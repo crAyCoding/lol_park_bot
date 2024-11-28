@@ -1,6 +1,6 @@
 # 롤파크 노예
 
-#### 디스코드 서버 '`롤파크`' 에서 이용 중인 디스코드 봇 코드 Repository입니다.
+#### 디스코드 리그오브레전드 내전 서버 '`롤파크`' 에서 이용 중인 디스코드 봇 Repository입니다.
 
 #### 디스코드 링크
 https://discord.gg/lolpark
@@ -17,21 +17,27 @@ https://discord.gg/lolpark
 - ![image](https://github.com/user-attachments/assets/77716e16-7e80-4b33-b023-2720cb3822b9)
 
 - 팀원이 다 모이면, 아래와 같이 해당 인원에게 mention 하며, 유저를 수정할 수 있는 기회를 부여합니다.
-- (사진)
+- ![내전 모집 완료](https://github.com/user-attachments/assets/19aac141-5fd8-4b0f-bbba-13d8bc596c96)
+
 - 확정 후에는, 팀장 두 명을 뽑아 팀원 뽑기를 이어서 진행할 수 있습니다.
-- (사진)
+- ![일반 내전 팀장 뽑기](https://github.com/user-attachments/assets/c19b1dc6-37e9-40b0-8a0e-db28929946b6)
+
 - 이후에는 진영을 결정하고, 뽑는 순서를 결정합니다. (주사위 결과가 높은 쪽에게 선택권을 부여합니다.)
-- (사진)
+- ![블루팀 레드팀 선택](https://github.com/user-attachments/assets/a56c890f-7b0d-46bb-856d-994a0e6ef356)
+- ![선뽑 후뽑](https://github.com/user-attachments/assets/bf7ef33e-b765-4b10-8462-b68128653900)
+
 - 마지막으로 각 팀장이 팀원을 뽑아주면, 결과 보드가 출력됩니다.
-- (사진)
+- ![일반 내전 전적 기록 보드](https://github.com/user-attachments/assets/14fa584d-4d15-4880-9f1c-df551bb2308c)
+
 - 결과 보드 출력 이후, 각 팀원들은 정해진 음성 채널로 자동 이동합니다.
 
 ### 일반 내전 기록
 
 - 모집 완료 후, 전적을 등록할 수 있는 View가 출력됩니다.
-- (사진)
 - 내전에 참여한 인원만 버튼을 누를 수 있는 권한이 주어지며, 버튼 결과에 따라 기록이 저장됩니다.
 - 잘못 눌렀을 경우를 대비해 수정할 시간 '60초'가 주어집니다.
+- ![일반 내전 전적 기록 완료 보드](https://github.com/user-attachments/assets/132dbd86-40d8-4913-9a02-65c1eef85819)
+
 
 ### 20인 내전 모집
 
@@ -39,37 +45,47 @@ https://discord.gg/lolpark
 - `!내전` 키워드를 통해 20인 내전을 엽니다. `20인내전모집` 채널에서만 가능합니다.
 - 각 라인 별로 4명씩 모아, 최소 20명이 되었을 때 `!마감` 키워드를 이용하여 결과를 도출합니다.
 - 모집 예시
-- (사진)
+- ![20인 내전 모집](https://github.com/user-attachments/assets/47ea3d17-5783-4c7f-9980-c55a2b7eb0ef)
+
 - 결과 예시
-- (사진)
+- ![20인 내전 팀장](https://github.com/user-attachments/assets/546bae89-026b-420c-9af7-5b822f7d4fbc)
+- ![20인 내전 팀원](https://github.com/user-attachments/assets/677c608c-7090-4547-80be-fb6344b1a531)
+- ![20인 내전 대기](https://github.com/user-attachments/assets/f76ecef1-53dd-4b97-8830-4f4fb4f5ffb9)
+
 - 이후 `20인내전경매` 채널에서 `!경매`를 통해 경매를 진행할 수 있습니다.
 
 ### 20인 내전 경매
 
 -  `20인내전경매` 채널에서 `!경매`를 통해 경매를 진행할 수 있습니다.
-- 먼저 라인별 인원을 수정할 수 있는 기회를 부여합니다.
-- (사진)
+- 먼저 라인별 인원을 수정할 수 있는 기회를 부여합니다. (일반 내전과 동일)
 - 참여 인원이 확정되면 `경매 시작` 버튼이 나오고, 이 버튼을 누른 사람이 경매의 호스트가 됩니다.
 - 경매의 호스트는 출력되는 경매 현황에 따라 경매를 진행합니다.
 - 팀장을 제외한 인원 중 무작위로 한명씩 출력되며, 경매 진행 결과에 따라 `n팀 m` 혹은 `유찰` 로 경매를 진행합니다.
 - 경매가 완료되면 각 팀의 채널로 자동 이동합니다.
 - 이후 남은 점수가 가장 높은 팀이 4강에서 상대할 팀을 결정하며, 이 결과에 따라 두개의 전적 기록 보드가 출력됩니다.
-- (사진)
+- ![20인 내전 4강 기록 보드](https://github.com/user-attachments/assets/604cbb35-9cea-49ae-91e3-0f590bc6b170)
+
 - 결승 진출 두 팀이 확정되면 두 팀의 결승 기록의 전적 기록 보드가 출력됩니다.
-- (사진)
+- ![20인 내전 결승](https://github.com/user-attachments/assets/003c500e-0c82-4a91-a1b1-9f5964eea486)
+
 - 우승이 확정되면, `20인내전우승` 채널에 우승자 기록이 추가됩니다.
-- (사진)
+- ![20인 내전 우승](https://github.com/user-attachments/assets/0e68b7cf-9420-41e3-8b3a-ee187dd36c86)
+
 
 ### 전적 검색
 
 - `내전전적` 채널에서 현재까지의 내전 전적을 출력할 수 있습니다.
 - `!전적` 을 통해 본인 전적 출력이 가능하며, 누군가를 언급할 경우 언급한 인원의 전적을 확인할 수 있습니다.
-- (사진)
+- ![내전 전적 검색](https://github.com/user-attachments/assets/68914bf6-cfb5-422c-b6bf-4393062590bf)
+- `!내전악귀` 를 통해 이 달의 가장 내전 많이 한 인원 TOP 15를 출력할 수 있습니다.
+- ![내전악귀](https://github.com/user-attachments/assets/0ec3afd3-d2be-4283-a22f-447985beb84c)
+
 
 ### 서버 환영
 
 - `롤파크` 내에서 서버원 역할에 해당하는 `인증` 역할이 부여되면, `광장채팅` 에 환영 문구가 출력됩니다.
-- (사진)
+- ![서버 환영 이미지](https://github.com/user-attachments/assets/96f0f9bb-25b2-4bb5-9854-bf8f0cf15baa)
+
 
 ### 40인 내전 - 추후 추가 예정
 
@@ -79,7 +95,7 @@ https://discord.gg/lolpark
 - 결과 예시
 - 경매 예시
 
-4. 명령어 (현재 비활성화)
+### 명령어 (현재 비활성화)
 
 - `!(text)`를 이용해 서버 내에서 특정 인물을 대상으로 한 명령어가 출력됩니다.
 - 디스코드 서버 내에서 추가 문의하여 사용할 수 있습니다.
