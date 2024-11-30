@@ -45,8 +45,8 @@ async def end_game(ctx):
         await twenty_game.end_twenty_game(ctx)
 
 
-# '!전적' 입력 시 동작
-async def show_summoner_record(ctx, member):
+# '!전적', '!통산전적' 입력 시 동작
+async def show_summoner_record(ctx, member, is_total=False):
     channel_id = ctx.channel.id
     # 멘션이 없으면 자기 자신의 정보로 설정, 있으면 멘션된 사용자로 설정
     if member is None:
@@ -55,8 +55,9 @@ async def show_summoner_record(ctx, member):
         summoner = Summoner(member)
 
     if channel_id == channels.RECORD_SERVER_ID:
+        await database.add_summoner(summoner, is_total=True)
         await database.add_summoner(summoner)
-        record_message = await database.get_summoner_record_message(summoner)
+        record_message = await database.get_summoner_record_message(summoner, is_total)
         await ctx.send(record_message)
 
 

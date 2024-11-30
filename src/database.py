@@ -9,22 +9,26 @@ summoners_table = 'summoners'
 total_summoners_table = 'total_summoners'
 
 # 소환사 등록
-async def add_summoner(summoner):
+async def add_summoner(summoner, is_total=False):
     conn = sqlite3.connect(lolpark.summoners_db)
     db = conn.cursor()
     try:
+        table = f'total_summoners' if is_total else f'summoners'
+
+        query = f'SELECT id FROM {table} WHERE id = ?'
         # 해당 id가 존재하는지 확인
-        db.execute('SELECT id FROM summoners WHERE id = ?', (summoner.id,))
+        db.execute(query, (summoner.id,))
         result = db.fetchone()
 
         # id가 존재하지 않으면 삽입
         if result is None:
-            db.execute('''
-            INSERT INTO summoners (id, display_name, score, rank, normal_game_count, normal_game_win, 
+            insert_query = f'''
+            INSERT INTO {table} (id, display_name, score, rank, normal_game_count, normal_game_win, 
             normal_game_lose, twenty_game_count, twenty_game_winner, twenty_game_final, twenty_game_win, twenty_game_lose,
             russian_roulette) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''',
+            '''
+            db.execute(insert_query,
                        (summoner.id, summoner.nickname, summoner.score, summoner.rank, 0, 0, 0, 0, 0, 0, 0, 0, 0))
             conn.commit()
             return True

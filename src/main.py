@@ -107,6 +107,11 @@ async def command_record(ctx, member: discord.Member = None):
     await main_functions.show_summoner_record(ctx, member)
 
 
+@bot.command(name='통산전적')
+async def command_total_record(ctx, member: discord.Member = None):
+    await main_functions.show_summoner_record(ctx, member, is_total=True)
+
+
 @bot.command(name='내전악귀')
 async def command_game_ghost(ctx):
     await main_functions.show_summoner_most_normal_game(ctx)
