@@ -5,6 +5,8 @@ import lolpark
 from summoner import Summoner
 from bot import bot
 
+summoners_table = 'summoners'
+total_summoners_table = 'total_summoners'
 
 # 소환사 등록
 async def add_summoner(summoner):
@@ -101,10 +103,19 @@ def create_table():
 
 
 # 데이터베이스 값 가져오기
-async def get_database_value(summoner, value):
+async def get_database_value(summoner, value, is_total=False):
     conn = sqlite3.connect(lolpark.summoners_db)
     db = conn.cursor()
     try:
+        if is_total:
+            total_query = f'SELECT COALESCE(s.{value}, 0) + t.{value} AS total_value FROM total_summoners AS t LEFT JOIN summoners AS s ON s.id = t.id WHERE t.id = ?;'
+            db.execute(total_query, (summoner.id,))
+            total_result = db.fetchone()
+            if total_result:
+                return result[0]
+            else:
+                return 0
+
         query = f'SELECT {value} FROM summoners WHERE id = ?'
         # id에 따른 game_count 조회
         db.execute(query, (summoner.id,))
@@ -126,28 +137,32 @@ async def get_database_value(summoner, value):
 
 
 # 내전 전적 메세지 가져오기
-async def get_summoner_record_message(summoner):
-    normal_game_count = await get_database_value(summoner, 'normal_game_count')
-    normal_game_win = await get_database_value(summoner, 'normal_game_win')
-    normal_game_lose = await get_database_value(summoner, 'normal_game_lose')
-    twenty_game_count = await get_database_value(summoner, 'twenty_game_count')
-    twenty_game_win = await get_database_value(summoner, 'twenty_game_win')
-    twenty_game_lose = await get_database_value(summoner, 'twenty_game_lose')
-    twenty_game_winner = await get_database_value(summoner, 'twenty_game_winner')
-    twenty_game_final = await get_database_value(summoner, 'twenty_game_final')
+async def get_summoner_record_message(summoner, is_total=False):
+    normal_game_count = await get_database_value(summoner, 'normal_game_count', is_total)
+    normal_game_win = await get_database_value(summoner, 'normal_game_win', is_total)
+    normal_game_lose = await get_database_value(summoner, 'normal_game_lose', is_total)
+    twenty_game_count = await get_database_value(summoner, 'twenty_game_count', is_total)
+    twenty_game_win = await get_database_value(summoner, 'twenty_game_win', is_total)
+    twenty_game_lose = await get_database_value(summoner, 'twenty_game_lose', is_total)
+    twenty_game_winner = await get_database_value(summoner, 'twenty_game_winner', is_total)
+    twenty_game_final = await get_database_value(summoner, 'twenty_game_final', is_total)
     is_joint, game_rank = await get_summoner_game_count_rank(summoner)
 
-    if normal_game_count < 3 and twenty_game_count == 0:
+
+    if not is_valid_twenty(summoner):
         return (f'### {functions.get_nickname(summoner.nickname)}\n\n'
                 f'일반 내전 참여 횟수 : {normal_game_count}회\n\n'
                 f'내전 횟수 3회 미만인 소환사는 전적 검색 기능을 제공하지 않습니다.')
 
     record_message = f''
+    if is_total:
+        record_message += f'## [통산 전적]\n\n'
     record_message += (f'## {functions.get_nickname(summoner.nickname)}\n\n'
                        f'### 전체 내전 참여 횟수 : {normal_game_count + twenty_game_count}회, '
-                       f'{normal_game_win + normal_game_lose + twenty_game_win + twenty_game_lose}전 '
-                       f"({'공동 ' if is_joint else ''}{game_rank}등) "
-                       f'{normal_game_win + twenty_game_win}승 {normal_game_lose + twenty_game_lose}패\n\n')
+                       f'{normal_game_win + normal_game_lose + twenty_game_win + twenty_game_lose}전 ')
+    if not is_total:
+        record_message += f"({'공동 ' if is_joint else ''}{game_rank}등) "
+    record_message += f'{normal_game_win + twenty_game_win}승 {normal_game_lose + twenty_game_lose}패\n\n'
     record_message += f'일반 내전 참여 횟수 : {normal_game_count}회\n'
     record_message += (f'일반 내전 전적 : {normal_game_win + normal_game_lose}전 '
                        f'{normal_game_win}승 {normal_game_lose}패, '
@@ -200,7 +215,7 @@ def get_top_normal_game_players():
         conn.close()
 
 
-# 일반 내전 탑 텐 메세지 가져오기
+# 일반 내전 TOP 15 메세지 가져오기
 async def get_summoner_most_normal_game_message():
     most_normal_game_message = f'## 내전 악귀 명단\n\n'
     top_ten = get_top_normal_game_players()
@@ -227,7 +242,6 @@ async def get_summoner_game_count_rank(summoner):
     db = conn.cursor()
 
     try:
-        # 현재 소환사의 총 게임 수
         db.execute('''
         SELECT normal_game_win + normal_game_lose + twenty_game_win + twenty_game_lose AS total_games
         FROM summoners
@@ -279,7 +293,8 @@ def is_valid_twenty(summoner):
     db = conn.cursor()
 
     try:
-        pre_query = f'SELECT twenty_game_count FROM summoners WHERE id = ?'
+
+        pre_query = f'SELECT COALESCE(s.twenty_game_count, 0) + t.twenty_game_count AS total_value FROM total_summoners AS t LEFT JOIN summoners AS s ON s.id = t.id WHERE t.id = ?;'
         # id에 따른 game_count 조회
         db.execute(pre_query, (summoner.id,))
         pre_result = db.fetchone()
@@ -289,7 +304,7 @@ def is_valid_twenty(summoner):
             if game_count > 0:
                 return True
 
-        query = f'SELECT normal_game_count FROM summoners WHERE id = ?'
+        query = f'SELECT COALESCE(s.normal_game_count, 0) + t.normal_game_count AS total_value FROM total_summoners AS t LEFT JOIN summoners AS s ON s.id = t.id WHERE t.id = ?;'
         # id에 따른 game_count 조회
         db.execute(query, (summoner.id,))
         result = db.fetchone()
@@ -311,3 +326,47 @@ def is_valid_twenty(summoner):
         # 커서 및 연결 닫기
         db.close()
         conn.close()
+
+
+# 내전 전적 메세지 가져오기
+async def get_total_summoner_record_message(summoner):
+    normal_game_count = await get_database_value(summoner, 'normal_game_count')
+    normal_game_win = await get_database_value(summoner, 'normal_game_win')
+    normal_game_lose = await get_database_value(summoner, 'normal_game_lose')
+    twenty_game_count = await get_database_value(summoner, 'twenty_game_count')
+    twenty_game_win = await get_database_value(summoner, 'twenty_game_win')
+    twenty_game_lose = await get_database_value(summoner, 'twenty_game_lose')
+    twenty_game_winner = await get_database_value(summoner, 'twenty_game_winner')
+    twenty_game_final = await get_database_value(summoner, 'twenty_game_final')
+    is_joint, game_rank = await get_summoner_game_count_rank(summoner)
+
+    if normal_game_count < 3 and twenty_game_count == 0:
+        return (f'### {functions.get_nickname(summoner.nickname)}\n\n'
+                f'일반 내전 참여 횟수 : {normal_game_count}회\n\n'
+                f'내전 횟수 3회 미만인 소환사는 전적 검색 기능을 제공하지 않습니다.')
+
+    record_message = f''
+    record_message += (f'## {functions.get_nickname(summoner.nickname)}\n\n'
+                       f'### 전체 내전 참여 횟수 : {normal_game_count + twenty_game_count}회, '
+                       f'{normal_game_win + normal_game_lose + twenty_game_win + twenty_game_lose}전 '
+                       f"({'공동 ' if is_joint else ''}{game_rank}등) "
+                       f'{normal_game_win + twenty_game_win}승 {normal_game_lose + twenty_game_lose}패\n\n')
+    record_message += f'일반 내전 참여 횟수 : {normal_game_count}회\n'
+    record_message += (f'일반 내전 전적 : {normal_game_win + normal_game_lose}전 '
+                       f'{normal_game_win}승 {normal_game_lose}패, '
+                       f'승률 : {functions.calculate_win_rate(normal_game_win, normal_game_lose)}\n\n')
+    if twenty_game_count > 0:
+        record_message += (f'20인 내전 참여 횟수 : {twenty_game_count}회\n'
+                           f'20인 내전 우승 횟수 : {twenty_game_winner}회, '
+                           f'우승 확률 : '
+                           f'{functions.calculate_win_rate(twenty_game_winner, twenty_game_count - twenty_game_winner)}'
+                           f'\n'
+                           f'20인 내전 결승 진출 횟수 : {twenty_game_final}회, '
+                           f'결승 진출 확률 : '
+                           f'{functions.calculate_win_rate(twenty_game_final, twenty_game_count - twenty_game_final)}'
+                           f'\n'
+                           f'20인 내전 전적 : {twenty_game_win + twenty_game_lose}전 '
+                           f'{twenty_game_win}승 {twenty_game_lose}패,'
+                           f'승률 : {functions.calculate_win_rate(twenty_game_win, twenty_game_lose)}\n')
+
+    return record_message
