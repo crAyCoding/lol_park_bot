@@ -116,7 +116,7 @@ async def get_database_value(summoner, value, is_total=False):
             db.execute(total_query, (summoner.id,))
             total_result = db.fetchone()
             if total_result:
-                return result[0]
+                return total_result[0]
             else:
                 return 0
 
