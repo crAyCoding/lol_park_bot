@@ -97,9 +97,7 @@ async def close_normal_game(ctx, summoners, host):
             confirmed_summoners = [member.summoner for member in view.members]
 
             sorted_summoners = sort_game_members(confirmed_summoners)
-            sorted_summoners_message = get_result_sorted_by_tier(sorted_summoners)
 
-            await ctx.send(sorted_summoners_message)
             await handle_game_team(ctx, sorted_summoners, summoners, host)
 
     view = GameView()
@@ -147,6 +145,7 @@ async def end_fearless_game(ctx):
 # 팀장 정하기, 메모장으로 진행, 명단 수정
 async def handle_game_team(ctx, sorted_summoners, summoners, host):
     team_head_list = []
+    sorted_summoners_message = get_result_sorted_by_tier(sorted_summoners)
 
     class GameMember:
         def __init__(self, index):
@@ -171,7 +170,7 @@ async def handle_game_team(ctx, sorted_summoners, summoners, host):
             press_user = Summoner(interaction.user)
             if press_user != host:
                 await (interaction.response.edit_message
-                       (content=f'## {get_nickname(host.nickname)}님이 누른 것만 인식합니다. '
+                       (content=f'{sorted_summoners_message} \n\n## {get_nickname(host.nickname)}님이 누른 것만 인식합니다. '
                                 f'{get_nickname(press_user.nickname)}님 누르지 말아주세요.',
                         view=self.view))
                 return
@@ -184,7 +183,7 @@ async def handle_game_team(ctx, sorted_summoners, summoners, host):
                 await choose_blue_red_game(ctx, team_head_list, self.view.users, summoners, host)
                 return
 
-            await interaction.response.edit_message(content=f'## 두번째 팀장 닉네임 버튼을 눌러주세요.',
+            await interaction.response.edit_message(content=f'{sorted_summoners_message} \n\n## 두번째 팀장 닉네임 버튼을 눌러주세요.',
                                                     view=self.view)
 
     class StopButton(discord.ui.Button):
@@ -195,7 +194,7 @@ async def handle_game_team(ctx, sorted_summoners, summoners, host):
             press_user = Summoner(interaction.user)
             if press_user != host:
                 await (interaction.response.edit_message
-                       (content=f'## {get_nickname(host.nickname)}님이 누른 것만 인식합니다. '
+                       (content=f'{sorted_summoners_message} \n\n## {get_nickname(host.nickname)}님이 누른 것만 인식합니다. '
                                 f'{get_nickname(press_user.nickname)}님 누르지 말아주세요.',
                         view=self.view))
                 return
@@ -211,7 +210,7 @@ async def handle_game_team(ctx, sorted_summoners, summoners, host):
             press_user = Summoner(interaction.user)
             if press_user != host:
                 await (interaction.response.edit_message
-                       (content=f'## {get_nickname(host.nickname)}님이 누른 것만 인식합니다. '
+                       (content=f'{sorted_summoners_message} \n\n## {get_nickname(host.nickname)}님이 누른 것만 인식합니다. '
                                 f'{get_nickname(press_user.nickname)}님 누르지 말아주세요.',
                         view=self.view))
                 return
@@ -219,7 +218,9 @@ async def handle_game_team(ctx, sorted_summoners, summoners, host):
             await close_normal_game(ctx, summoners, host)
 
     handle_team_view = HandleTeamView()
-    await ctx.send(content=f'## {get_nickname(host.nickname)}님, '
+
+    await ctx.send(content=f'{sorted_summoners_message}\n\n'
+                           f'## {get_nickname(host.nickname)}님, '
                            f'팀장 두 분의 닉네임 버튼을 눌러주세요.', view=handle_team_view)
 
 
