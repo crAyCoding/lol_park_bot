@@ -163,6 +163,10 @@ async def finalize_normal_game_record(ctx, blue_win_count, red_win_count, summon
                     await database.add_database_count(summoner, 'normal_game_count')
             await database.record_game_win_lose(self.teams, 'normal_game', self.blue_win_count, self.red_win_count)
             await record_undo_for_manager(self.teams, self.blue_win_count, self.red_win_count)
+            christmas_channel = bot.get_channel(1320671146445770806)
+            for team in self.teams:
+                for summoner in team:
+                    await christmas_channel.send(f'{summoner.nickname}')
             self.stop()
 
     class UndoButton(discord.ui.Button):
