@@ -147,8 +147,6 @@ async def recruit_game_members(message):
     if (lolpark.is_normal_game and channel_id == lolpark.normal_game_channel
             and message.content in recognize_message_list):
         user = Summoner(message.author)
-        if user.nickname == 'T1 zeus #KR222 / D3 / MID':
-            await message.channel.send('우와! 대머리다!!')
         if user in lolpark.normal_game_log:
             lolpark.normal_game_log[user].append(message.id)
         else:
