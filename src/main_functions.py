@@ -24,8 +24,14 @@ async def make_game(ctx, message):
     if channel_id in channels.NORMAL_GAME_CHANNEL_ID_LIST and not lolpark.is_normal_game:
         lolpark.is_normal_game = await normal_game.make_normal_game(ctx, message)
 
-    if channel_id == channels.GAME_FEARLESS_A_RECRUIT_CHANNEL_ID:
-        await normal_game.make_fearless_game(ctx, message)
+    if channel_id == channels.GAME_FEARLESS_A_RECRUIT_CHANNEL_ID and lolpark.fearless_game_log is None:
+        await normal_game.make_special_game(ctx, message, 'FEARLESS')
+    
+    if channel_id == channels.TIER_LIMITED_RECRUIT_CHANNEL_ID and lolpark.tier_limited_game_log is None:
+        await normal_game.make_special_game(ctx, message, 'TIER_LIMIT')
+    
+    if channel_id == channels.ARAM_RECRUIT_CHANNEL_ID and lolpark.aram_game_log is None:
+        await normal_game.make_special_game(ctx, message, 'ARAM')
 
     if channel_id == channels.TWENTY_RECRUIT_CHANNEL_ID:
         await twenty_game.make_twenty_game(ctx, message)
@@ -38,8 +44,14 @@ async def end_game(ctx):
     if channel_id == lolpark.normal_game_channel and lolpark.is_normal_game:
         lolpark.is_normal_game = await normal_game.end_normal_game(ctx)
 
-    if channel_id == channels.GAME_FEARLESS_A_RECRUIT_CHANNEL_ID:
-        await normal_game.end_fearless_game(ctx)
+    if channel_id == channels.GAME_FEARLESS_A_RECRUIT_CHANNEL_ID and lolpark.fearless_game_log is not None:
+        await normal_game.end_special_game(ctx, 'FEARLESS')
+
+    if channel_id == channels.TIER_LIMITED_RECRUIT_CHANNEL_ID and lolpark.tier_limited_game_log is not None:
+        await normal_game.end_special_game(ctx, 'TIER_LIMIT')
+
+    if channel_id == channels.ARAM_RECRUIT_CHANNEL_ID and lolpark.aram_game_log is not None:
+        await normal_game.end_special_game(ctx, 'ARAM')
 
     if channel_id == channels.TWENTY_RECRUIT_CHANNEL_ID:
         await twenty_game.end_twenty_game(ctx)

@@ -28,18 +28,31 @@ async def make_normal_game(ctx, message='3판 2선 모이면 바로 시작'):
     return True
 
 
-# 피어리스 내전 모집
-async def make_fearless_game(ctx, message='3판 2선 모이면 바로 시작'):
+# 피어리스, 티어 제한, 칼바람 내전 모집
+async def make_special_game(ctx, message='모이면 바로 시작', type='NONE'):
 
     user = Summoner(ctx.author)
-    lolpark.fearless_game_log = {user: [ctx.message.id]}
 
     # 내전 역할 가져오기
     role_name = '내전'
     role = discord.utils.get(ctx.guild.roles, name=role_name)
+    game_type = '피어리스' if type == 'FEARLESS' \
+                 else '티어 제한' if type == 'TIER_LIMIT' \
+                 else '칼바람'
+    
+    if type == 'FEARLESS':
+        lolpark.fearless_game_log = {user: [ctx.message.id]}
+        lolpark.fearless_game_creator = Summoner(ctx.author)
+    
+    if game_type == 'TIER_LIMIT':
+        lolpark.tier_limited_game_log = {user: [ctx.message.id]}
+        lolpark.tier_limited_game_log = Summoner(ctx.author)
+    
+    if game_type == 'ARAM':
+        lolpark.aram_game_log = {user: [ctx.message.id]}
+        lolpark.aram_game_creator = Summoner(ctx.author)
 
-    lolpark.fearless_game_creator = Summoner(ctx.author)
-    await ctx.send(f'{get_nickname(ctx.author.display_name)} 님이 피어리스 내전을 모집합니다!\n'
+    await ctx.send(f'{get_nickname(ctx.author.display_name)} 님이 {game_type} 내전을 모집합니다!\n'
                    f'[ {message} ]\n{role.mention}')
 
 
@@ -125,21 +138,36 @@ async def end_normal_game(ctx):
     return False
 
 
-# 피어리스 내전 쫑
-async def end_fearless_game(ctx):
+# 스페셜 내전 쫑
+async def end_special_game(ctx, type):
 
-    if lolpark.fearless_game_creator != Summoner(ctx.author):
+    game_creator = lolpark.fearless_game_creator if type == 'FEARLESS' \
+                    else lolpark.tier_limited_game_creator if type == 'TIER_LIMIT' \
+                    else lolpark.aram_game_creator
+    
+    game_type = '피어리스' if type == 'FEARLESS' \
+                 else '티어 제한' if type == 'TIER_LIMIT' \
+                 else '칼바람'
+
+    if game_creator != Summoner(ctx.author):
         return
 
     # 내전 역할 가져오기
     role_name = '내전'
     role = discord.utils.get(ctx.guild.roles, name=role_name)
 
-    await ctx.send(f'피어리스 내전 쫑내겠습니다~\n{role.mention}')
+    await ctx.send(f'{game_type} 내전 쫑내겠습니다~\n{role.mention}')
 
     # 초기화
-    lolpark.fearless_game_log = None
-    lolpark.fearless_game_creator = None
+    if type == 'FEARLESS':
+        lolpark.fearless_game_log = None
+        lolpark.fearless_game_creator = None
+    if type == 'TIER_LIMIT':
+        lolpark.tier_limited_game_log = None
+        lolpark.tier_limited_game_creator = None
+    if type == 'ARAM':
+        lolpark.aram_game_log = None
+        lolpark.aram_game_creator = None
 
 
 # 팀장 정하기, 메모장으로 진행, 명단 수정
