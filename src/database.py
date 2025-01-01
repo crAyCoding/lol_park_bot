@@ -24,8 +24,7 @@ async def add_summoner(summoner, is_total=False):
         if result is None:
             insert_query = f'''
             INSERT INTO {table} (id, display_name, score, rank, normal_game_count, normal_game_win, 
-            normal_game_lose, twenty_game_count, twenty_game_winner, twenty_game_final, twenty_game_win, twenty_game_lose,
-            russian_roulette) 
+            normal_game_lose, twenty_game_count, twenty_game_winner, twenty_game_final, twenty_game_win, twenty_game_lose) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             '''
             db.execute(insert_query,
@@ -97,8 +96,7 @@ def create_table():
         twenty_game_winner INTEGER NOT NULL,
         twenty_game_final INTEGER NOT NULL,
         twenty_game_win INTEGER NOT NULL,
-        twenty_game_lose INTEGER NOT NULL,
-        russian_roulette INTEGER NOT NULL
+        twenty_game_lose INTEGER NOT NULL
     )
     ''')
     conn.commit()
