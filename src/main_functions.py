@@ -7,7 +7,7 @@ import channels
 import lolpark
 import normal_game
 import database
-import managers
+import functions
 import twenty_game
 import twenty_auction
 from summoner import Summoner
@@ -163,21 +163,16 @@ async def recruit_game_members(message):
             lolpark.is_normal_game = False
 
     # 피어리스 내전이 열려 있을 경우, 손 든 사람 모집
-    if (lolpark.fearless_game_log is not None and message.content in recognize_message_list
-            and channel_id == channels.GAME_FEARLESS_A_RECRUIT_CHANNEL_ID):
-        user = Summoner(message.author)
-        if user in lolpark.fearless_game_log:
-            lolpark.fearless_game_log[user].append(message.id)
-        else:
-            lolpark.fearless_game_log[user] = [message.id]
-        # 참여자 수가 10명이면 내전 자동 마감
-        if len(lolpark.fearless_game_log) == 10:
-            await normal_game.close_normal_game(message.channel, list(lolpark.fearless_game_log.keys()),
-                                                lolpark.fearless_game_creator)
+    if (lolpark.fearless_game_log is not None and channel_id == channels.GAME_FEARLESS_A_RECRUIT_CHANNEL_ID):
+        await functions.recruit_special_game(message, 'FEARLESS')
+    
+    # 티어 제한 내전이 열려 있을 경우, 손 든 사람 모집
+    if (lolpark.tier_limited_game_log is not None and channel_id == channels.TIER_LIMITED_RECRUIT_CHANNEL_ID):
+        await functions.recruit_special_game(message, 'TIER_LIMITED')
 
-            # 내전 변수 초기화, 명단 확정 후에 진행
-            lolpark.fearless_game_creator = None
-            lolpark.fearless_game_log = None
+    # 칼바람 내전이 열려 있을 경우, 손 든 사람 모집
+    if (lolpark.aram_game_log and channel_id == channels.ARAM_RECRUIT_CHANNEL_ID):
+        await functions.recruit_special_game(message, 'ARAM')
 
 
 def delete_member_in_log(message):
@@ -185,20 +180,16 @@ def delete_member_in_log(message):
 
     # 내전 모집에서 채팅 지우면 로그에서 삭제
     if lolpark.is_normal_game and channel_id == lolpark.normal_game_channel:
-        user = Summoner(message.author)
-        if user not in lolpark.normal_game_log:
-            return
-        lolpark.normal_game_log[user] = [mid for mid in lolpark.normal_game_log[user] if mid != message.id]
-        # 만약 채팅이 더 남아 있지 않으면 로그에서 유저 삭제
-        if not lolpark.normal_game_log[user]:
-            del lolpark.normal_game_log[user]
+        functions.delete_log_message(message, 'NORMAL')
 
     # 피어리스 내전 모집에서 채팅 지우면 로그에서 삭제
     if lolpark.fearless_game_log is not None and channel_id == channels.GAME_FEARLESS_A_RECRUIT_CHANNEL_ID:
-        user = Summoner(message.author)
-        if user not in lolpark.fearless_game_log:
-            return
-        lolpark.fearless_game_log[user] = [mid for mid in lolpark.fearless_game_log[user] if mid != message.id]
-        # 만약 채팅이 더 남아 있지 않으면 로그에서 유저 삭제
-        if not lolpark.fearless_game_log[user]:
-            del lolpark.fearless_game_log[user]
+        functions.delete_log_message(message, 'FEARLESS')
+    
+    # 티어 제한 내전 모집에서 채팅 지우면 로그에서 삭제
+    if lolpark.tier_limited_game_log is not None and channel_id == channels.TIER_LIMITED_RECRUIT_CHANNEL_ID:
+        functions.delete_log_message(message, 'TIER_LIMIT')
+
+    # 칼바람 내전 모집에서 채팅 지우면 로그에서 삭제
+    if lolpark.aram_game_log is not None and channel_id == channels.ARAM_RECRUIT_CHANNEL_ID:
+        functions.delete_log_message(message, 'ARAM')

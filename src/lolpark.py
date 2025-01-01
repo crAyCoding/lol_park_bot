@@ -4,9 +4,12 @@ line_names = ['탑', '정글', '미드', '원딜', '서폿']
 # 현재 내전이 진행 중인지 확인
 is_normal_game = False
 
-# 일반 내전 / 피어리스 내전 참가자들을 담은 Log
+# 일반 내전 / 피어리스 내전 / 긴급 내전 / 티어 제한 내전 / 칼바람 내전 참가자들을 담은 Log
 normal_game_log = None
 fearless_game_log = None
+emergency_game_log = None
+tier_limited_game_log = None
+aram_game_log = None
 
 # 일반 내전이 진행 중인 채널
 normal_game_channel = None
@@ -14,6 +17,9 @@ normal_game_channel = None
 # 일반 내전 / 피어리스 내전 모집 호스트
 normal_game_creator = None
 fearless_game_creator = None
+emergency_game_creator = None
+tier_limited_game_creator = None
+aram_game_creator = None
 
 # 확정된 내전 팀 리스트
 finalized_normal_game_team_list = None
