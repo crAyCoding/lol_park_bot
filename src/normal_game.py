@@ -46,7 +46,7 @@ async def make_special_game(ctx, message='모이면 바로 시작', type='NONE')
     
     if game_type == 'TIER_LIMIT':
         lolpark.tier_limited_game_log = {user: [ctx.message.id]}
-        lolpark.tier_limited_game_log = Summoner(ctx.author)
+        lolpark.tier_limited_game_creator = Summoner(ctx.author)
     
     if game_type == 'ARAM':
         lolpark.aram_game_log = {user: [ctx.message.id]}
