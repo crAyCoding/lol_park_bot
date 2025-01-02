@@ -8,6 +8,7 @@ from functions import *
 from summoner import Summoner
 from database import add_summoner, update_summoner, add_database_count
 from bot import bot
+import special_game
 
 
 # 일반 내전 모집
@@ -45,6 +46,9 @@ async def make_special_game(ctx, message='모이면 바로 시작', type='NONE')
         lolpark.fearless_game_creator = Summoner(ctx.author)
     
     if type == 'TIER_LIMIT':
+        print("HI")
+        limited_tier = await special_game.tier_limited_game_init(ctx)
+        print(limited_tier)
         lolpark.tier_limited_game_log = {user: [ctx.message.id]}
         lolpark.tier_limited_game_creator = Summoner(ctx.author)
     

@@ -13,7 +13,7 @@ import main_functions
 import record
 
 # 테스트 할때 아래 사용
-# load_dotenv()
+load_dotenv()
 # GitHub Secrets에서 가져오는 값
 TOKEN = os.getenv('DISCORD_TOKEN')
 
@@ -150,7 +150,7 @@ async def command_reset(ctx):
 
 
 def main() -> None:
-    database.create_table()
+    # database.create_table()
     bot.run(token=TOKEN)
 
 
