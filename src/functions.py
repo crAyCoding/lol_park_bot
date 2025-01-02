@@ -1,7 +1,3 @@
-import lolpark
-import normal_game
-from summoner import Summoner
-
 def get_user_tier_score(display_name: str):
     level, score = get_user_tier(display_name)
 
@@ -230,41 +226,3 @@ def get_summoners_from_auction_dict(auction_dict):
         for line, (summoner, score) in positions.items():
             summoners[team].append(summoner)
     return summoners
-
-
-async def recruit_special_game(message, game_type):
-    game_log = lolpark.fearless_game_log if game_type == 'FEARLESS' \
-                else lolpark.aram_game_log if game_type == 'ARAM' \
-                    else lolpark.tier_limited_game_log
-    game_creator = lolpark.fearless_game_creator if game_type == 'FEARLESS' \
-                else lolpark.aram_game_creator if game_type == 'ARAM' \
-                    else lolpark.tier_limited_game_creator
-    if message.content not in ['ㅅ', 't', 'T', '손']:
-        return
-    user = Summoner(message.author)
-    if user in game_log:
-        game_log[user].append(message.id)
-    else:
-        game_log[user] = [message.id]
-    # 참여자 수가 10명이면 내전 자동 마감
-    if len(game_log) == 10:
-        await normal_game.close_normal_game(message.channel, list(game_log.keys()), game_creator)
-
-        # 내전 변수 초기화, 명단 확정 후에 진행
-        game_creator = None
-        game_log = None
-
-
-def delete_log_message(message, game_type):
-    game_log = lolpark.normal_game_log if game_type == 'NORMAL' \
-                else lolpark.fearless_game_log if game_type == 'FEARLESS' \
-                else lolpark.tier_limited_game_log if game_type == 'TIER_LIMIT' \
-                else lolpark.aram_game_log
-
-    user = Summoner(message.author)
-    if user not in game_log:
-        return
-    game_log[user] = [mid for mid in game_log[user] if mid != message.id]
-    # 만약 채팅이 더 남아 있지 않으면 로그에서 유저 삭제
-    if not game_log[user]:
-        del game_log[user]

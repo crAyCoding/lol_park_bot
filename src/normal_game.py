@@ -44,11 +44,11 @@ async def make_special_game(ctx, message='모이면 바로 시작', type='NONE')
         lolpark.fearless_game_log = {user: [ctx.message.id]}
         lolpark.fearless_game_creator = Summoner(ctx.author)
     
-    if game_type == 'TIER_LIMIT':
+    if type == 'TIER_LIMIT':
         lolpark.tier_limited_game_log = {user: [ctx.message.id]}
         lolpark.tier_limited_game_creator = Summoner(ctx.author)
     
-    if game_type == 'ARAM':
+    if type == 'ARAM':
         lolpark.aram_game_log = {user: [ctx.message.id]}
         lolpark.aram_game_creator = Summoner(ctx.author)
 
@@ -140,7 +140,6 @@ async def end_normal_game(ctx):
 
 # 스페셜 내전 쫑
 async def end_special_game(ctx, type):
-
     game_creator = lolpark.fearless_game_creator if type == 'FEARLESS' \
                     else lolpark.tier_limited_game_creator if type == 'TIER_LIMIT' \
                     else lolpark.aram_game_creator
