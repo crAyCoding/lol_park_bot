@@ -7,6 +7,7 @@ from bot import bot
 
 summoners_table = 'summoners'
 total_summoners_table = 'total_summoners'
+aram_table = 'aram_summoners'
 
 # 소환사 등록
 async def add_summoner(summoner, is_total=False):
@@ -372,3 +373,85 @@ async def get_total_summoner_record_message(summoner):
                            f'승률 : {functions.calculate_win_rate(twenty_game_win, twenty_game_lose)}\n')
 
     return record_message
+
+
+#################################  칼바람 전용  #############################################
+
+
+# 칼바람 소환사 등록
+async def add_aram_summoner(summoner):
+    conn = sqlite3.connect(lolpark.summoners_db)
+    db = conn.cursor()
+    try:
+        table = aram_table
+
+        query = f'SELECT id FROM {table} WHERE id = ?'
+        # 해당 id가 존재하는지 확인
+        db.execute(query, (summoner.id,))
+        result = db.fetchone()
+
+        # id가 존재하지 않으면 삽입
+        if result is None:
+            insert_query = f'''
+            INSERT INTO {table} (id, nickname, count, win, lose) 
+            VALUES (?, ?, ?, ?, ?)
+            '''
+            db.execute(insert_query,
+                       (summoner.id, summoner.nickname, 0, 0, 0))
+            conn.commit()
+            return True
+        else:
+            return False
+    except sqlite3.Error as e:
+        print(f"An error occurred: {e}")
+    finally:
+        db.close()
+        conn.close()
+
+
+# id를 통해 display_name, score, rank 값 업데이트
+async def update_aram_summoner(summoner):
+    conn = sqlite3.connect(lolpark.summoners_db)
+    db = conn.cursor()
+    try:
+        query = 'UPDATE aram_summoners SET display_name = ? WHERE id = ?'
+        # display_name 변경 사항 기록
+        db.execute(query, (summoner.nickname, summoner.id,))
+        # 변경사항 저장
+        conn.commit()
+    except sqlite3.Error as e:
+        print(f"An error occurred: {e}")
+    finally:
+        db.close()
+        conn.close()
+
+
+# 데이터베이스의 특정 컬럼 값 1 증가
+async def add_aram_count(summoner, value: str, count=1):
+    conn = sqlite3.connect(lolpark.summoners_db)
+    db = conn.cursor()
+    try:
+        query = f'UPDATE aram_summoners SET {value} = {value} + {count} WHERE id = ?'
+        # id가 일치하는 행의 value를 1 증가
+        db.execute(query, (summoner.id,))
+        # 변경사항 저장
+        conn.commit()
+        # 업데이트된 행이 있는지 확인
+        if db.rowcount == 0:
+            update_log_channel = bot.get_channel(channels.RECORD_UPDATE_LOG_SERVER_ID)
+            await update_log_channel.send(f"{summoner.nickname} 님을 찾을 수 없습니다.")
+    except sqlite3.Error as e:
+        print(f"An error occurred: {e}")
+    finally:
+        db.close()
+        conn.close()
+
+
+# 칼바람 승/패 기록
+async def record_aram_win_lose(teams, team_1_win_count, team_2_win_count):
+    for summoner in teams[0]:
+        await add_aram_count(summoner, f'win', team_1_win_count)
+        await add_aram_count(summoner, f'lose', team_2_win_count)
+    for summoner in teams[1]:
+        await add_aram_count(summoner, f'lose', team_1_win_count)
+        await add_aram_count(summoner, f'win', team_2_win_count)

@@ -14,7 +14,7 @@ from summoner import Summoner
 from bot import bot
 
 
-async def record_normal_game(ctx, summoners, teams):
+async def record_normal_game(ctx, summoners, teams, is_aram=False):
     class RecordUpdateView(discord.ui.View):
         def __init__(self, ctx, summoners, teams):
             super().__init__(timeout=86400)
@@ -92,7 +92,7 @@ async def record_normal_game(ctx, summoners, teams):
                                             f'확정 버튼을 눌렀습니다.')
             await finalize_normal_game_record(self.record_view.ctx, self.record_view.blue_win_count,
                                               self.record_view.red_win_count, self.record_view.summoners,
-                                              self.record_view.teams)
+                                              self.record_view.teams, is_aram)
 
     class ResetButton(discord.ui.Button):
         def __init__(self, record_view):
@@ -127,7 +127,7 @@ async def record_normal_game(ctx, summoners, teams):
 
 
 # 일반 내전 전적 기록 최종
-async def finalize_normal_game_record(ctx, blue_win_count, red_win_count, summoners, teams):
+async def finalize_normal_game_record(ctx, blue_win_count, red_win_count, summoners, teams, is_aram):
     class RecordFinalizeView(discord.ui.View):
         def __init__(self, ctx, blue_win_count, red_win_count, summoners, teams, timeout=60):
             super().__init__(timeout=timeout)
@@ -158,15 +158,17 @@ async def finalize_normal_game_record(ctx, blue_win_count, red_win_count, summon
                 await self.message.edit(
                     content=normal_game.get_result_board(teams, blue_win_count, red_win_count, is_record=True),
                     view=self)
-            for team in self.teams:
-                for summoner in team:
-                    await database.add_database_count(summoner, 'normal_game_count')
-            await database.record_game_win_lose(self.teams, 'normal_game', self.blue_win_count, self.red_win_count)
-            await record_undo_for_manager(self.teams, self.blue_win_count, self.red_win_count)
-            christmas_channel = bot.get_channel(1320671146445770806)
-            for team in self.teams:
-                for summoner in team:
-                    await christmas_channel.send(f'{summoner.nickname}')
+            if is_aram:
+                for team in self.teams:
+                    for summoner in team:
+                        await database.add_aram_count(summoner, 'count')
+                await database.record_aram_win_lose(self.teams, self.blue_win_count, self.red_win_count)
+            else:
+                for team in self.teams:
+                    for summoner in team:
+                        await database.add_database_count(summoner, 'normal_game_count')
+                await database.record_game_win_lose(self.teams, 'normal_game', self.blue_win_count, self.red_win_count)
+                await record_undo_for_manager(self.teams, self.blue_win_count, self.red_win_count)
             self.stop()
 
     class UndoButton(discord.ui.Button):

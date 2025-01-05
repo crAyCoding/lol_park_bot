@@ -6,7 +6,7 @@ import record
 from discord.ui import Button
 from functions import *
 from summoner import Summoner
-from database import add_summoner, update_summoner, add_database_count
+from database import add_summoner, update_summoner, add_database_count, add_aram_summoner
 from bot import bot
 import special_game
 
@@ -138,7 +138,7 @@ async def close_normal_game(ctx, summoners, host):
 
             if ctx.id == channels.ARAM_RECRUIT_CHANNEL_ID:
                 aram_teams = await special_game.get_aram_game_team(ctx, summoners, get_result_sorted_by_tier(sorted_summoners))
-                await finalize_team(ctx, aram_teams, get_game_board(aram_teams), summoners, host)
+                await finalize_team(ctx, aram_teams, get_game_board(aram_teams), summoners, host, is_aram=True)
             else:
                 await handle_game_team(ctx, sorted_summoners, summoners, host)
 
@@ -510,7 +510,7 @@ async def choose_game_team(ctx, teams, flag, members, summoners, host):
 
 
 # 이대로 확정 , 명단 수정 (내전 시작 최종 확인)
-async def finalize_team(ctx, teams, board_message, summoners, host):
+async def finalize_team(ctx, teams, board_message, summoners, host, is_aram=False):
 
     class FinalTeamView(discord.ui.View):
         def __init__(self):
@@ -561,13 +561,18 @@ async def finalize_team(ctx, teams, board_message, summoners, host):
 
 
 # 내전 전적 기록용 보드 출력
-async def add_normal_game_to_database(ctx, summoners, teams):
+async def add_normal_game_to_database(ctx, summoners, teams, is_aram):
     for summoner in summoners:
         await add_summoner(summoner)
         await update_summoner(summoner)
     await ctx.send(f'내전 종료 이후 결과를 직접 기입해 주세요. 가급적 꼬이지 않게 대표로 한 명만 진행해 주시길 바랍니다.\n'
                    f'24시간 내에 아무도 기록하지 않을 경우, 내전 전적에 반영되지 않습니다. 이 점 참고 바랍니다.')
-    await record.record_normal_game(ctx, summoners, teams)
+    if is_aram:
+        for summoner in summoners:
+            await add_aram_summoner(summoner)
+        await record.record_normal_game(ctx, summoners, teams, is_aram=True)
+    else:
+        await record.record_normal_game(ctx, summoners, teams)
 
 
 # 서버원 내전 팀 채널로 이동
