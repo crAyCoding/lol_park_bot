@@ -140,7 +140,7 @@ async def command_lose_manual(ctx, *members: discord.Member):
 
 @bot.command(name='마루쫑쫑')
 async def command_maru(ctx):
-    await ctx.send('!쫑 으로 내전을 쫑내주세요. 집 나간 마루는 아직 감감무소식입니다..')
+    await ctx.send('`!쫑` 으로 내전을 쫑내주세요. 집 나간 마루는 아직 감감무소식입니다..')
 
 
 @bot.command(name='초기화')
