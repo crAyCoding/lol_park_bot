@@ -24,6 +24,10 @@ aram_game_creator = None
 # 확정된 내전 팀 리스트
 finalized_normal_game_team_list = None
 
+# 티어 제한 내전 전용
+tier_limit_standard_score = None
+up_and_down = None
+
 # 20인 내전 리스트
 twenty_summoner_list = None
 

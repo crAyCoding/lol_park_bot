@@ -80,7 +80,13 @@ async def reset_game(ctx):
         await normal_game.reset_normal_game(ctx)
 
     if channel_id == channels.GAME_FEARLESS_A_RECRUIT_CHANNEL_ID:
-        await normal_game.reset_fearless_game(ctx)
+        await normal_game.reset_special_game(ctx, 'FEARLESS')
+
+    if channel_id == channels.TIER_LIMITED_RECRUIT_CHANNEL_ID:
+        await normal_game.reset_special_game(ctx, 'TIER_LIMIT')
+
+    if channel_id == channels.ARAM_RECRUIT_CHANNEL_ID:
+        await normal_game.reset_special_game(ctx, 'ARAM')
 
     if channel_id == channels.TWENTY_RECRUIT_CHANNEL_ID:
         await twenty_game.reset_twenty_game(ctx)
@@ -179,7 +185,7 @@ async def recruit_game_members(message):
     
     # 티어 제한 내전이 열려 있을 경우, 손 든 사람 모집
     if (lolpark.tier_limited_game_log is not None and channel_id == channels.TIER_LIMITED_RECRUIT_CHANNEL_ID):
-        await recruit_special_game(message, 'TIER_LIMITED')
+        await recruit_special_game(message, 'TIER_LIMIT')
 
     # 칼바람 내전이 열려 있을 경우, 손 든 사람 모집
     if (lolpark.aram_game_log and channel_id == channels.ARAM_RECRUIT_CHANNEL_ID):
@@ -217,17 +223,41 @@ async def recruit_special_game(message, game_type):
     if message.content not in ['ㅅ', 't', 'T', '손']:
         return
     user = Summoner(message.author)
+    if game_type == 'TIER_LIMIT':
+        if lolpark.up_and_down:
+            if user.score > lolpark.tier_limit_standard_score:
+                await message.delete()
+                await message.channel.send(f'<@{user.id}> \n'
+                                           f'## <:sad_bee:1287073499634208911> 기준에 부합하는 서버원만 참여할 수 있어요 <:sad_bee:1287073499634208911>')
+                return
+        else:
+            if user.score < lolpark.tier_limit_standard_score:
+                await message.delete()
+                await message.channel.send(f'<@{user.id}> \n'
+                                           f'## <:sad_bee:1287073499634208911> 기준에 부합하는 서버원만 참여할 수 있어요 <:sad_bee:1287073499634208911>')
+                return
+
     if user in game_log:
         game_log[user].append(message.id)
     else:
         game_log[user] = [message.id]
+    print(game_log)
     # 참여자 수가 10명이면 내전 자동 마감
     if len(game_log) == 10:
         await normal_game.close_normal_game(message.channel, list(game_log.keys()), game_creator)
 
         # 내전 변수 초기화, 명단 확정 후에 진행
-        game_creator = None
-        game_log = None
+        if game_type == 'FEARLESS':
+            lolpark.fearless_game_log = None
+            lolpark.fearless_game_creator = None
+        if game_type == 'TIER_LIMIT':
+            lolpark.tier_limited_game_log = None
+            lolpark.tier_limited_game_creator = None
+            lolpark.tier_limit_standard_score = None
+            lolpark.up_and_down = None
+        if game_type == 'ARAM':
+            lolpark.aram_game_log = None
+            lolpark.aram_game_creator = None
 
 
 def delete_log_message(message, game_type):

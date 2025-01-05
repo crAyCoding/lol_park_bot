@@ -46,18 +46,38 @@ async def make_special_game(ctx, message='모이면 바로 시작', type='NONE')
         lolpark.fearless_game_creator = Summoner(ctx.author)
     
     if type == 'TIER_LIMIT':
-        print("HI")
-        limited_tier = await special_game.tier_limited_game_init(ctx)
-        print(limited_tier)
+        (limited_tier, lolpark.up_and_down) = await special_game.tier_limited_game_init(ctx)
+        lolpark.tier_limit_standard_score = special_game.calculate_standard_score(limited_tier, lolpark.up_and_down)
+        tier_name = '마스터' if limited_tier == 'M' \
+                     else '다이아몬드' if limited_tier == 'D' \
+                     else '에메랄드' if limited_tier == 'E' \
+                     else '플레티넘' if limited_tier == 'P' \
+                     else '골드' if limited_tier == 'G' \
+                     else '실버'
+        if lolpark.up_and_down:
+            if user.score > lolpark.tier_limit_standard_score:
+                await ctx.send(f'선생님은 {tier_name} {"이상" if lolpark.up_and_down else "이하"}에 해당이 안되는거 같습니다만...')
+                return
+        else:
+            if user.score < lolpark.tier_limit_standard_score:
+                await ctx.send(f'선생님은 {tier_name} {"이상" if lolpark.up_and_down else "이하"}에 해당이 안되는거 같습니다만...')
+                return
         lolpark.tier_limited_game_log = {user: [ctx.message.id]}
         lolpark.tier_limited_game_creator = Summoner(ctx.author)
+        tier_message = f'{tier_name} {"이상" if lolpark.up_and_down else "이하"}'
     
     if type == 'ARAM':
         lolpark.aram_game_log = {user: [ctx.message.id]}
         lolpark.aram_game_creator = Summoner(ctx.author)
 
-    await ctx.send(f'{get_nickname(ctx.author.display_name)} 님이 {game_type} 내전을 모집합니다!\n'
-                   f'[ {message} ]\n{role.mention}')
+    tier_message_part = f"## ({tier_message})\n" if type == "TIER_LIMIT" else ""
+    final_message = (
+        f"{get_nickname(ctx.author.display_name)} 님이 {game_type} 내전을 모집합니다!\n"
+        f"{tier_message_part}"
+        f"[ {message} ]\n{role.mention}"
+    )
+
+    await ctx.send(final_message)
 
 
 # 일반 내전 마감
@@ -168,6 +188,8 @@ async def end_special_game(ctx, type):
     if type == 'TIER_LIMIT':
         lolpark.tier_limited_game_log = None
         lolpark.tier_limited_game_creator = None
+        lolpark.tier_limit_standard_score = None
+        lolpark.up_and_down = None
     if type == 'ARAM':
         lolpark.aram_game_log = None
         lolpark.aram_game_creator = None
@@ -617,7 +639,19 @@ async def reset_normal_game(ctx):
     await ctx.send("일반 내전을 초기화했습니다.")
 
 
-async def reset_fearless_game(ctx):
-    lolpark.fearless_game_creator = False
-    lolpark.fearless_game_log = None
-    await ctx.send("피어리스 내전을 초기화했습니다.")
+async def reset_special_game(ctx, type):
+    if type == 'FEARLESS':
+        lolpark.fearless_game_log = None
+        lolpark.fearless_game_creator = None
+        game_type = '피어리스'
+    if type == 'TIER_LIMIT':
+        lolpark.tier_limited_game_log = None
+        lolpark.tier_limited_game_creator = None
+        lolpark.tier_limit_standard_score = None
+        lolpark.up_and_down = None
+        game_type = '티어 제한'
+    if type == 'ARAM':
+        lolpark.aram_game_log = None
+        lolpark.aram_game_creator = None
+        game_type = '칼바람'
+    await ctx.send(f"{game_type} 내전을 초기화했습니다.")
