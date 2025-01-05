@@ -341,6 +341,12 @@ async def get_total_summoner_record_message(summoner):
     twenty_game_lose = await get_database_value(summoner, 'twenty_game_lose')
     twenty_game_winner = await get_database_value(summoner, 'twenty_game_winner')
     twenty_game_final = await get_database_value(summoner, 'twenty_game_final')
+
+    aram_count = await get_aram_value(summoner, 'count')
+    aram_win = await get_aram_value(summoner, 'win')
+    aram_lose = await get_aram_value(summoner, 'lose')
+    is_aram_joint, aram_rank = await get_summoner_aram_count_rank(summoner)
+
     is_joint, game_rank = await get_summoner_game_count_rank(summoner)
 
     if normal_game_count < 3 and twenty_game_count == 0:
@@ -370,7 +376,13 @@ async def get_total_summoner_record_message(summoner):
                            f'\n'
                            f'20인 내전 전적 : {twenty_game_win + twenty_game_lose}전 '
                            f'{twenty_game_win}승 {twenty_game_lose}패,'
-                           f'승률 : {functions.calculate_win_rate(twenty_game_win, twenty_game_lose)}\n')
+                           f'승률 : {functions.calculate_win_rate(twenty_game_win, twenty_game_lose)}\n\n')
+    if aram_count > 0:
+        record_message += (f'칼바람 내전 참여 횟수 : {aram_count}회\n'
+                           f'칼바람 내전 전적 : {aram_win + aram_lose}전 '
+                           f'({"공동 " if is_joint else ""}{game_rank}등), '
+                           f'{aram_win}승 {aram_lose}패 '
+                           f'승률 : {functions.calculate_win_rate(aram_win, aram_lose)}\n\n')
 
     return record_message
 
@@ -455,3 +467,79 @@ async def record_aram_win_lose(teams, team_1_win_count, team_2_win_count):
     for summoner in teams[1]:
         await add_aram_count(summoner, f'lose', team_1_win_count)
         await add_aram_count(summoner, f'win', team_2_win_count)
+
+
+# 칼바람 데이터 값 가져오기
+async def get_aram_value(summoner, value):
+    conn = sqlite3.connect(lolpark.summoners_db)
+    db = conn.cursor()
+    try:
+        query = f'SELECT {value} FROM aram_summoners WHERE id = ?'
+        # id에 따른 game_count 조회
+        db.execute(query, (summoner.id,))
+        result = db.fetchone()
+
+        # 결과 확인
+        if result:
+            return result[0]
+        else:
+            return 0
+
+    except sqlite3.Error as e:
+        print(f"An error occurred: {e}")
+        return None
+    finally:
+        # 커서 및 연결 닫기
+        db.close()
+        conn.close()
+
+
+# 칼바람 등수 가져오기 (개인용)
+async def get_summoner_aram_count_rank(summoner):
+    conn = sqlite3.connect(lolpark.summoners_db)
+    db = conn.cursor()
+
+    try:
+        db.execute('''
+        SELECT win + lose AS total_games
+        FROM aram_summoners
+        WHERE id = ?''', (summoner.id,))
+
+        result = db.fetchone()
+
+        if result is None:
+            print(f"No result found for summoner with ID: {summoner.id}")
+            return False, 0
+
+        total_games = result[0]
+
+        # 나보다 게임 수가 많은 소환사 수 계산
+        db.execute('''
+        SELECT COUNT(*)
+        FROM aram_summoners
+        WHERE win + lose > ?''', (total_games,))
+
+        higher_rank_count = db.fetchone()[0]
+
+        # 나와 동일한 게임 수를 가진 소환사 수 계산
+        db.execute('''
+        SELECT COUNT(*)
+        FROM aram_summoners
+        WHERE win + lose = ?''', (total_games,))
+
+        same_rank_count = db.fetchone()[0]
+
+        # 공동 등수 계산
+        rank = higher_rank_count + 1  # 더 높은 사람 수 + 1로 등수 계산
+        if same_rank_count > 1:
+            return True, rank  # 공동 등수가 있는 경우
+        else:
+            return False, rank  # 공동 등수가 없는 경우
+
+    except sqlite3.Error as e:
+        print(f"An error occurred: {e}")
+        return False, 0
+    finally:
+        # 커서 및 연결 닫기
+        db.close()
+        conn.close()
