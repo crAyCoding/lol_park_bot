@@ -1,3 +1,5 @@
+from itertools import combinations
+import random
 import discord
 from summoner import Summoner
 
@@ -104,3 +106,30 @@ def calculate_standard_score(limited_tier, up_and_down):
         return 230
         
     return tier_values.get(limited_tier)
+
+
+async def get_aram_game_team(ctx, summoners, sorted_message):
+
+    await ctx.send(f'{sorted_message}')
+
+    n = len(summoners)
+    half_size = n // 2
+    min_diff = float("inf")  # 초기값: 무한대
+    best_group1, best_group2 = None, None
+
+    # 모든 조합 탐색
+    for group1_indices in combinations(range(n), half_size):
+        group1 = [summoners[i] for i in group1_indices]
+        group2 = [summoners[i] for i in range(n) if i not in group1_indices]
+
+        # 두 그룹의 점수 합 계산
+        group1_score = sum(s.score for s in group1)
+        group2_score = sum(s.score for s in group2)
+        diff = abs(group1_score - group2_score)
+
+        # 최소 차이 업데이트
+        if diff < min_diff:
+            min_diff = diff
+            best_group1, best_group2 = group1, group2
+
+    return random.choice([[best_group1, best_group2], [best_group2, best_group1]])

@@ -241,7 +241,6 @@ async def recruit_special_game(message, game_type):
         game_log[user].append(message.id)
     else:
         game_log[user] = [message.id]
-    print(game_log)
     # 참여자 수가 10명이면 내전 자동 마감
     if len(game_log) == 10:
         await normal_game.close_normal_game(message.channel, list(game_log.keys()), game_creator)

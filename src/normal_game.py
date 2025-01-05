@@ -82,6 +82,7 @@ async def make_special_game(ctx, message='모이면 바로 시작', type='NONE')
 
 # 일반 내전 마감
 async def close_normal_game(ctx, summoners, host):
+
     class GameMember:
         def __init__(self, index, summoner):
             self.index = index + 1
@@ -135,7 +136,11 @@ async def close_normal_game(ctx, summoners, host):
 
             sorted_summoners = sort_game_members(confirmed_summoners)
 
-            await handle_game_team(ctx, sorted_summoners, summoners, host)
+            if ctx.id == channels.ARAM_RECRUIT_CHANNEL_ID:
+                aram_teams = await special_game.get_aram_game_team(ctx, summoners, get_result_sorted_by_tier(sorted_summoners))
+                await finalize_team(ctx, aram_teams, get_game_board(aram_teams), summoners, host)
+            else:
+                await handle_game_team(ctx, sorted_summoners, summoners, host)
 
     view = GameView()
     game_members_result = "\n".join([f"### {member.index}: <@{member.summoner.id}>" for member in view.members])
