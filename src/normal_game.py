@@ -516,6 +516,8 @@ async def finalize_team(ctx, teams, board_message, summoners, host, is_aram=Fals
         def __init__(self):
             super().__init__(timeout=3600)
             self.add_item(FinalizeButton())
+            if is_aram:
+                self.add_item(AramOnlyFinalizeButton())
             self.add_item(EditButton())
 
     class FinalizeButton(discord.ui.Button):
@@ -537,6 +539,26 @@ async def finalize_team(ctx, teams, board_message, summoners, host, is_aram=Fals
             await send_normal_game_message(ctx)
             # 맞는 음성 채널로 이동
             await move_summoners(ctx, teams)
+            # 기록 보드 자동 출력
+            await add_normal_game_to_database(ctx, summoners, teams, is_aram)
+    
+    class AramOnlyFinalizeButton(discord.ui.Button):
+        def __init__(self):
+            super().__init__(label=f"이대로 확정 (팀 이동 X)", style=discord.ButtonStyle.red)
+
+        async def callback(self, interaction: discord.Interaction):
+            press_user = Summoner(interaction.user)
+            if press_user != host:
+                await (interaction.response.edit_message
+                       (content=f'{board_message}\n## {get_nickname(host.nickname)}님이 누른 것만 인식합니다. '
+                                f'{get_nickname(press_user.nickname)}님 누르지 말아주세요.',
+                        view=self.view))
+                return
+            self.view.clear_items()
+
+            await interaction.message.delete()
+            # 내전 모집 완료 후 메세지 출력
+            await send_normal_game_message(ctx)
             # 기록 보드 자동 출력
             await add_normal_game_to_database(ctx, summoners, teams, is_aram)
 
@@ -588,7 +610,15 @@ async def move_summoners(channel, teams):
 
     if channel_id == channels.GAME_FEARLESS_A_RECRUIT_CHANNEL_ID:
         blue_team_channel = bot.get_channel(channels.GAME_FEARLESS_A_TEAM_1_CHANNEL_ID)
-        red_team_channel = bot.get_channel(channels.GAME_FEARLESS_A_TEAM_2_CHANNEL_ID)
+        red_team_channel = bot.get_channel(channels.GAME_FEARLESS_A_TEAM_2_CHANNEL_ID)\
+    
+    if channel_id == channels.TIER_LIMITED_RECRUIT_CHANNEL_ID:
+        blue_team_channel = bot.get_channel(channels.TIER_LIMITED_A_TEAM_1_CHANNEL_ID)
+        red_team_channel = bot.get_channel(channels.TIER_LIMITED_A_TEAM_2_CHANNEL_ID)
+
+    if channel_id == channels.ARAM_RECRUIT_CHANNEL_ID:
+        blue_team_channel = bot.get_channel(channels.ARAM_A_TEAM_1_CHANNEL_ID)
+        red_team_channel = bot.get_channel(channels.ARAM_A_TEAM_2_CHANNEL_ID)
 
     for i, recruit_channel_id in enumerate(normal_game_recruit_channel_id_list):
         if channel_id == recruit_channel_id:
