@@ -426,7 +426,7 @@ async def update_aram_summoner(summoner):
     conn = sqlite3.connect(lolpark.summoners_db)
     db = conn.cursor()
     try:
-        query = 'UPDATE aram_summoners SET display_name = ? WHERE id = ?'
+        query = 'UPDATE aram_summoners SET nickname = ? WHERE id = ?'
         # display_name 변경 사항 기록
         db.execute(query, (summoner.nickname, summoner.id,))
         # 변경사항 저장
