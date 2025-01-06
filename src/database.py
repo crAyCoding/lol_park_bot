@@ -26,10 +26,10 @@ async def add_summoner(summoner, is_total=False):
             insert_query = f'''
             INSERT INTO {table} (id, display_name, score, rank, normal_game_count, normal_game_win, 
             normal_game_lose, twenty_game_count, twenty_game_winner, twenty_game_final, twenty_game_win, twenty_game_lose) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             '''
             db.execute(insert_query,
-                       (summoner.id, summoner.nickname, summoner.score, summoner.rank, 0, 0, 0, 0, 0, 0, 0, 0, 0))
+                       (summoner.id, summoner.nickname, summoner.score, summoner.rank, 0, 0, 0, 0, 0, 0, 0, 0))
             conn.commit()
             return True
         else:
