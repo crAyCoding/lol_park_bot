@@ -187,9 +187,9 @@ async def get_summoner_record_message(summoner, is_total=False):
                            f'\n'
                            f'20인 내전 전적 : {twenty_game_win + twenty_game_lose}전 '
                            f'{twenty_game_win}승 {twenty_game_lose}패,'
-                           f'승률 : {functions.calculate_win_rate(twenty_game_win, twenty_game_lose)}\n')
+                           f'승률 : {functions.calculate_win_rate(twenty_game_win, twenty_game_lose)}\n\n')
     if aram_count > 0:
-        record_message += (f'칼바람 내전 참여 횟수 : {aram_count}회\n'
+        record_message += (f'### 칼바람 내전 참여 횟수 : {aram_count}회\n'
                            f'칼바람 내전 전적 : {aram_win + aram_lose}전 '
                            f'({"공동 " if is_aram_joint else ""}{aram_rank}등), '
                            f'{aram_win}승 {aram_lose}패 '
