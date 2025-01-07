@@ -126,7 +126,7 @@ async def command_record(ctx, *members: discord.Member):
 @bot.command(name='등록')
 @commands.has_role("관리자")
 async def command_record(ctx, member: discord.Member = None):
-    await database.add_summoner(member)
+    await database.add_summoner(Summoner(member))
 
 
 @bot.command(name='승리')
