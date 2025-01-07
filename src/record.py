@@ -129,7 +129,7 @@ async def record_normal_game(ctx, summoners, teams, is_aram=False):
 # 일반 내전 전적 기록 최종
 async def finalize_normal_game_record(ctx, blue_win_count, red_win_count, summoners, teams, is_aram):
     class RecordFinalizeView(discord.ui.View):
-        def __init__(self, ctx, blue_win_count, red_win_count, summoners, teams, timeout=60):
+        def __init__(self, ctx, blue_win_count, red_win_count, summoners, teams, timeout=5):
             super().__init__(timeout=timeout)
             self.ctx = ctx
             self.blue_win_count = blue_win_count
@@ -164,9 +164,6 @@ async def finalize_normal_game_record(ctx, blue_win_count, red_win_count, summon
                         await database.add_aram_count(summoner, 'count')
                 await database.record_aram_win_lose(self.teams, self.blue_win_count, self.red_win_count)
             else:
-                for team in self.teams:
-                    for summoner in team:
-                        await database.add_database_count(summoner, 'normal_game_count')
                 await database.record_game_win_lose(self.teams, 'normal_game', self.blue_win_count, self.red_win_count)
                 await record_undo_for_manager(self.teams, self.blue_win_count, self.red_win_count)
             self.stop()
