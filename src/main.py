@@ -123,6 +123,12 @@ async def command_record(ctx, *members: discord.Member):
     await record.manually_add_teams_record(ctx, members)
 
 
+@bot.command(name='등록')
+@commands.has_role("관리자")
+async def command_record(ctx, member: discord.Member = None):
+    await database.add_summoner(member)
+
+
 @bot.command(name='승리')
 async def command_win_manual(ctx, *members: discord.Member):
     await record.manually_add_summoner_win_lose(ctx, members, is_win=True)
