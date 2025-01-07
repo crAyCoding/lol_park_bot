@@ -164,6 +164,10 @@ async def finalize_normal_game_record(ctx, blue_win_count, red_win_count, summon
                         await database.add_aram_count(summoner, 'count')
                 await database.record_aram_win_lose(self.teams, self.blue_win_count, self.red_win_count)
             else:
+                for team in self.teams:
+                    for summoner in team:
+                        await database.add_summoner(summoner)
+                        # await database.add_database_count(summoner, 'normal_game_count')
                 await database.record_game_win_lose(self.teams, 'normal_game', self.blue_win_count, self.red_win_count)
                 await record_undo_for_manager(self.teams, self.blue_win_count, self.red_win_count)
             self.stop()
