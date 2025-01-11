@@ -2,3 +2,4 @@ venv/
 .idea/
 token.txt
 src/.env
+src/__pycache__

@@ -1,5 +1,6 @@
 import asyncio
 from datetime import datetime, timedelta
+from pathlib import Path
 
 import discord
 
@@ -272,3 +273,14 @@ def delete_log_message(message, game_type):
     # 만약 채팅이 더 남아 있지 않으면 로그에서 유저 삭제
     if not game_log[user]:
         del game_log[user]
+
+
+# !점검 입력 시 동작
+async def notice_update():
+    notice_channels = [channels.RECORD_SERVER_ID, channels.GAME_A_RECRUIT_CHANNEL_ID, channels.GAME_B_RECRUIT_CHANNEL_ID,
+                       channels.GAME_C_RECRUIT_CHANNEL_ID, channels.GAME_D_RECRUIT_CHANNEL_ID, channels.GAME_E_RECRUIT_CHANNEL_ID,
+                       channels.GAME_F_RECRUIT_CHANNEL_ID, channels.TIER_LIMITED_RECRUIT_CHANNEL_ID, channels.ARAM_RECRUIT_CHANNEL_ID,
+                       channels.GAME_FEARLESS_A_RECRUIT_CHANNEL_ID]
+    
+    for channel in notice_channels:
+        await bot.get_channel(channel).send(f'# 현재 롤파크 노예 점검 중입니다. 점검 종료 전까지 명령어 사용 시 경고가 부여될 수 있음을 알려드립니다.')
