@@ -543,6 +543,8 @@ async def finalize_team(ctx, teams, board_message, summoners, host, is_aram=Fals
             await move_summoners(ctx, teams)
             # 기록 보드 자동 출력
             await add_normal_game_to_database(ctx, summoners, teams, is_aram)
+            if is_aram:
+                await special_game.get_aram_champions_result(ctx, teams, host)
     
     class AramOnlyFinalizeButton(discord.ui.Button):
         def __init__(self):
@@ -563,6 +565,8 @@ async def finalize_team(ctx, teams, board_message, summoners, host, is_aram=Fals
             await send_normal_game_message(ctx)
             # 기록 보드 자동 출력
             await add_normal_game_to_database(ctx, summoners, teams, is_aram)
+            if is_aram:
+                await special_game.get_aram_champions_result(ctx, teams, host)
 
     class EditButton(discord.ui.Button):
         def __init__(self):

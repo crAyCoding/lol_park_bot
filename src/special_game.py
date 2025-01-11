@@ -1,7 +1,11 @@
+from io import BytesIO
 from itertools import combinations
+from pathlib import Path
 import random
 import discord
+import lolpark
 from summoner import Summoner
+from PIL import Image, UnidentifiedImageError
 
 async def tier_limited_game_init(ctx):
     limited_tier = await choose_limit_tier(ctx)
@@ -133,3 +137,106 @@ async def get_aram_game_team(ctx, summoners, sorted_message):
             best_group1, best_group2 = group1, group2
 
     return random.choice([[best_group1, best_group2], [best_group2, best_group1]])
+
+
+async def get_aram_champions_result(ctx, teams, host):
+    class AramDiceView(discord.ui.View):
+        def __init__(self):
+            super().__init__()
+            self.add_item(TeamButton('블루'))
+            self.add_item(TeamButton('레드'))
+            self.add_item(RerollButton())
+
+    class TeamButton(discord.ui.Button):
+        def __init__(self, team_type):
+            button_style = discord.ButtonStyle.primary if team_type == '블루' else discord.ButtonStyle.red
+            super().__init__(label=f"{team_type}팀 챔피언 목록 확인", style=button_style)
+            self.team_type = team_type
+
+        async def callback(self, interaction: discord.Interaction):
+            press_user = Summoner(interaction.user)
+            team_number = 0 if self.team_type == '블루' else 1
+            if press_user not in teams[team_number]:
+                await interaction.response.send_message(
+                    f"{self.team_type}팀만 볼 수 있습니다.", ephemeral=True
+                )
+                return
+            
+            await interaction.response.send_message(
+                f"이번 게임에서 사용 가능한 챔피언 목록입니다. 팀과 상의하여 결정해주세요. \n{get_aram_champions_file(lolpark.aram_available_champions_list[self.team_type])}", ephemeral=True
+            )
+
+    class RerollButton(discord.ui.Button):
+        def __init__(self):
+            super().__init__(label=f"챔피언 목록 변경", style=discord.ButtonStyle.green)
+
+        async def callback(self, interaction: discord.Interaction):
+            press_user = Summoner(interaction.user)
+            if press_user != host:
+                await interaction.response.send_message(
+                    f"내전 연 사람만 챔피언 목록을 변경할 수 있습니다.", ephemeral=True
+                )
+                return
+            
+            await interaction.response.send_message(
+                f'챔피언 목록이 변경되었습니다.'
+            )
+
+    make_new_aram_champions_list()
+    view = AramDiceView()
+    lolpark.aram_view_message_id = await ctx.send(f'## 칼바람 내전 기능 목록', view=view)
+
+
+def make_new_aram_champions_list():
+    lolpark.aram_available_champions_list = {'블루' : [], '레드' : []}
+    
+    new_aram_champions_list = random.sample(lolpark.lol_champions, 30)
+
+    blue_team_champions = new_aram_champions_list[15:]
+    red_team_champions = new_aram_champions_list[:15]
+
+    lolpark.aram_available_champions_list = {'블루' : blue_team_champions, '레드' : red_team_champions}
+
+
+def get_aram_champions_file(champions_list):
+
+    current_path = Path.cwd()
+
+    image_paths = []
+
+    for champion in champions_list:
+        print(champion)
+        image_paths.append(f'{current_path}/assets/lol_champions/{champion}.png')
+
+    merged_image = merge_aram_images(image_paths)
+
+    # 이미지를 메모리에 저장
+    buffer = BytesIO()
+    merged_image.save(buffer, format="PNG")
+    buffer.seek(0)  # 스트림의 시작 위치로 이동
+
+    return discord.File(fp=buffer, filename='aram_merged.png')
+
+
+def merge_aram_images(image_paths):
+    try:
+        images = [Image.open(path) for path in image_paths]
+    except FileNotFoundError as e:
+        print(f"파일을 찾을 수 없습니다: {e}")
+        return
+    except UnidentifiedImageError as e:
+        print(f"이미지 파일이 아닙니다: {e}")
+        return
+
+    widths, heights = zip(*(img.size for img in images))
+    total_width = sum(widths)
+    max_height = max(heights)
+
+    merged_image = Image.new('RGB', (total_width, max_height), (255, 255, 255))
+
+    x_offset = 0
+    for img in images:
+        merged_image.paste(img, (x_offset, 0))
+        x_offset += img.size[0]
+
+    return merged_image

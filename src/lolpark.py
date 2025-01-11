@@ -28,6 +28,10 @@ finalized_normal_game_team_list = None
 tier_limit_standard_score = None
 up_and_down = None
 
+# 칼바람 내전 전용
+aram_available_champions_list = None
+aram_view_message_id = None
+
 # 20인 내전 리스트
 twenty_summoner_list = None
 
@@ -54,3 +58,25 @@ is_twenty_game = False
 
 # 데이터베이스 파일 저장소
 summoners_db = '/database/summoners.db'
+
+# 롤 챔피언 이름 목록
+lol_champions = [
+    "aatrox", "ahri", "akali", "akshan", "alistar", "ambessa", "amumu", "anivia", "annie", "aphelios", "ashe",
+    "aurelionsol", "aurora", "azir", "bard", "belveth", "blitzcrank", "brand", "braum", "briar", "caitlyn", "camille",
+    "cassiopeia", "chogath", "corki", "darius", "diana", "drmundo", "draven", "ekko", "elise", 
+    "evelynn", "ezreal", "fiddlesticks", "fiora", "fizz", "galio", "gankplank", "garen", "gnar", 
+    "gragas", "graves", "gwen", "hecarim", "heimerdinger", "hwei", "illaoi", "irellia", "ivern", "janna", 
+    "jarvaniv", "jax", "jayce", "jhin", "jinx", "ksante", "kaisa", "kalista", "karma", "karthus", 
+    "kassadin", "katarina", "kayle", "kayn", "kennen", "khazix", "kindred", "kled", "kogmaw", "ksante",
+    "leblanc", "leesin", "leona", "lillia", "lissandra", "lucian", "lulu", "lux", "malphite", 
+    "malzahar", "maokai", "masteryi", "milio", "missfortune", "mordekaiser", "morgana", "naafiri",
+    "nami", "nasus", "nautilus", "neeko", "nidalee", "nilah", "nocturne", "nunu", "olaf", 
+    "orianna", "ornn", "pantheon", "poppy", "pyke", "qiyana", "quinn", "rakan", "rammus", "reksai", 
+    "rell", "renataglasc", "renekton", "rengar", "riven", "rumble", "ryze", "samira", "sejuani", 
+    "senna", "seraphine", "sett", "shaco", "shen", "shyvana", "singed", "sion", "sivir", "skarner", "smolder",
+    "sona", "soraka", "swain", "sylas", "syndra", "tahmkench", "taliyah", "talon", "taric", 
+    "teemo", "thresh", "tristana", "trundle", "tryndamere", "twistedfate", "twitch", "udyr", 
+    "urgot", "varus", "vayne", "veigar", "velkoz", "vex", "vi", "viego", "viktor", "vladimir", 
+    "volibear", "warwick", "wukong", "xayah", "xerath", "xinzhao", "yasuo", "yone", "yorick", 
+    "yuumi", "zac", "zed", "zeri", "ziggs", "zilean", "zoe", "zyra"
+]

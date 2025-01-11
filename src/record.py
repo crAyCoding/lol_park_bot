@@ -90,6 +90,12 @@ async def record_normal_game(ctx, summoners, teams, is_aram=False):
             await interaction.message.delete()
             await self.record_view.ctx.send(f'{functions.get_nickname(press_user.nickname)}님이 '
                                             f'확정 버튼을 눌렀습니다.')
+            # 메시지 ID로 메시지 가져오기
+            if lolpark.aram_view_message_id is not None:
+                message = await ctx.channel.fetch_message(lolpark.aram_view_message_id)
+                await message.delete()
+                lolpark.aram_view_message_id = None
+            lolpark.aram_available_champions_list = None
             await finalize_normal_game_record(self.record_view.ctx, self.record_view.blue_win_count,
                                               self.record_view.red_win_count, self.record_view.summoners,
                                               self.record_view.teams, is_aram)

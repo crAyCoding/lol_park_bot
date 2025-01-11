@@ -1,10 +1,11 @@
 import asyncio
 from datetime import datetime, timedelta
+from io import BytesIO
 from pathlib import Path
 import random
 
+from PIL import Image, UnidentifiedImageError
 import discord
-
 import channels
 import lolpark
 import normal_game
@@ -152,7 +153,6 @@ async def start_auction(ctx):
 
 
 async def start_test(ctx, members):
-    
     return
 
 
