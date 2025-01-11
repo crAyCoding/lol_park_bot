@@ -69,12 +69,14 @@ async def make_special_game(ctx, message='모이면 바로 시작', type='NONE')
     if type == 'ARAM':
         lolpark.aram_game_log = {user: [ctx.message.id]}
         lolpark.aram_game_creator = Summoner(ctx.author)
+        aram_role = discord.utils.get(ctx.guild.roles, name='칼바람')
 
     tier_message_part = f"## ({tier_message})\n" if type == "TIER_LIMIT" else ""
     final_message = (
         f"{get_nickname(ctx.author.display_name)} 님이 {game_type} 내전을 모집합니다!\n"
         f"{tier_message_part}"
         f"[ {message} ]\n{role.mention}"
+        f' {aram_role.mention if type == 'ARAM' else ''}'
     )
 
     await ctx.send(final_message)
