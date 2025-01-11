@@ -155,6 +155,16 @@ async def command_reset(ctx):
     await main_functions.reset_game(ctx)
 
 
+@bot.command(name='점검')
+async def command_notice_update(ctx):
+    await main_functions.notice_update()
+
+
+@bot.command(name='주사위')
+async def command_roll_dice(ctx):
+    await main_functions.roll_dice(ctx)
+
+
 def main() -> None:
     database.create_table()
     bot.run(token=TOKEN)

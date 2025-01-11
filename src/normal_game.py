@@ -76,7 +76,7 @@ async def make_special_game(ctx, message='모이면 바로 시작', type='NONE')
         f"{get_nickname(ctx.author.display_name)} 님이 {game_type} 내전을 모집합니다!\n"
         f"{tier_message_part}"
         f"[ {message} ]\n{role.mention}"
-        f' {aram_role.mention if type == 'ARAM' else ''}'
+        f' {aram_role.mention if type == "ARAM" else ""}'
     )
 
     await ctx.send(final_message)

@@ -1,6 +1,7 @@
 import asyncio
 from datetime import datetime, timedelta
 from pathlib import Path
+import random
 
 import discord
 
@@ -10,6 +11,7 @@ import normal_game
 import database
 import twenty_game
 import twenty_auction
+import functions
 from summoner import Summoner
 from bot import bot
 
@@ -150,6 +152,7 @@ async def start_auction(ctx):
 
 
 async def start_test(ctx, members):
+    
     return
 
 
@@ -284,3 +287,29 @@ async def notice_update():
     
     for channel in notice_channels:
         await bot.get_channel(channel).send(f'# 현재 롤파크 노예 점검 중입니다. 점검 종료 전까지 명령어 사용 시 경고가 부여될 수 있음을 알려드립니다.')
+
+
+# !주사위 입력 시 동작
+async def roll_dice(ctx):
+    current_path = Path.cwd()
+
+    random_number = random.randint(1, 6)
+
+    # 주사위 에셋 경로
+    file_path = f"{current_path}/assets/dice_image/dice_{random_number}.jpg"
+    
+    # 이미지 파일을 열어서 첨부
+    file = discord.File(file_path, filename="lolpark_dice.png")
+
+    user_name = ctx.author.display_name
+    user_avatar = ctx.author.avatar.url
+
+    embed = discord.Embed()
+
+    embed.set_footer(text=f"{functions.get_nickname(user_name)}", icon_url=user_avatar)  # 하단에 사용자 정보 추가
+    
+    # Embed에 파일 첨부
+    embed.set_image(url="attachment://lolpark_dice.png")
+
+    # 파일과 Embed 전송
+    await ctx.send(file=file, embed=embed)
