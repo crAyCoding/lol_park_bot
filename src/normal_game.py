@@ -239,7 +239,7 @@ async def handle_game_team(ctx, sorted_summoners, summoners, host):
             self.view.remove_item(self)
             self.view.users.remove(self.user)
             if len(team_head_list) == 2:
-                await interaction.message.delete()
+                await interaction.response.edit_message(content=f'{sorted_summoners_message}')
                 await choose_blue_red_game(ctx, team_head_list, self.view.users, summoners, host)
                 return
 
@@ -259,7 +259,7 @@ async def handle_game_team(ctx, sorted_summoners, summoners, host):
                         view=self.view))
                 return
             await ctx.send(f'메모장으로 진행합니다.')
-            await interaction.message.delete()
+            await interaction.response.edit_message(content=f'{sorted_summoners_message}')
             await finalize_with_notepad(ctx, sorted_summoners, summoners, host)
 
     class UndoButton(discord.ui.Button):
