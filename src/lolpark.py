@@ -30,7 +30,7 @@ up_and_down = None
 
 # 칼바람 내전 전용
 aram_available_champions_list = None
-aram_view_message_id = None
+aram_view_message = None
 
 # 20인 내전 리스트
 twenty_summoner_list = None

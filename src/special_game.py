@@ -186,7 +186,7 @@ async def get_aram_champions_result(ctx, teams, host):
 
     make_new_aram_champions_list()
     view = AramDiceView()
-    lolpark.aram_view_message_id = await ctx.send(f'## 칼바람 내전 기능 목록', view=view)
+    lolpark.aram_view_message = await ctx.send(f'## 칼바람 내전 기능 목록', view=view)
 
 
 def make_new_aram_champions_list():
