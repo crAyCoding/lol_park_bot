@@ -239,7 +239,7 @@ async def handle_game_team(ctx, sorted_summoners, summoners, host):
             self.view.remove_item(self)
             self.view.users.remove(self.user)
             if len(team_head_list) == 2:
-                await interaction.response.edit_message(content=f'{sorted_summoners_message}')
+                await interaction.response.edit_message(content=f'{sorted_summoners_message}', view=self.view)
                 await choose_blue_red_game(ctx, team_head_list, self.view.users, summoners, host)
                 return
 
