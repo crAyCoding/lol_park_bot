@@ -163,7 +163,9 @@ async def get_aram_champions_result(ctx, teams, host):
                 return
             
             await interaction.response.send_message(
-                f"이번 게임에서 사용 가능한 챔피언 목록입니다. 팀과 상의하여 결정해주세요. \n{get_aram_champions_file(lolpark.aram_available_champions_list[self.team_type])}", ephemeral=True
+                content=f"이번 게임에서 사용 가능한 챔피언 목록입니다. 팀과 상의하여 결정해주세요.", 
+                file=get_aram_champions_file(lolpark.aram_available_champions_list[self.team_type]),
+                ephemeral=True
             )
 
     class RerollButton(discord.ui.Button):
@@ -188,7 +190,6 @@ async def get_aram_champions_result(ctx, teams, host):
 
 
 def make_new_aram_champions_list():
-    lolpark.aram_available_champions_list = {'블루' : [], '레드' : []}
     
     new_aram_champions_list = random.sample(lolpark.lol_champions, 30)
 
@@ -205,7 +206,6 @@ def get_aram_champions_file(champions_list):
     image_paths = []
 
     for champion in champions_list:
-        print(champion)
         image_paths.append(f'{current_path}/assets/lol_champions/{champion}.png')
 
     merged_image = merge_aram_images(image_paths)
