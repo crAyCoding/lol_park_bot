@@ -289,6 +289,31 @@ async def notice_update():
         await bot.get_channel(channel).send(f'# 현재 롤파크 노예 점검 중입니다. 점검 종료 전까지 명령어 사용 시 경고가 부여될 수 있음을 알려드립니다.')
 
 
+# !점검종료 입력 시 동작
+async def end_update():
+    try:
+        notice_channels = [channels.RECORD_SERVER_ID, channels.GAME_A_RECRUIT_CHANNEL_ID, channels.GAME_B_RECRUIT_CHANNEL_ID,
+                       channels.GAME_C_RECRUIT_CHANNEL_ID, channels.GAME_D_RECRUIT_CHANNEL_ID, channels.GAME_E_RECRUIT_CHANNEL_ID,
+                       channels.GAME_F_RECRUIT_CHANNEL_ID, channels.TIER_LIMITED_RECRUIT_CHANNEL_ID, channels.ARAM_RECRUIT_CHANNEL_ID,
+                       channels.GAME_FEARLESS_A_RECRUIT_CHANNEL_ID]
+        # 최신 메시지 불러오기
+        messages = []
+        for channel_id in notice_channels:
+            channel = bot.get_channel(channel_id)
+            async for message in channel.history(limit=1):
+                messages.append(message)
+
+        if len(messages) > 1:
+            last_message = messages[1]  # 명령어 메시지 이후의 메시지를 선택
+            await last_message.delete()
+        else:
+            print("ERROR")
+    except discord.Forbidden:
+        print("권한없음")
+    except discord.HTTPException as e:
+        print("메세지 삭제 오류")
+
+
 # !주사위 입력 시 동작
 async def roll_dice(ctx):
     current_path = Path.cwd()

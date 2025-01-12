@@ -160,6 +160,11 @@ async def command_notice_update(ctx):
     await main_functions.notice_update()
 
 
+@bot.command(name='점검종료')
+async def command_end_update(ctx):
+    await main_functions.end_update()
+
+
 @bot.command(name='주사위')
 async def command_roll_dice(ctx):
     await main_functions.roll_dice(ctx)
