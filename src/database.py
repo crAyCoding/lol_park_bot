@@ -519,7 +519,6 @@ async def get_summoner_aram_count_rank(summoner):
         result = db.fetchone()
 
         if result is None:
-            print(f"No result found for summoner with ID: {summoner.id}")
             return False, 0
 
         total_games = result[0]
