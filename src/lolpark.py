@@ -67,7 +67,7 @@ lol_champions = [
     "evelynn", "ezreal", "fiddlesticks", "fiora", "fizz", "galio", "gankplank", "garen", "gnar", 
     "gragas", "graves", "gwen", "hecarim", "heimerdinger", "hwei", "illaoi", "irellia", "ivern", "janna", 
     "jarvaniv", "jax", "jayce", "jhin", "jinx", "ksante", "kaisa", "kalista", "karma", "karthus", 
-    "kassadin", "katarina", "kayle", "kayn", "kennen", "khazix", "kindred", "kled", "kogmaw", "ksante",
+    "kassadin", "katarina", "kayle", "kayn", "kennen", "khazix", "kindred", "kled", "kogmaw",
     "leblanc", "leesin", "leona", "lillia", "lissandra", "lucian", "lulu", "lux", "malphite", 
     "malzahar", "maokai", "masteryi", "milio", "missfortune", "mordekaiser", "morgana", "naafiri",
     "nami", "nasus", "nautilus", "neeko", "nidalee", "nilah", "nocturne", "nunu", "olaf", 
