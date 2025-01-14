@@ -174,11 +174,15 @@ async def get_aram_champions_result(ctx, teams, host):
 
         async def callback(self, interaction: discord.Interaction):
             press_user = Summoner(interaction.user)
-            if press_user.id != host.id:
-                await interaction.response.send_message(
-                    f"내전 연 사람만 챔피언 목록을 변경할 수 있습니다.", ephemeral=True
-                )
-                return
+            try:
+                print(host.nickname)
+                if press_user != host:
+                    await interaction.response.send_message(
+                        f"내전 연 사람만 챔피언 목록을 변경할 수 있습니다.", ephemeral=True
+                    )
+                    return
+            except:
+                print('호스트가 이상해요')      
             
             make_new_aram_champions_list()
             
