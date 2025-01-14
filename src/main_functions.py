@@ -338,3 +338,28 @@ async def roll_dice(ctx):
 
     # 파일과 Embed 전송
     await ctx.send(file=file, embed=embed)
+
+
+# !수동내전 입력시 작동 (개발자만 가능)
+async def make_twenty_by_own(ctx, members):
+    summoners = []
+    for member in members:
+        summoners.append(Summoner(member))
+    lolpark.twenty_summoner_list = {line_name: [] for line_name in lolpark.line_names}
+    
+    for i, summoner in enumerate(summoners):
+        if i < 4:
+            lolpark.twenty_summoner_list['탑'].append(summoner)
+        elif i < 8:
+            lolpark.twenty_summoner_list['정글'].append(summoner)
+        elif i < 12:
+            lolpark.twenty_summoner_list['미드'].append(summoner)
+        elif i < 16:
+            lolpark.twenty_summoner_list['원딜'].append(summoner)
+        else:
+            lolpark.twenty_summoner_list['서폿'].append(summoner)
+    
+    lolpark.twenty_host = Summoner(ctx.author)
+
+    await twenty_game.close_twenty_game(ctx)
+    

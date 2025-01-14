@@ -166,6 +166,12 @@ async def command_reset(ctx):
     await main_functions.reset_game(ctx)
 
 
+@bot.command(name='수동내전')
+@commands.has_role("개발자")
+async def command_make_twenty_game_by_own(ctx, *members: discord.Member):
+    await main_functions.make_twenty_by_own(ctx)
+
+
 @bot.command(name='점검')
 async def command_notice_update(ctx):
     await main_functions.notice_update()
