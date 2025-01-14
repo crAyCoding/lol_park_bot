@@ -68,6 +68,17 @@ async def on_message_delete(message):
     main_functions.delete_member_in_log(message)
 
 
+# 명령어 에러 처리
+@bot.event
+async def on_command_error(ctx, error):
+    # CommandNotFound 에러는 무시
+    if isinstance(error, commands.CommandNotFound):
+        pass  # 아무 작업도 하지 않음
+    else:
+        # 다른 에러는 콘솔에 출력
+        print(f"Unhandled error: {error}")
+
+
 # 서버원 상태 바뀔 때 마다 수행
 @bot.event
 async def on_member_update(before, after):
