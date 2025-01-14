@@ -645,11 +645,27 @@ async def move_summoners(channel, teams):
 
 async def send_normal_game_message(ctx):
 
-    await ctx.send(f'밴픽 진행을 위해 <#1326507745465208842> 에서 프로그램을 다운로드 받아 주시길 바랍니다. \n'
-                   f'밴픽은 사용방법 숙지 후 진행해주시면 됩니다.\n'
+    channel_name = get_channel_name(ctx)
+
+    await ctx.send(f'https://banpick.kr/ \n'
+                   f'밴픽은 위 사이트에서 진행해주시면 됩니다.\n'
                    f'## 해당 메세지 출력 이후 각 팀 디스코드로 자동 이동됩니다. 오류가 나지 않게 가만히 계셔주시면 감사하겠습니다.\n'
-                   f'혹여 30초 내에 이동되지 않는 경우 수동으로 옮겨주시고 개발자에게 DM 부탁드립니다.\n'
-                   f'## 사용자 설정 방 제목 : 롤파크 / 비밀번호 : 0921\n')
+                   f'## 사용자 설정 방 제목 : 롤파크 {channel_name} / 비밀번호 : 0921\n')
+
+
+def get_channel_name(ctx):
+    channel_map = {
+        channels.GAME_A_RECRUIT_CHANNEL_ID: 'A',
+        channels.GAME_B_RECRUIT_CHANNEL_ID: 'B',
+        channels.GAME_C_RECRUIT_CHANNEL_ID: 'C',
+        channels.GAME_D_RECRUIT_CHANNEL_ID: 'D',
+        channels.GAME_E_RECRUIT_CHANNEL_ID: 'E',
+        channels.GAME_F_RECRUIT_CHANNEL_ID: 'F',
+        channels.GAME_FEARLESS_A_RECRUIT_CHANNEL_ID: '피어리스',
+        channels.TIER_LIMITED_RECRUIT_CHANNEL_ID: 'T',
+        channels.ARAM_RECRUIT_CHANNEL_ID: '칼바람'
+    }
+    return channel_map.get(ctx.id, '')
 
 
 def get_game_board(teams):
