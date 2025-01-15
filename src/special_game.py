@@ -156,13 +156,14 @@ async def get_aram_champions_result(ctx, teams, host):
         async def callback(self, interaction: discord.Interaction):
             press_user = Summoner(interaction.user)
             team_number = 0 if self.team_type == '블루' else 1
+            await interaction.response.defer()
             if press_user not in teams[team_number]:
-                await interaction.response.send_message(
+                await interaction.followup.send(
                     f"{self.team_type}팀만 볼 수 있습니다.", ephemeral=True
                 )
                 return
             
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 content=f"이번 게임에서 사용 가능한 챔피언 목록입니다. 팀과 상의하여 결정해주세요.", 
                 file=get_aram_champions_file(lolpark.aram_available_champions_list[self.team_type]),
                 ephemeral=True
@@ -174,19 +175,16 @@ async def get_aram_champions_result(ctx, teams, host):
 
         async def callback(self, interaction: discord.Interaction):
             press_user = Summoner(interaction.user)
-            try:
-                print(host.nickname)
-                if press_user != host:
-                    await interaction.response.send_message(
-                        f"내전 연 사람만 챔피언 목록을 변경할 수 있습니다.", ephemeral=True
-                    )
-                    return
-            except:
-                print('호스트가 이상해요')      
+            await interaction.response.defer()
+            if press_user != host:
+                await interaction.followup.send(
+                    f"내전 연 사람만 챔피언 목록을 변경할 수 있습니다.", ephemeral=True
+                )
+                return   
             
             make_new_aram_champions_list()
             
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 content=f'챔피언 목록이 변경되었습니다.'
             )
 
